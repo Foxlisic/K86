@@ -1,0 +1,327 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf8">
+    <title>8086 INSTRUCTION SET TABLE DONE</title>
+    <style>
+		body, html { padding: 0; margin: 0; }
+        table { border-collapse: collapse; }
+        tr { vertical-align: top; }
+        td, th { background: #eee; padding: 2px; border: 1px solid #aaa; font-size: 12px; font-family: Monospace; width: 100px; line-height: 1.2em; letter-spacing: -1px; }
+		td { width: 6%; }
+        td b { display: block; text-decoration: underline; font-size: 13px; min-height: 13px; }
+        th { width: 30px; background: #ffa; }
+        td.mrm { background: #cfc; }
+        td.pfx { background: #aee; }
+        td.fin { background: #efe; }
+    </style>
+</head>
+<body>
+<table width="100%">
+<!--0x-->
+<tr>
+    <!--00--><td class="mrm"><b>ADD</b>rm,r8</td>
+    <!--01--><td class="mrm"><b>ADD</b>rm,r16</td>
+    <!--02--><td class="mrm"><b>ADD</b>r8,rm</td>
+    <!--03--><td class="mrm"><b>ADD</b>r16,rm</td>
+    <!--04--><td class="fin"><b>ADD</b>al,i8</td>
+    <!--05--><td class="fin"><b>ADD</b>ax,i16</td>
+    <!--06--><td class="fin"><b>PUSH</b>es</td>
+    <!--07--><td class="fin"><b>POP</b>es</td>
+    <!--08--><td class="mrm"><b>OR</b>rm,r8</td>
+    <!--09--><td class="mrm"><b>OR</b>rm,r16</td>
+    <!--0A--><td class="mrm"><b>OR</b>r8,rm</td>
+    <!--0B--><td class="mrm"><b>OR</b>r16,rm</td>
+    <!--0C--><td class="fin"><b>OR</b>al,i8</td>
+    <!--0D--><td class="fin"><b>OR</b>ax,i16</td>
+    <!--0E--><td class="fin"><b>PUSH</b>cs</td>
+    <!--0F--><td class="pfx"><b>#</b></td>
+</tr>
+<!--1x-->
+<tr>
+    <!--10--><td class="mrm"><b>ADC</b>rm,r8</td>
+    <!--11--><td class="mrm"><b>ADC</b>rm,r16</td>
+    <!--12--><td class="mrm"><b>ADC</b>r8,rm</td>
+    <!--13--><td class="mrm"><b>ADC</b>r16,rm</td>
+    <!--14--><td class="fin"><b>ADC</b>al,i8</td>
+    <!--15--><td class="fin"><b>ADC</b>ax,i16</td>
+    <!--16--><td class="fin"><b>PUSH</b>ss</td>
+    <!--17--><td class="fin"><b>POP</b>ss</td>
+    <!--18--><td class="mrm"><b>SBB</b>rm,r8</td>
+    <!--19--><td class="mrm"><b>SBB</b>rm,r16</td>
+    <!--1A--><td class="mrm"><b>SBB</b>r8,rm</td>
+    <!--1B--><td class="mrm"><b>SBB</b>r16,rm</td>
+    <!--1C--><td class="fin"><b>SBB</b>al,i8</td>
+    <!--1D--><td class="fin"><b>SBB</b>ax,i16</td>
+    <!--1E--><td class="fin"><b>PUSH</b>ds</td>
+    <!--1F--><td class="fin"><b>POP</b>ds</td>
+</tr>
+<!--2x-->
+<tr>
+    <!--20--><td class="mrm"><b>AND</b>rm,r8</td>
+    <!--21--><td class="mrm"><b>AND</b>rm,r16</td>
+    <!--22--><td class="mrm"><b>AND</b>r8,rm</td>
+    <!--23--><td class="mrm"><b>AND</b>r16,rm</td>
+    <!--24--><td class="fin"><b>AND</b>al,i8</td>
+    <!--25--><td class="fin"><b>AND</b>ax,i16</td>
+    <!--26--><td class="pfx"><b>ES:</b></td>
+    <!--27--><td><b></b></td>
+    <!--28--><td class="mrm"><b>SUB</b>rm,r8</td>
+    <!--29--><td class="mrm"><b>SUB</b>rm,r16</td>
+    <!--2A--><td class="mrm"><b>SUB</b>r8,rm</td>
+    <!--2B--><td class="mrm"><b>SUB</b>r16,rm</td>
+    <!--2C--><td class="fin"><b>SUB</b>al,i8</td>
+    <!--2D--><td class="fin"><b>SUB</b>ax,i16</td>
+    <!--2E--><td class="pfx"><b>CS:</b></td>
+    <!--2F--><td><b></b></td>
+</tr>
+<!--3x-->
+<tr>
+    <!--30--><td class="mrm"><b>XOR</b>rm,r8</td>
+    <!--31--><td class="mrm"><b>XOR</b>rm,r16</td>
+    <!--32--><td class="mrm"><b>XOR</b>r8,rm</td>
+    <!--33--><td class="mrm"><b>XOR</b>r16,rm</td>
+    <!--34--><td class="fin"><b>XOR</b>al,i8</td>
+    <!--35--><td class="fin"><b>XOR</b>ax,i16</td>
+    <!--36--><td class="pfx"><b>SS:</b></td>
+    <!--37--><td><b></b></td>
+    <!--38--><td class="mrm"><b>CMP</b>rm,r8</td>
+    <!--39--><td class="mrm"><b>CMP</b>rm,r16</td>
+    <!--3A--><td class="mrm"><b>CMP</b>r8,rm</td>
+    <!--3B--><td class="mrm"><b>CMP</b>r16,rm</td>
+    <!--3C--><td class="fin"><b>CMP</b>al,i8</td>
+    <!--3D--><td class="fin"><b>CMP</b>ax,i16</td>
+    <!--3E--><td class="pfx"><b>DS:</b></td>
+    <!--3F--><td><b></b></td>
+</tr>
+<!--4x-->
+<tr>
+    <!--40--><td><b></b></td>
+    <!--41--><td><b></b></td>
+    <!--42--><td><b></b></td>
+    <!--43--><td><b></b></td>
+    <!--44--><td><b></b></td>
+    <!--45--><td><b></b></td>
+    <!--46--><td><b></b></td>
+    <!--47--><td><b></b></td>
+    <!--48--><td><b></b></td>
+    <!--49--><td><b></b></td>
+    <!--4A--><td><b></b></td>
+    <!--4B--><td><b></b></td>
+    <!--4C--><td><b></b></td>
+    <!--4D--><td><b></b></td>
+    <!--4E--><td><b></b></td>
+    <!--4F--><td><b></b></td>
+</tr>
+<!--5x-->
+<tr>
+    <!--50--><td><b></b></td>
+    <!--51--><td><b></b></td>
+    <!--52--><td><b></b></td>
+    <!--53--><td><b></b></td>
+    <!--54--><td><b></b></td>
+    <!--55--><td><b></b></td>
+    <!--56--><td><b></b></td>
+    <!--57--><td><b></b></td>
+    <!--58--><td><b></b></td>
+    <!--59--><td><b></b></td>
+    <!--5A--><td><b></b></td>
+    <!--5B--><td><b></b></td>
+    <!--5C--><td><b></b></td>
+    <!--5D--><td><b></b></td>
+    <!--5E--><td><b></b></td>
+    <!--5F--><td><b></b></td>
+</tr>
+<!--6x-->
+<tr>
+    <!--60--><td><b></b></td>
+    <!--61--><td><b></b></td>
+    <!--62--><td><b></b></td>
+    <!--63--><td><b></b></td>
+    <!--64--><td><b></b></td>
+    <!--65--><td><b></b></td>
+    <!--66--><td><b></b></td>
+    <!--67--><td><b></b></td>
+    <!--68--><td><b></b></td>
+    <!--69--><td><b></b></td>
+    <!--6A--><td><b></b></td>
+    <!--6B--><td><b></b></td>
+    <!--6C--><td><b></b></td>
+    <!--6D--><td><b></b></td>
+    <!--6E--><td><b></b></td>
+    <!--6F--><td><b></b></td>
+</tr>
+<!--7x-->
+<tr>
+    <!--70--><td><b></b></td>
+    <!--71--><td><b></b></td>
+    <!--72--><td><b></b></td>
+    <!--73--><td><b></b></td>
+    <!--74--><td><b></b></td>
+    <!--75--><td><b></b></td>
+    <!--76--><td><b></b></td>
+    <!--77--><td><b></b></td>
+    <!--78--><td><b></b></td>
+    <!--79--><td><b></b></td>
+    <!--7A--><td><b></b></td>
+    <!--7B--><td><b></b></td>
+    <!--7C--><td><b></b></td>
+    <!--7D--><td><b></b></td>
+    <!--7E--><td><b></b></td>
+    <!--7F--><td><b></b></td>
+</tr>
+<!--8x-->
+<tr>
+    <!--80--><td><b></b></td>
+    <!--81--><td><b></b></td>
+    <!--82--><td><b></b></td>
+    <!--83--><td><b></b></td>
+    <!--84--><td><b></b></td>
+    <!--85--><td><b></b></td>
+    <!--86--><td><b></b></td>
+    <!--87--><td><b></b></td>
+    <!--88--><td><b></b></td>
+    <!--89--><td><b></b></td>
+    <!--8A--><td><b></b></td>
+    <!--8B--><td><b></b></td>
+    <!--8C--><td><b></b></td>
+    <!--8D--><td><b></b></td>
+    <!--8E--><td><b></b></td>
+    <!--8F--><td><b></b></td>
+</tr>
+<!--9x-->
+<tr>
+    <!--90--><td><b></b></td>
+    <!--91--><td><b></b></td>
+    <!--92--><td><b></b></td>
+    <!--93--><td><b></b></td>
+    <!--94--><td><b></b></td>
+    <!--95--><td><b></b></td>
+    <!--96--><td><b></b></td>
+    <!--97--><td><b></b></td>
+    <!--98--><td><b></b></td>
+    <!--99--><td><b></b></td>
+    <!--9A--><td><b></b></td>
+    <!--9B--><td><b></b></td>
+    <!--9C--><td><b></b></td>
+    <!--9D--><td><b></b></td>
+    <!--9E--><td><b></b></td>
+    <!--9F--><td><b></b></td>
+</tr>
+<!--Ax-->
+<tr>
+    <!--A0--><td><b></b></td>
+    <!--A1--><td><b></b></td>
+    <!--A2--><td><b></b></td>
+    <!--A3--><td><b></b></td>
+    <!--A4--><td><b></b></td>
+    <!--A5--><td><b></b></td>
+    <!--A6--><td><b></b></td>
+    <!--A7--><td><b></b></td>
+    <!--A8--><td><b></b></td>
+    <!--A9--><td><b></b></td>
+    <!--AA--><td><b></b></td>
+    <!--AB--><td><b></b></td>
+    <!--AC--><td><b></b></td>
+    <!--AD--><td><b></b></td>
+    <!--AE--><td><b></b></td>
+    <!--AF--><td><b></b></td>
+</tr>
+<!--Bx-->
+<tr>
+    <!--B0--><td><b></b></td>
+    <!--B1--><td><b></b></td>
+    <!--B2--><td><b></b></td>
+    <!--B3--><td><b></b></td>
+    <!--B4--><td><b></b></td>
+    <!--B5--><td><b></b></td>
+    <!--B6--><td><b></b></td>
+    <!--B7--><td><b></b></td>
+    <!--B8--><td><b></b></td>
+    <!--B9--><td><b></b></td>
+    <!--BA--><td><b></b></td>
+    <!--BB--><td><b></b></td>
+    <!--BC--><td><b></b></td>
+    <!--BD--><td><b></b></td>
+    <!--BE--><td><b></b></td>
+    <!--BF--><td><b></b></td>
+</tr>
+<!--Cx-->
+<tr>
+    <!--C0--><td><b></b></td>
+    <!--C1--><td><b></b></td>
+    <!--C2--><td><b></b></td>
+    <!--C3--><td><b></b></td>
+    <!--C4--><td><b></b></td>
+    <!--C5--><td><b></b></td>
+    <!--C6--><td><b></b></td>
+    <!--C7--><td><b></b></td>
+    <!--C8--><td><b></b></td>
+    <!--C9--><td><b></b></td>
+    <!--CA--><td><b></b></td>
+    <!--CB--><td><b></b></td>
+    <!--CC--><td><b></b></td>
+    <!--CD--><td><b></b></td>
+    <!--CE--><td><b></b></td>
+    <!--CF--><td><b></b></td>
+</tr>
+<!--Dx-->
+<tr>
+    <!--D0--><td><b></b></td>
+    <!--D1--><td><b></b></td>
+    <!--D2--><td><b></b></td>
+    <!--D3--><td><b></b></td>
+    <!--D4--><td><b></b></td>
+    <!--D5--><td><b></b></td>
+    <!--D6--><td><b></b></td>
+    <!--D7--><td><b></b></td>
+    <!--D8--><td><b></b></td>
+    <!--D9--><td><b></b></td>
+    <!--DA--><td><b></b></td>
+    <!--DB--><td><b></b></td>
+    <!--DC--><td><b></b></td>
+    <!--DD--><td><b></b></td>
+    <!--DE--><td><b></b></td>
+    <!--DF--><td><b></b></td>
+</tr>
+<!--Ex-->
+<tr>
+    <!--E0--><td><b></b></td>
+    <!--E1--><td><b></b></td>
+    <!--E2--><td><b></b></td>
+    <!--E3--><td><b></b></td>
+    <!--E4--><td><b></b></td>
+    <!--E5--><td><b></b></td>
+    <!--E6--><td><b></b></td>
+    <!--E7--><td><b></b></td>
+    <!--E8--><td><b></b></td>
+    <!--E9--><td><b></b></td>
+    <!--EA--><td><b></b></td>
+    <!--EB--><td><b></b></td>
+    <!--EC--><td><b></b></td>
+    <!--ED--><td><b></b></td>
+    <!--EE--><td><b></b></td>
+    <!--EF--><td><b></b></td>
+</tr>
+<!--Fx-->
+<tr>
+    <!--F0--><td><b></b></td>
+    <!--F1--><td><b></b></td>
+    <!--F2--><td><b></b></td>
+    <!--F3--><td><b></b></td>
+    <!--F4--><td><b></b></td>
+    <!--F5--><td><b></b></td>
+    <!--F6--><td><b></b></td>
+    <!--F7--><td><b></b></td>
+    <!--F8--><td><b></b></td>
+    <!--F9--><td><b></b></td>
+    <!--FA--><td><b></b></td>
+    <!--FB--><td><b></b></td>
+    <!--FC--><td><b></b></td>
+    <!--FD--><td><b></b></td>
+    <!--FE--><td><b></b></td>
+    <!--FF--><td><b></b></td>
+</tr>
+</table>
+</body>
+</html>
