@@ -2,6 +2,8 @@
 
 #include <stdlib.h>
 
+#include "obj_dir/Vvideo.h"
+
 #include <SDL2/SDL.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -9,17 +11,16 @@
 class App {
 protected:
 
-    SDL_Window*         sdl_window;
-    SDL_Renderer*       sdl_renderer;
-    SDL_Texture*        sdl_screen_texture;
-    Uint32*             screen_buffer;
+    SDL_Window*     sdl_window;
+    SDL_Renderer*   sdl_renderer;
+    SDL_Texture*    sdl_screen_texture;
+    Uint32*         screen_buffer;
 
     Uint32  width, height, _scale, _width, _height;
-    Uint32  frame_id;
-    Uint32  frame_length;
-    Uint32  frame_prev_ticks;
-
+    Uint32  frame_id, frame_length, frame_prev_ticks;
     int     x, y, _hs, _vs;
+
+    Vvideo* mod_ppu;
 
 public:
 
@@ -27,8 +28,8 @@ public:
     // ОБЩИЕ МЕТОДЫ
     // -----------------------------------------------------------------------------
 
-    App(int w, int h, int scale = 2, int fps = 25) {
-
+    App(int w, int h, int scale = 2, int fps = 25)
+    {
         _scale   = scale;
         _width   = w;
         _height  = h;
@@ -56,11 +57,13 @@ public:
         // Настройка FPS
         frame_length     = 1000 / (fps ? fps : 1);
         frame_prev_ticks = SDL_GetTicks();
+
+        mod_ppu = new Vvideo;
     }
 
     // Ожидание событий
-    int main() {
-
+    int main()
+    {
         SDL_Event evt;
         SDL_Rect  dstRect;
 
@@ -102,8 +105,8 @@ public:
     }
 
     // Уничтожение окна
-    int destroy() {
-
+    int destroy()
+    {
         if (sdl_screen_texture) { SDL_DestroyTexture(sdl_screen_texture);   sdl_screen_texture  = NULL; }
         if (sdl_renderer)       { SDL_DestroyRenderer(sdl_renderer);        sdl_renderer        = NULL; }
 
@@ -120,8 +123,8 @@ public:
     // -----------------------------------------------------------------------------
 
     // Установка точки
-    void pset(int x, int y, Uint32 cl) {
-
+    void pset(int x, int y, Uint32 cl)
+    {
         if (x < 0 || y < 0 || x >= _width || y >= _height)
             return;
 
@@ -129,8 +132,8 @@ public:
     }
 
     // Отслеживание сигнала RGB по HS/VS; save=1 сохранить фрейм как ppm, 2=как png
-    void vga(int hs, int vs, int color) {
-
+    void vga(int hs, int vs, int color)
+    {
         if (hs) x++;
 
         // Отслеживание изменений HS/VS
@@ -142,19 +145,24 @@ public:
         _vs = vs;
 
         // Вывод на экран
-        pset(x - 48, y - 31, color);
+        pset(x - 48, y - 35, color);
     }
 
 	// Основной обработчик (TOP-уровень)
-	void tick() {
+	void tick()
+    {
+        mod_ppu->data = 0x12;
 
-		// vga(mod_ppu->HS, mod_ppu->VS, 65536*(mod_ppu->R << 4) + 256*(mod_ppu->G << 4) + (mod_ppu->B << 4));
+        mod_ppu->clock = 0; mod_ppu->eval();
+        mod_ppu->clock = 1; mod_ppu->eval();
+
+		vga(mod_ppu->hs, mod_ppu->vs, 65536*(mod_ppu->r << 4) + 256*(mod_ppu->g << 4) + (mod_ppu->b << 4));
 	}
 };
 
 // Главный цикл работы программы
-int main(int argc, char **argv) {
-
+int main(int argc, char **argv)
+{
     // -------------------------------------
     // Verilated::commandArgs(argc, argv);
     App* app = new App(640, 400);
