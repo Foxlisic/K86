@@ -996,7 +996,7 @@ else if (ce) begin
                 endcase
 
                 // PUSH rm
-                6: begin wb <= op1; fn <= PUSH; end
+                6: begin fn <= PUSH; wb <= op1; end
                 7: begin fn <= UNDEF; end
 
             endcase
@@ -1253,8 +1253,6 @@ else if (ce) begin
         endcase
 
         // Деление op1 на op2, size -> wb
-        // DIV: case (s5)
-        // endcase
         DIV: begin
 /*
             if (divcnt) begin
@@ -1283,7 +1281,7 @@ end
 // Арифметикое и логическое устройство
 // ---------------------------------------------------------------------
 
-wire [31:0] mult = op1 & op2;
+wire [31:0] mult = op1 * op2;
 
 wire [ 3:0] alu_top = size ? 15 : 7;
 wire [ 4:0] alu_up  = alu_top + 1'b1;
@@ -1297,27 +1295,17 @@ wire [16:0] alu_r =
     alu == ALU_XOR ? op1 ^ op2:
                      op1 - op2; // SUB, CMP
 
-wire is_add  = alu == ALU_ADD || alu == ALU_ADC;
-wire is_lgc  = alu == ALU_XOR || alu == ALU_AND || alu == ALU_OR;
-wire alu_cf  = alu_r[alu_up];
-wire alu_sf  = alu_r[alu_top];
-wire alu_af  = op1[4] ^ op2[4] ^ alu_r[4];
-wire alu_zf  = (size ? alu_r[15:0] : alu_r[7:0]) == 0;
-wire alu_pf  = ~^alu_r[7:0];
-wire alu_of  = (op1[alu_top] ^ op2[alu_top] ^ is_add) & (op1[alu_top] ^ alu_r[alu_top]);
+wire _add = alu == ALU_ADD || alu == ALU_ADC;
+wire _lgc = alu != ALU_XOR && alu != ALU_AND && alu != ALU_OR;
+wire _cf  = alu_r[alu_up];
+wire _sf  = alu_r[alu_top];
+wire _af  = (op1[4] ^ op2[4] ^ alu_r[4]);
+wire _zf  = (size ? alu_r[15:0] : alu_r[7:0]) == 0;
+wire _pf  = ~^alu_r[7:0];
+wire _of  = ((op1[alu_top] ^ op2[alu_top] ^ _add) & (op1[alu_top] ^ alu_r[alu_top]));
 
-wire [11:0] alu_f = {
-    /* OF  */ alu_of & ~is_lgc,
-    /* DIT */ flags[10:8],
-    /* SF  */ alu_sf,
-    /* ZF  */ alu_zf,
-    /* 5   */ 1'b0,
-    /* AF  */ alu_af & ~is_lgc,
-    /* 3   */ 1'b0,
-    /* PF  */ alu_pf,
-    /* 1   */ 1'b1,
-    /* CF  */ alu_cf & ~is_lgc
-};
+// Итоговые флаги
+wire [11:0] alu_f = {_of & _lgc, flags[10:8], _sf, _zf, 1'b0, _af & _lgc, 1'b0, _pf, 1'b1, _cf & _lgc};
 
 // Сдвиги
 // ---------------------------------------------------------------------
@@ -1362,9 +1350,10 @@ always @* begin
 
 end
 
-// ---------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 // Десятичная коррекция DAA, DAS, AAA, AAS
-// ---------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+
 reg [15:0]  daa_r;
 reg [8:0]   daa_i;
 reg [7:0]   daa_h;
