@@ -91,16 +91,26 @@ reg [11:0]  flags;
 always @(posedge clock)
 if (reset_n == 1'b0) begin
 
+    // Разное
+    //             ODIT SZ A  P C
+    flags   <= 12'b0010_0000_0010;
     fn      <= START;
+    ip      <= 16'hFFF0;
+    iack    <= 1'b0;
+    // Сегменты
     cs      <= 16'hF000;
     es      <= 16'h0000;
     ds      <= 16'h0000;
     ss      <= 16'h0000;
-    sp      <= 16'h0000;
-    ip      <= 16'hFFF0;
-    iack    <= 1'b0;
-    //             ODIT SZ A  P C
-    flags   <= 12'b0010_0000_0010;
+    // Регистры
+    ax      <= 16'h0000;
+    bx      <= 16'h0000;
+    cx      <= 16'h0000;
+    dx      <= 16'h0000;
+    sp      <= 16'h7C00;
+    bp      <= 16'h0000;
+    si      <= 16'h0000;
+    di      <= 16'h0000;
 
 end
 else if (ce) begin
@@ -532,9 +542,10 @@ else if (ce) begin
             // POP r
             8'b01011xxx: begin
 
-                fn   <= WB;
-                size <= 1;
-                dir  <= 1;
+                fn    <= WB;
+                size  <= 1;
+                dir   <= 1;
+                fnext <= START;
                 modrm[5:3] <= opcode[2:0];
 
             end

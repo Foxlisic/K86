@@ -1,26 +1,27 @@
 [*]
-[*] GTKWave Analyzer v3.3.66 (w)1999-2015 BSI
-[*] Tue Apr 02 06:03:38 2024
+[*] GTKWave Analyzer v3.3.104 (w)1999-2020 BSI
+[*] Wed Apr  3 04:38:08 2024
 [*]
-[dumpfile] "Z:\dev\k86\tb.vcd"
-[dumpfile_mtime] "Tue Apr 02 04:26:47 2024"
-[dumpfile_size] 91923
-[savefile] "Z:\dev\k86\tb.gtkw"
-[timestart] 0
-[size] 960 434
+[dumpfile] "/home/fox/dev/k86/tb.vcd"
+[dumpfile_mtime] "Wed Apr  3 04:37:38 2024"
+[dumpfile_size] 93306
+[savefile] "/home/fox/dev/k86/tb.gtkw"
+[timestart] 444
+[size] 1920 1021
 [pos] -1 -1
-*-7.000000 100 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-7.000000 939 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] tb.
-[sst_width] 197
+[sst_width] 274
 [signals_width] 188
 [sst_expanded] 1
-[sst_vpaned_height] 95
+[sst_vpaned_height] 342
 @28
 [color] 3
 tb.clock
-@29
 [color] 3
 tb.SephironTurboXCore.clock
+[color] 2
+tb.SephironTurboXCore.m0
 @800200
 -IO
 @22
@@ -31,5 +32,61 @@ tb.SephironTurboXCore.out[7:0]
 tb.SephironTurboXCore.we
 @1000200
 -IO
+@800200
+-REG
+@22
+[color] 6
+tb.SephironTurboXCore.ax[15:0]
+[color] 6
+tb.SephironTurboXCore.bx[15:0]
+[color] 6
+tb.SephironTurboXCore.cx[15:0]
+[color] 6
+tb.SephironTurboXCore.dx[15:0]
+[color] 6
+tb.SephironTurboXCore.sp[15:0]
+[color] 6
+tb.SephironTurboXCore.bp[15:0]
+[color] 6
+tb.SephironTurboXCore.si[15:0]
+[color] 6
+tb.SephironTurboXCore.di[15:0]
+@23
+[color] 5
+tb.SephironTurboXCore.es[15:0]
+@22
+[color] 5
+tb.SephironTurboXCore.cs[15:0]
+[color] 5
+tb.SephironTurboXCore.ds[15:0]
+[color] 5
+tb.SephironTurboXCore.ss[15:0]
+@c00022
+[color] 5
+tb.SephironTurboXCore.flags[11:0]
+@28
+(0)tb.SephironTurboXCore.flags[11:0]
+(1)tb.SephironTurboXCore.flags[11:0]
+(2)tb.SephironTurboXCore.flags[11:0]
+(3)tb.SephironTurboXCore.flags[11:0]
+(4)tb.SephironTurboXCore.flags[11:0]
+(5)tb.SephironTurboXCore.flags[11:0]
+(6)tb.SephironTurboXCore.flags[11:0]
+(7)tb.SephironTurboXCore.flags[11:0]
+(8)tb.SephironTurboXCore.flags[11:0]
+(9)tb.SephironTurboXCore.flags[11:0]
+(10)tb.SephironTurboXCore.flags[11:0]
+(11)tb.SephironTurboXCore.flags[11:0]
+@1401200
+-group_end
+@1000200
+-REG
+@800200
+-CTL
+@22
+tb.SephironTurboXCore.fn[3:0]
+tb.SephironTurboXCore.fnext[3:0]
+@1000200
+-CTL
 [pattern_trace] 1
 [pattern_trace] 0
