@@ -1,0 +1,36 @@
+[*]
+[*] GTKWave Analyzer v3.3.66 (w)1999-2015 BSI
+[*] Fri Apr 26 05:51:43 2024
+[*]
+[dumpfile] "tb.vcd"
+[dumpfile_mtime] "Fri Apr 26 05:49:50 2024"
+[dumpfile_size] 63862
+[savefile] "tb.gtkw"
+[timestart] 0
+[size] 960 491
+[pos] -5 -5
+*-5.000000 20 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] tb.
+[sst_width] 197
+[signals_width] 179
+[sst_expanded] 1
+[sst_vpaned_height] 115
+@29
+[color] 7
+tb.reset_n
+@28
+tb.clock
+[color] 2
+tb.clock25
+@800200
+-PhysAddr
+@22
+tb.address[19:0]
+tb.in[7:0]
+tb.out[7:0]
+@28
+tb.we
+@1000200
+-PhysAddr
+[pattern_trace] 1
+[pattern_trace] 0
