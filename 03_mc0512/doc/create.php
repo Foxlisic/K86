@@ -105,8 +105,8 @@ class x86 {
         'ARPL     |rm,r16     |m| |',
         'FS:      |           |p| |',
         'GS:      |           |p| |',
-        'opsize   |           |e| |',
-        'rgsize   |           |e| |',
+        'Opsz     |           |p| |',
+        'Rgsz     |           |p| |',
         'PUSH     |i16        | |2|',
         'IMUL     |r16,rm,i16 |m|2|',
         'PUSH     |i8         | |1|',
@@ -283,8 +283,8 @@ class x86 {
     ];
 
     // [Выход] Список инструкции
-    public function generate() 
-	{
+    public function generate()
+    {
         $map = $this->parse_x86_table();
 
         // Рендеринг инструкции
@@ -300,31 +300,31 @@ class x86 {
                 $m1 = trim($b[1]);
                 $m2 = trim($b[2]) ? $b[2] : "o";
 
-				$curx = sprintf("%02X", $x);
-                $row .= "    <!--$curx--><td class='x86-$m2'><div><span>$y</span><b>$m0</b></div>$m1</td>\n";
+                $curx = sprintf("%02X", $x);
+                $row .= "    <!--$curx--><td class='x86 x86-$m2'><div><span>$y</span><b>$m0</b></div>$m1</td>\n";
             }
 
             $htm .= "$row";
             $htm .= "</tr>\n";
         }
-		
+
         $htm .= "</table>\n";
-		$htm .= "<b>ГРУППЫ</b>\n";
-		$htm .= "<table>\n";
-		$htm .= '<tr><th style="width:50px">GROUP</th>'; for ($i = 0; $i < 8; $i++) { $htm .= "<th>$i</th>"; } $htm .= "</tr>\n";
-		
-		// Рендеринг групп
-		foreach ($this->x86_group as $name => $grp) {
-			
-			$htm .= "<tr>\n";
-			$htm .= "    <th>".strtoupper($name)."</th>\n";
-			foreach ($grp as $item) {
-				$htm .= "    <td>".strtoupper($item)."</td>\n";
-			}
-			$htm .= "</tr>\n";
-		}
-		
-		$htm .= '</table>';
+        $htm .= "<b>ГРУППЫ</b>\n";
+        $htm .= "<table>\n";
+        $htm .= '<tr><th style="width:50px">GROUP</th>'; for ($i = 0; $i < 8; $i++) { $htm .= "<th>$i</th>"; } $htm .= "</tr>\n";
+
+        // Рендеринг групп
+        foreach ($this->x86_group as $name => $grp) {
+
+            $htm .= "<tr>\n";
+            $htm .= "    <th>".strtoupper($name)."</th>\n";
+            foreach ($grp as $item) {
+                $htm .= "    <td>".strtoupper($item)."</td>\n";
+            }
+            $htm .= "</tr>\n";
+        }
+
+        $htm .= '</table>';
 
         return $htm;
     }
@@ -347,18 +347,20 @@ class x86 {
     <meta charset="utf8">
     <title>8086 INSTRUCTION SET TABLE DONE</title>
     <style>
-		body, html { padding: 0; margin: 0; }
+        body, html { padding: 0; margin: 0; }
         table { border-collapse: collapse; }
         tr { vertical-align: top; }
-        td, th { background: #ffe; padding: 3px; border: 1px solid #999; font-size: 11px; font-family: Monospace; line-height: 1.3em; letter-spacing: -1px; }		
+        td, th { background: #ffe; padding: 3px; border: 1px solid #999; font-size: 11px; font-family: Monospace; line-height: 1.3em; letter-spacing: -1px; }
         td b { display: block; text-decoration: underline;  }
         th { width: 30px; background: #ffa; }
-		.x86-table td { width: 6%; }
+        .x86-table td { width: 6%; }
+        td.x86 { opacity: 1.0; }
+        td.done { opacity: 1.0; }
         td.x86-m { background: #cfc; }
         td.x86-g { background: #cac; }
         td.x86-p { background: #aee; }
         td.x86-e { background: #efe; }
-		td span { float: right; }
+        td span { float: right; }
     </style>
 </head>
 <body>
