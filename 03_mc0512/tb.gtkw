@@ -1,20 +1,20 @@
 [*]
-[*] GTKWave Analyzer v3.3.66 (w)1999-2015 BSI
-[*] Mon Apr 29 05:30:43 2024
+[*] GTKWave Analyzer v3.3.104 (w)1999-2020 BSI
+[*] Mon Apr 29 18:09:14 2024
 [*]
-[dumpfile] "z:\dev\k86\03_mc0512\tb.vcd"
-[dumpfile_mtime] "Mon Apr 29 05:29:34 2024"
-[dumpfile_size] 65725
-[savefile] "z:\dev\k86\03_mc0512\tb.gtkw"
-[timestart] 218
-[size] 960 491
+[dumpfile] "/home/fox/dev/k86/03_mc0512/tb.vcd"
+[dumpfile_mtime] "Mon Apr 29 18:08:41 2024"
+[dumpfile_size] 132032
+[savefile] "/home/fox/dev/k86/03_mc0512/tb.gtkw"
+[timestart] 0
+[size] 1920 1021
 [pos] -1 -1
-*-7.000000 307 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-7.000000 420 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] tb.
-[sst_width] 197
+[sst_width] 274
 [signals_width] 198
 [sst_expanded] 1
-[sst_vpaned_height] 115
+[sst_vpaned_height] 342
 @28
 [color] 7
 tb.reset_n
@@ -28,7 +28,7 @@ tb.address[19:0]
 tb.TurboCore.ip[15:0]
 tb.in[7:0]
 tb.out[7:0]
-@28
+@29
 tb.we
 @1000200
 -PhysAddr
@@ -50,7 +50,6 @@ tb.TurboCore.opcode[7:0]
 @22
 tb.TurboCore.ta[5:0]
 tb.TurboCore.m[3:0]
-@23
 tb.TurboCore.seg[15:0]
 @28
 tb.TurboCore.preip[2:0]
@@ -60,17 +59,17 @@ tb.TurboCore._overs[2:0]
 tb.TurboCore.ips[15:0]
 @1000200
 -CTRL
-@c00200
+@800200
 -REGS
 @22
 [color] 5
 tb.TurboCore.ax[15:0]
 [color] 5
-tb.TurboCore.bx[15:0]
-[color] 5
 tb.TurboCore.cx[15:0]
 [color] 5
 tb.TurboCore.dx[15:0]
+[color] 5
+tb.TurboCore.bx[15:0]
 [color] 5
 tb.TurboCore.sp[15:0]
 [color] 5
@@ -92,14 +91,31 @@ tb.TurboCore.ds[15:0]
 tb.TurboCore.ss[15:0]
 @1000200
 -SEG
-@1401200
 -REGS
-@c00200
+@800200
 -ALU
+@c00022
+tb.TurboCore.flag[11:0]
+@28
+(0)tb.TurboCore.flag[11:0]
+(1)tb.TurboCore.flag[11:0]
+(2)tb.TurboCore.flag[11:0]
+(3)tb.TurboCore.flag[11:0]
+(4)tb.TurboCore.flag[11:0]
+(5)tb.TurboCore.flag[11:0]
+(6)tb.TurboCore.flag[11:0]
+(7)tb.TurboCore.flag[11:0]
+(8)tb.TurboCore.flag[11:0]
+(9)tb.TurboCore.flag[11:0]
+(10)tb.TurboCore.flag[11:0]
+(11)tb.TurboCore.flag[11:0]
+@1401200
+-group_end
 @22
 tb.TurboCore.op1[15:0]
 tb.TurboCore.op2[15:0]
-@1401200
+tb.TurboCore.wb[15:0]
+@1000200
 -ALU
 [pattern_trace] 1
 [pattern_trace] 0
