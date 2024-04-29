@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf8">
@@ -13,6 +13,7 @@
         .x86-table td { width: 6%; }
         td.x86 { opacity: 0.3; }
         td.done { opacity: 1.0; }
+        td.x86-o { background: #ffa; }
         td.x86-m { background: #cfc; }
         td.x86-g { background: #cac; }
         td.x86-p { background: #aee; }
@@ -21,7 +22,8 @@
     </style>
 </head>
 <body>
-<table class="x86-table" width="100%"><tr>
+<table class="x86-table" width="100%">
+<tr>
     <!--00--><td class='x86 x86-m'><div><span>00</span><b>ADD</b></div>rm,r8</td>
     <!--01--><td class='x86 x86-m'><div><span>01</span><b>ADD</b></div>rm,r16</td>
     <!--02--><td class='x86 x86-m'><div><span>02</span><b>ADD</b></div>r8,rm</td>
@@ -37,7 +39,7 @@
     <!--0C--><td class='x86 x86-o'><div><span>0C</span><b>OR</b></div>al,i8</td>
     <!--0D--><td class='x86 x86-o'><div><span>0D</span><b>OR</b></div>ax,i16</td>
     <!--0E--><td class='x86 x86-o'><div><span>0E</span><b>PUSH</b></div>cs</td>
-    <!--0F--><td class='x86 x86-e done'><div><span>0F</span><b>*</b></div></td>
+    <!--0F--><td class='x86 x86-p done'><div><span>0F</span><b>*</b></div></td>
 </tr>
 <tr>
     <!--10--><td class='x86 x86-m'><div><span>10</span><b>ADC</b></div>rm,r8</td>
@@ -194,7 +196,7 @@
     <!--97--><td class='x86 x86-o'><div><span>97</span><b>XCHG</b></div>ax,di</td>
     <!--98--><td class='x86 x86-o'><div><span>98</span><b>CBW</b></div></td>
     <!--99--><td class='x86 x86-o'><div><span>99</span><b>CWD</b></div></td>
-    <!--9A--><td class='x86 x86-o'><div><span>9A</span><b>CALL</b></div>ptr16:16</td>
+    <!--9A--><td class='x86 x86-o'><div><span>9A</span><b>CALL</b></div>p16:16</td>
     <!--9B--><td class='x86 x86-o'><div><span>9B</span><b>FWAIT</b></div></td>
     <!--9C--><td class='x86 x86-o'><div><span>9C</span><b>PUSHF</b></div></td>
     <!--9D--><td class='x86 x86-o'><div><span>9D</span><b>POPF</b></div></td>
@@ -202,10 +204,10 @@
     <!--9F--><td class='x86 x86-o'><div><span>9F</span><b>LAHF</b></div></td>
 </tr>
 <tr>
-    <!--A0--><td class='x86 x86-o'><div><span>A0</span><b>MOV</b></div>al,[m16]</td>
+    <!--A0--><td class='x86 x86-o'><div><span>A0</span><b>MOV</b></div>al,[m]</td>
     <!--A1--><td class='x86 x86-o'><div><span>A1</span><b>MOV</b></div>ax,[m16]</td>
-    <!--A2--><td class='x86 x86-o'><div><span>A2</span><b>MOV</b></div>[m16],al</td>
-    <!--A3--><td class='x86 x86-o'><div><span>A3</span><b>MOV</b></div>[m16],ax</td>
+    <!--A2--><td class='x86 x86-o'><div><span>A2</span><b>MOV</b></div>[m],al</td>
+    <!--A3--><td class='x86 x86-o'><div><span>A3</span><b>MOV</b></div>[m],ax</td>
     <!--A4--><td class='x86 x86-o'><div><span>A4</span><b>MOVSB</b></div></td>
     <!--A5--><td class='x86 x86-o'><div><span>A5</span><b>MOVSW</b></div></td>
     <!--A6--><td class='x86 x86-o'><div><span>A6</span><b>CMPSB</b></div></td>
@@ -242,8 +244,8 @@
     <!--C1--><td class='x86 x86-g'><div><span>C1</span><b>GRP2</b></div>rm16,i8</td>
     <!--C2--><td class='x86 x86-o'><div><span>C2</span><b>RET</b></div>i16</td>
     <!--C3--><td class='x86 x86-o'><div><span>C3</span><b>RET</b></div></td>
-    <!--C4--><td class='x86 x86-m'><div><span>C4</span><b>LES</b></div>r16,[m16]</td>
-    <!--C5--><td class='x86 x86-m'><div><span>C5</span><b>LDS</b></div>r16,[m16]</td>
+    <!--C4--><td class='x86 x86-m'><div><span>C4</span><b>LES</b></div>r16,[m]</td>
+    <!--C5--><td class='x86 x86-m'><div><span>C5</span><b>LDS</b></div>r16,[m]</td>
     <!--C6--><td class='x86 x86-m'><div><span>C6</span><b>MOV</b></div>rm8,i8</td>
     <!--C7--><td class='x86 x86-m'><div><span>C7</span><b>MOV</b></div>rm16,i16</td>
     <!--C8--><td class='x86 x86-o'><div><span>C8</span><b>ENTER</b></div>i16,i8</td>
@@ -283,8 +285,8 @@
     <!--E6--><td class='x86 x86-o'><div><span>E6</span><b>OUT</b></div>i8,al</td>
     <!--E7--><td class='x86 x86-o'><div><span>E7</span><b>OUT</b></div>i8,ax</td>
     <!--E8--><td class='x86 x86-o'><div><span>E8</span><b>CALL</b></div>b16</td>
-    <!--E9--><td class='x86 x86-o'><div><span>E9</span><b>JMP</b></div>b16</td>
-    <!--EA--><td class='x86 x86-o'><div><span>EA</span><b>JMP</b></div>ptr16:16</td>
+    <!--E9--><td class='x86 x86-o done'><div><span>E9</span><b>JMP</b></div>b16</td>
+    <!--EA--><td class='x86 x86-o done'><div><span>EA</span><b>JMP</b></div>p16:16</td>
     <!--EB--><td class='x86 x86-o'><div><span>EB</span><b>JMP</b></div>b8</td>
     <!--EC--><td class='x86 x86-o'><div><span>EC</span><b>IN</b></div>al,dx</td>
     <!--ED--><td class='x86 x86-o'><div><span>ED</span><b>IN</b></div>ax,dx</td>

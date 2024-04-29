@@ -24,13 +24,13 @@ wire        we;
 
 initial begin
 
-    $readmemh("tb.hex", memory, 20'h0000);
+    $readmemh("tb.hex", memory, 20'h00000);
 
-    memory[20'hFFFF0] = 8'hEA; // Instinct
-    memory[20'hFFFF1] = 8'h00; // Insult
-    memory[20'hFFFF2] = 8'h00; // Infakct
-    memory[20'hFFFF3] = 8'h00; // Megademo
-    memory[20'hFFFF4] = 8'h00; // Party
+    memory[20'hFFFF0] = 8'hEA;
+    memory[20'hFFFF1] = 8'h00;
+    memory[20'hFFFF2] = 8'h00;
+    memory[20'hFFFF3] = 8'h00;
+    memory[20'hFFFF4] = 8'h00;
 
 end
 

@@ -33,13 +33,18 @@ reg [11:0]  flag = 12'b0000_0000_0010;
 // СИСТЕМНЫЕ РЕГИСТРЫ
 // ---------------------------------------------------------------------
 reg         cp;
+reg [ 3:0]  m;
 reg [ 5:0]  ta;
-reg [15:0]  ea, seg;
+reg [15:0]  ea, seg, op1, op2;
 reg [ 7:0]  opcode;
-reg [ 3:0]  overs, _overs;      // Over Segment
+reg [ 2:0]  overs, _overs;      // Over Segment
 reg [ 1:0]  rep, _rep;          // Repeat:
 reg [ 2:0]  preip;
 reg         size, dir;
+
+// ВЫЧИСЛЕНИЯ
+// ---------------------------------------------------------------------
+wire [15:0] ipn = ip + 1;
 
 // ЗНАЧЕНИЕ РЕГИСТРОВ
 // ---------------------------------------------------------------------
@@ -75,8 +80,19 @@ if (reset_n == 1'b0) begin
 
     cp <= 0;
     ta <= 0;
-    cs <= 16'hF000;
-    ip <= 16'hFFF0;
+
+    // F000:FFF0
+    ip <= 16'h0000;
+
+    // SG
+    es <= 16'h1234; cs <= 16'h0000;
+    ss <= 16'hDEAD; ds <= 16'hBEEF;
+
+    // RG
+    ax <= 16'h0000; bx <= 16'h0000;
+    cx <= 16'h0000; dx <= 16'h0000;
+    sp <= 16'h0000; bp <= 16'h0000;
+    si <= 16'h0000; di <= 16'h0000;
 
     _overs <= {DS, 1'b0};
     _rep   <= 2'b00;
@@ -86,7 +102,6 @@ if (reset_n == 1'b0) begin
 end else if (ce) begin
 
     we <= 0;
-
     case (ta)
 
     // Загрузка опкода и выполнение простых инструкции
@@ -107,6 +122,7 @@ end else if (ce) begin
 
             // Метка по умолчанию
             ta      <= RUN;
+            m       <= 0;
 
             // Место реального старта инструкции с учетом префиксов
             ips     <= ip - preip;
@@ -132,8 +148,32 @@ end else if (ce) begin
         endcase
 
     end
+
+    // Исполнение инструкции
+    // -----------------------------------------------------------------
+    RUN: casex (opcode)
+
+        // 3T JMP b16
+        8'b1110_1001: case (m)
+
+            0: begin m <= 1; op1[7:0] <= in; ip <= ip + 1; end
+            1: begin m <= 0; ip <= ipn + {in, op1[7:0]}; ta <= LOAD; end
+
+        endcase
+
+        // 5T JMP far
+        8'b1110_1010: case (m)
+
+            0: begin m <= 1; ip <= ipn; op1[ 7:0] <= in; ip <= ip + 1; end
+            1: begin m <= 2; ip <= ipn; op1[15:8] <= in; ip <= ip + 1; end
+            2: begin m <= 3; ip <= ipn; op2[ 7:0] <= in; ip <= ip + 1; end
+            3: begin m <= 0; ip <= ipn; cs <= {in, op2[7:0]}; ip <= op1; ta <= LOAD; end
+
+        endcase
+
     endcase
 
+    endcase
 end
 
 endmodule

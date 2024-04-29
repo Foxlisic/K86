@@ -18,7 +18,7 @@ class x86 {
         'OR       |al,i8      | |1|',
         'OR       |ax,i16     | |2|',
         'PUSH     |cs         | | |',
-        '*        |           |e| |',
+        '*        |           |p| |',
         'ADC      |rm,r8      |m| |',
         'ADC      |rm,r16     |m| |',
         'ADC      |r8,rm      |m| |',
@@ -157,16 +157,16 @@ class x86 {
         'XCHG     |ax,di      | | |',
         'CBW      |           | | |',
         'CWD      |           | | |',
-        'CALL     |ptr16:16   | |4|',
+        'CALL     |p16:16     | |4|',
         'FWAIT    |           | | |',
         'PUSHF    |           | | |',
         'POPF     |           | | |',
         'SAHF     |           | | |',
         'LAHF     |           | | |',
-        'MOV      |al,[m16]   | |2|',
-        'MOV      |ax,[m16]   | |2|',
-        'MOV      |[m16],al   | |2|',
-        'MOV      |[m16],ax   | |2|',
+        'MOV      |al,[m]     | |2|',
+        'MOV      |ax,[m]     | |2|',
+        'MOV      |[m],al     | |2|',
+        'MOV      |[m],ax     | |2|',
         'MOVSB    |           | | |',
         'MOVSW    |           | | |',
         'CMPSB    |           | | |',
@@ -199,8 +199,8 @@ class x86 {
         'GRP2     |rm16,i8    |g|1|',
         'RET      |i16        | |2|',
         'RET      |           | | |',
-        'LES      |r16,[m16]  |m| |',
-        'LDS      |r16,[m16]  |m| |',
+        'LES      |r16,[m]    |m| |',
+        'LDS      |r16,[m]    |m| |',
         'MOV      |rm8,i8     |m|1|',
         'MOV      |rm16,i16   |m|2|',
         'ENTER    |i16,i8     | |3|',
@@ -237,7 +237,7 @@ class x86 {
         'OUT      |i8,ax      | |1|',
         'CALL     |b16        | |2|',
         'JMP      |b16        | |2|',
-        'JMP      |ptr16:16   | |4|',
+        'JMP      |p16:16     | |4|',
         'JMP      |b8         | |1|',
         'IN       |al,dx      | | |',
         'IN       |ax,dx      | | |',
@@ -288,7 +288,7 @@ class x86 {
         $map = $this->parse_x86_table();
 
         // Рендеринг инструкции
-        $htm = '<table class="x86-table" width="100%">';
+        $htm = '<table class="x86-table" width="100%">'."\n";
         foreach ($map as $n => $item) {
 
             $row = "<tr>\n";
@@ -356,6 +356,7 @@ class x86 {
         .x86-table td { width: 6%; }
         td.x86 { opacity: 1.0; }
         td.done { opacity: 1.0; }
+        td.x86-o { background: #ffa; }
         td.x86-m { background: #cfc; }
         td.x86-g { background: #cac; }
         td.x86-p { background: #aee; }
