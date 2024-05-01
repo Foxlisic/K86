@@ -26,11 +26,11 @@ initial begin
 
     $readmemh("tb.hex", memory, 20'h00000);
 
-    memory[20'hFFFF0] = 8'hEA;
-    memory[20'hFFFF1] = 8'h00;
-    memory[20'hFFFF2] = 8'h00;
-    memory[20'hFFFF3] = 8'h00;
-    memory[20'hFFFF4] = 8'h00;
+    memory[20'hBF0F1] = 8'h56;
+    memory[20'hBF0F2] = 8'hAF;
+    // memory[20'hFFFF2] = 8'h00;
+    // memory[20'hFFFF3] = 8'h00;
+    // memory[20'hFFFF4] = 8'h00;
 
 end
 
