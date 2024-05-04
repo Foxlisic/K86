@@ -4,10 +4,14 @@ module core
     input               clock,
     input               ce,
     input               reset_n,
+    // Память
     output      [19:0]  address,
-    input       [ 7:0]  in,
-    output reg  [ 7:0]  out,
-    output reg          we
+    input       [ 7:0]  in,         // Чтение и из памяти или порта
+    output reg  [ 7:0]  out,        // Запись в память или порт
+    output reg          we,
+    // Порты
+    output reg          pr,         // Сигнал чтения из порта
+    output reg          pw          // Сигнал записи в порт
 );
 
 `include "core_decl.v"
@@ -34,6 +38,9 @@ if (reset_n == 1'b0) begin
 end else if (ce) begin
 
     we <= 0;
+    pr <= 0;
+    pw <= 0;
+
     case (ta)
 
     // Загрузка опкода и выполнение простых инструкции
@@ -72,6 +79,7 @@ end else if (ce) begin
             _rep    <= 2'b00;
             dir     <= in[1];
             size    <= in[0];
+            alu     <= in[5:3];
 
             // Назначить сегмент по умолчанию
             case (_overs[2:1])
@@ -81,9 +89,6 @@ end else if (ce) begin
 
             // Обработка и подготовка инструкции
             casex (in)
-            // 8 АЛУ инструкции
-            8'b00xx_x0xx,
-            8'b00xx_x10x: begin alu <= in[5:3]; end
             // HLT, CMC, CLC, STC, CLI, STI, CLD, STD
             8'b1111_0100: begin ta <= LOAD; ip <= ipx; end
             8'b1111_0101: begin ta <= LOAD; flag[CF] <= ~flag[CF]; end
@@ -146,6 +151,8 @@ end else if (ce) begin
                 end
 
             end
+            // #T [80..83] GRP#1
+            8'b1000_00xx: begin dir <= 0; end
             // 2T [90..97] XCHG ax, r
             8'b1001_0xxx: begin
 
@@ -158,7 +165,6 @@ end else if (ce) begin
             end
             // C3 RET, C2 RET i
             8'b1100_001x: begin ta <= POP; tb <= RUN; end
-
             endcase
 
             // Наличие байта modrm у инструкции
@@ -345,6 +351,41 @@ end else if (ce) begin
             tb <= LOAD;
 
         end
+
+        // 5T+ [80..83] GRP#1
+        8'b1000_00xx: case (m)
+
+            0: begin
+
+                m   <= 1;
+                cp  <= 0;
+                alu <= modrm[5:3];
+
+            end
+            1: begin
+
+                op2 <= opcode[1:0] == 2'b11 ? signex : in;
+                m   <= opcode[1:0] == 2'b01 ? 2 : 3;
+                ip  <= ipn;
+
+            end
+            2: begin
+
+                m   <= 3;
+                ip  <= ipn;
+                op2[15:8] <= in;
+
+            end
+            3: begin
+
+                ta   <= alu == CMP ? LOAD : WB;
+                tb   <= LOAD;
+                wb   <= alu_res;
+                flag <= alu_flag;
+
+            end
+
+        endcase
 
         // 3T [B0..B7] MOV r, i
         8'b1011_0xxx: begin

@@ -20,7 +20,7 @@ reg  [ 7:0] memory[1048576];
 wire [19:0] address;
 reg  [ 7:0] in;
 wire [ 7:0] out;
-wire        we;
+wire        we, pr, pw;
 
 initial begin
 
@@ -45,9 +45,11 @@ core TurboCore
     .ce         (1'b1),
     .reset_n    (reset_n),
     .address    (address),
-    .in         (in),
+    .in         (pr ? 8'hFF : in),
     .out        (out),
-    .we         (we)
+    .we         (we),
+    .pr         (pr),
+    .pw         (pw)
 );
 
 endmodule

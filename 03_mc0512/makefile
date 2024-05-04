@@ -6,6 +6,7 @@ ica: fsm
 	vvp main.qqq >> /dev/null
 fsm:
 	fasm tb.asm tb.bin
+	php tb.php
 vcd:
 	gtkwave tb.vcd
 wav:

@@ -26,7 +26,7 @@ localparam
 // -----------------------------------------------------------------------------
 reg [15:0]  ax = 16'h120A, bx = 16'h5678, cx = 16'hFFFF, dx = 16'hEF12,
             sp = 16'hBABA, bp = 16'hDEAD, si = 16'hBEEF, di = 16'hDADD,
-            es = 16'h1234, cs = 16'h0000, ss = 16'hDEAD, ds = 16'hBEEF;
+            es = 16'hBEEF, cs = 16'h0000, ss = 16'hDEAD, ds = 16'h0000;
 //                     ODIT SZ A  P C
 reg [11:0]  flag = 12'b0000_0000_0010;
 reg [15:0]  ip, ips;
