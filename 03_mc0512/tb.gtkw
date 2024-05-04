@@ -1,15 +1,15 @@
 [*]
 [*] GTKWave Analyzer v3.3.104 (w)1999-2020 BSI
-[*] Wed May  1 07:43:25 2024
+[*] Sat May  4 04:54:10 2024
 [*]
-[dumpfile] "/home/fox/dev/k86/03_mc0512/tb.vcd"
-[dumpfile_mtime] "Wed May  1 07:41:49 2024"
-[dumpfile_size] 112285
-[savefile] "/home/fox/dev/k86/03_mc0512/tb.gtkw"
-[timestart] 0
+[dumpfile] "/home/fox/dev/x86/03_mc0512/tb.vcd"
+[dumpfile_mtime] "Sat May  4 04:53:00 2024"
+[dumpfile_size] 56424
+[savefile] "/home/fox/dev/x86/03_mc0512/tb.gtkw"
+[timestart] 17
 [size] 1920 1021
 [pos] -1 -1
-*-7.000000 380 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-7.000000 207 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] tb.
 [sst_width] 274
 [signals_width] 198
@@ -23,6 +23,9 @@ tb.clock
 tb.clock25
 @800200
 -PhysAddr
+@29
+[color] 2
+tb.TurboCore.m0
 @22
 tb.address[19:0]
 tb.TurboCore.ip[15:0]
@@ -67,7 +70,7 @@ tb.TurboCore.tb[5:0]
 @22
 tb.TurboCore.tm[5:0]
 tb.TurboCore.m[3:0]
-@29
+@28
 tb.TurboCore.cp
 @1000200
 -LINE

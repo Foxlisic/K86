@@ -24,11 +24,12 @@ localparam
 
 // РЕГИСТРЫ
 // -----------------------------------------------------------------------------
-reg [15:0]  ax, bx, cx, dx, sp, bp, si, di;
-reg [15:0]  es, cs, ss, ds;
-reg [15:0]  ip, ips;
-reg [11:0]  flag = 12'b0000_0000_0010;
+reg [15:0]  ax = 16'h120A, bx = 16'h5678, cx = 16'hFFFF, dx = 16'hEF12,
+            sp = 16'hBABA, bp = 16'hDEAD, si = 16'hBEEF, di = 16'hDADD,
+            es = 16'h1234, cs = 16'h0000, ss = 16'hDEAD, ds = 16'hBEEF;
 //                     ODIT SZ A  P C
+reg [11:0]  flag = 12'b0000_0000_0010;
+reg [15:0]  ip, ips;
 
 // СИСТЕМНЫЕ РЕГИСТРЫ
 // -----------------------------------------------------------------------------
@@ -49,11 +50,26 @@ wire [15:0] ipx = ip - preip;
 wire [15:0] signex = {{8{in[7]}}, in};
 wire [15:0] ipsign = ip + 1 + signex;
 
+// УСЛОВНЫЙ ПЕРЕХОД
+// -----------------------------------------------------------------------------
+wire [7:0] branches =
+{
+    (flag[SF] ^ flag[OF]) | flag[ZF],  // 7: (ZF=1) OR (SF!=OF)
+    (flag[SF] ^ flag[OF]),             // 6: SF!=OF
+     flag[PF],
+     flag[SF],
+     flag[CF] | flag[OF],              // 3: CF != OF
+     flag[ZF],
+     flag[CF],
+     flag[OF]
+};
+
 // ЗНАЧЕНИЕ РЕГИСТРОВ
 // -----------------------------------------------------------------------------
 
 // 16-битные операнды на LOAD-секции
-wire rsize = (ta == LOAD) | size;
+wire m0    = (ta == LOAD);
+wire rsize = m0 | size;
 
 // Входящие из 2:0
 wire [15:0] r20 =
@@ -104,3 +120,16 @@ wire of = (op1[top] ^ op2[top] ^ is_add) & (op1[top] ^ alu_res[top]);
 
 // ВЫчисление флагов
 wire [11:0] alu_flag = {of & is_lgc, flag[10:8], sf, zf, 1'b0, af & is_lgc, 1'b0, pf, 1'b1, (cf & is_lgc)};
+
+// ДЕСЯТИЧНАЯ КОРРЕКЦИЯ DAA, DAS, AAA, AAS
+// -----------------------------------------------------------------------------
+wire        daa_m = flag[AF] || ax[3:0] > 4'h9;
+wire [ 8:0] daa_i = daa_m ? (in[3] ? ax[7:0] - 3'h6 : ax[7:0] + 3'h6) : ax[7:0];
+wire        daa_c = daa_m ? daa_i[8] : flag[CF];
+wire        daa_t = daa_c || daa_i[7:0] > 8'h9F;
+wire [ 7:0] daa_r = daa_t ? (in[3] ? daa_i[7:0] - 8'h60 : daa_i[7:0] + 8'h60) : daa_i[7:0];
+wire        daa_x = daa_t || daa_c;
+wire [11:0] daa_f = {flag[11:8], daa_r[7], ~|daa_r, 1'b0, flag[AF] | daa_m, 1'b0, ~^daa_r, 1'b1, daa_x};
+wire [ 8:0] aaa_h = daa_m ? (in[3] ? ax[15:8] - 1'b1 : ax[15:8] + 1'b1) : ax[15:8];
+wire [15:0] aaa_r = {aaa_h, 4'h0, daa_i[3:0]};
+wire [11:0] aaa_f = {flag[11:5], daa_m, flag[3:1], daa_m};

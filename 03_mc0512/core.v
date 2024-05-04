@@ -24,20 +24,7 @@ if (reset_n == 1'b0) begin
 
     // F000:FFF0
     ip <= 16'h0000;
-
-    // SG
-    es <= 16'h1234; cs <= 16'h0000;
-    ss <= 16'hDEAD; ds <= 16'hBEEF;
-
-    // RG
-    ax <= 16'h1274;
-    bx <= 16'h5678;
-    cx <= 16'hFFFF;
-    dx <= 16'hEF12;
-    sp <= 16'hBABE;
-    bp <= 16'hDEAD;
-    si <= 16'hBEEF;
-    di <= 16'hDADD;
+    cs <= 16'h0000;
 
     _overs <= {DS, 1'b0};
     _rep   <= 2'b00;
@@ -59,7 +46,6 @@ end else if (ce) begin
         // Разбор префиксов
         8'b001x_x110: begin preip <= preip + 1; _overs <= {in[4:3], 1'b1}; end
         8'b1111_101x: begin preip <= preip + 1; _rep   <= in[1:0]; end
-        8'b0000_1111,
         8'b0110_01xx,
         8'b1111_0000: begin preip <= preip + 1; end
         // Выполнить опкод
@@ -104,6 +90,20 @@ end else if (ce) begin
             8'b1111_100x: begin ta <= LOAD; flag[CF] <= in[0]; end
             8'b1111_101x: begin ta <= LOAD; flag[IF] <= in[0]; end
             8'b1111_110x: begin ta <= LOAD; flag[DF] <= in[0]; end
+            // 4T [06,0E,16,1E] PUSH [es,cs,ss,ds]
+            8'b000x_x110: begin
+
+                ta <= PUSH;
+
+                case (in[4:3])
+                ES: wb <= es; CS: wb <= cs;
+                SS: wb <= ss; DS: wb <= ds;
+                endcase
+
+            end
+            // 1T [27,2F,37,3F] DAA, DAS, AAA, AAS
+            8'b0010_x111: begin ta <= LOAD; ax[7:0] <= daa_r; flag <= daa_f; end
+            8'b0011_x111: begin ta <= LOAD; ax      <= aaa_r; flag <= aaa_f; end
             // 3T [40..4F] INC, DEC
             8'b0100_xxxx: begin
 
@@ -122,13 +122,28 @@ end else if (ce) begin
                 wb <= r20;
 
             end
+            // 5T [07,17,1F] POP [es,ss,ds]
             // 6T [58..5F] POP r
+            8'b000x_0111,
+            8'b0001_1111,
             8'b0101_1xxx: begin
 
                 ta <= POP;
                 tb <= RUN;
                 {dir, size} <= 2'b11;
                 modrm[5:3] <= in[2:0];
+
+            end
+            // 1T [70..7F] IF [xxx] THEN
+            8'b0111_xxxx: begin
+
+                // Условие не совпадает, пропуск инструкции
+                if (branches[in[3:1]] == in[0]) begin
+
+                    ta <= LOAD;
+                    ip <= ip + 2;
+
+                end
 
             end
             // 2T [90..97] XCHG ax, r
@@ -300,6 +315,20 @@ end else if (ce) begin
 
         endcase
 
+        // 5T [07,17,1F] POP [es,ss,ds]
+        8'b000x_0111,
+        8'b0001_1111: begin
+
+            ta <= LOAD;
+
+            case (opcode[4:3])
+            ES: es <= wb;
+            SS: ss <= wb;
+            DS: ds <= wb;
+            endcase
+
+        end
+
         // 3T [40..4F] INC, DEC r
         8'b0100_xxxx: begin
 
@@ -383,7 +412,9 @@ end else if (ce) begin
 
         endcase
 
+        // 2T [70..7F] Jxxx b8
         // 2T [EB xx] JMP b8
+        8'b0111_xxxx,
         8'b1110_1011: begin
 
             ip <= ipsign;

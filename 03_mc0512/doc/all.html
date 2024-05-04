@@ -30,15 +30,15 @@
     <!--03--><td class='x86 x86-m done'><div><span>03</span><b>ADD</b></div>r16,rm</td>
     <!--04--><td class='x86 x86-o done'><div><span>04</span><b>ADD</b></div>al,i8</td>
     <!--05--><td class='x86 x86-o done'><div><span>05</span><b>ADD</b></div>ax,i16</td>
-    <!--06--><td class='x86 x86-o'><div><span>06</span><b>PUSH</b></div>es</td>
-    <!--07--><td class='x86 x86-o'><div><span>07</span><b>POP</b></div>es</td>
+    <!--06--><td class='x86 x86-o done'><div><span>06</span><b>PUSH</b></div>es</td>
+    <!--07--><td class='x86 x86-o done'><div><span>07</span><b>POP</b></div>es</td>
     <!--08--><td class='x86 x86-m done'><div><span>08</span><b>OR</b></div>rm,r8</td>
     <!--09--><td class='x86 x86-m done'><div><span>09</span><b>OR</b></div>rm,r16</td>
     <!--0A--><td class='x86 x86-m done'><div><span>0A</span><b>OR</b></div>r8,rm</td>
     <!--0B--><td class='x86 x86-m done'><div><span>0B</span><b>OR</b></div>r16,rm</td>
     <!--0C--><td class='x86 x86-o done'><div><span>0C</span><b>OR</b></div>al,i8</td>
     <!--0D--><td class='x86 x86-o done'><div><span>0D</span><b>OR</b></div>ax,i16</td>
-    <!--0E--><td class='x86 x86-o'><div><span>0E</span><b>PUSH</b></div>cs</td>
+    <!--0E--><td class='x86 x86-o done'><div><span>0E</span><b>PUSH</b></div>cs</td>
     <!--0F--><td class='x86 x86-p done'><div><span>0F</span><b>*</b></div></td>
 </tr>
 <tr>
@@ -48,16 +48,16 @@
     <!--13--><td class='x86 x86-m done'><div><span>13</span><b>ADC</b></div>r16,rm</td>
     <!--14--><td class='x86 x86-o done'><div><span>14</span><b>ADC</b></div>al,i8</td>
     <!--15--><td class='x86 x86-o done'><div><span>15</span><b>ADC</b></div>ax,i16</td>
-    <!--16--><td class='x86 x86-o'><div><span>16</span><b>PUSH</b></div>ss</td>
-    <!--17--><td class='x86 x86-o'><div><span>17</span><b>POP</b></div>ss</td>
+    <!--16--><td class='x86 x86-o done'><div><span>16</span><b>PUSH</b></div>ss</td>
+    <!--17--><td class='x86 x86-o done'><div><span>17</span><b>POP</b></div>ss</td>
     <!--18--><td class='x86 x86-m done'><div><span>18</span><b>SBB</b></div>rm,r8</td>
     <!--19--><td class='x86 x86-m done'><div><span>19</span><b>SBB</b></div>rm,r16</td>
     <!--1A--><td class='x86 x86-m done'><div><span>1A</span><b>SBB</b></div>r8,rm</td>
     <!--1B--><td class='x86 x86-m done'><div><span>1B</span><b>SBB</b></div>r16,rm</td>
     <!--1C--><td class='x86 x86-o done'><div><span>1C</span><b>SBB</b></div>al,i8</td>
     <!--1D--><td class='x86 x86-o done'><div><span>1D</span><b>SBB</b></div>ax,i16</td>
-    <!--1E--><td class='x86 x86-o'><div><span>1E</span><b>PUSH</b></div>ds</td>
-    <!--1F--><td class='x86 x86-o'><div><span>1F</span><b>POP</b></div>ds</td>
+    <!--1E--><td class='x86 x86-o done'><div><span>1E</span><b>PUSH</b></div>ds</td>
+    <!--1F--><td class='x86 x86-o done'><div><span>1F</span><b>POP</b></div>ds</td>
 </tr>
 <tr>
     <!--20--><td class='x86 x86-m done'><div><span>20</span><b>AND</b></div>rm,r8</td>
@@ -67,7 +67,7 @@
     <!--24--><td class='x86 x86-o done'><div><span>24</span><b>AND</b></div>al,i8</td>
     <!--25--><td class='x86 x86-o done'><div><span>25</span><b>AND</b></div>ax,i16</td>
     <!--26--><td class='x86 x86-p done'><div><span>26</span><b>ES:</b></div></td>
-    <!--27--><td class='x86 x86-o'><div><span>27</span><b>DAA</b></div>al</td>
+    <!--27--><td class='x86 x86-o done'><div><span>27</span><b>DAA</b></div></td>
     <!--28--><td class='x86 x86-m done'><div><span>28</span><b>SUB</b></div>rm,r8</td>
     <!--29--><td class='x86 x86-m done'><div><span>29</span><b>SUB</b></div>rm,r16</td>
     <!--2A--><td class='x86 x86-m done'><div><span>2A</span><b>SUB</b></div>r8,rm</td>
@@ -75,7 +75,7 @@
     <!--2C--><td class='x86 x86-o done'><div><span>2C</span><b>SUB</b></div>al,i8</td>
     <!--2D--><td class='x86 x86-o done'><div><span>2D</span><b>SUB</b></div>ax,i16</td>
     <!--2E--><td class='x86 x86-p done'><div><span>2E</span><b>CS:</b></div></td>
-    <!--2F--><td class='x86 x86-o'><div><span>2F</span><b>DAS</b></div>al</td>
+    <!--2F--><td class='x86 x86-o done'><div><span>2F</span><b>DAS</b></div></td>
 </tr>
 <tr>
     <!--30--><td class='x86 x86-m done'><div><span>30</span><b>XOR</b></div>rm,r8</td>
@@ -85,7 +85,7 @@
     <!--34--><td class='x86 x86-o done'><div><span>34</span><b>XOR</b></div>al,i8</td>
     <!--35--><td class='x86 x86-o done'><div><span>35</span><b>XOR</b></div>ax,i16</td>
     <!--36--><td class='x86 x86-p done'><div><span>36</span><b>SS:</b></div></td>
-    <!--37--><td class='x86 x86-o'><div><span>37</span><b>AAA</b></div>al</td>
+    <!--37--><td class='x86 x86-o done'><div><span>37</span><b>AAA</b></div></td>
     <!--38--><td class='x86 x86-m done'><div><span>38</span><b>CMP</b></div>rm,r8</td>
     <!--39--><td class='x86 x86-m done'><div><span>39</span><b>CMP</b></div>rm,r16</td>
     <!--3A--><td class='x86 x86-m done'><div><span>3A</span><b>CMP</b></div>r8,rm</td>
@@ -93,7 +93,7 @@
     <!--3C--><td class='x86 x86-o done'><div><span>3C</span><b>CMP</b></div>al,i8</td>
     <!--3D--><td class='x86 x86-o done'><div><span>3D</span><b>CMP</b></div>ax,i16</td>
     <!--3E--><td class='x86 x86-p done'><div><span>3E</span><b>DS:</b></div></td>
-    <!--3F--><td class='x86 x86-o'><div><span>3F</span><b>AAS</b></div>al</td>
+    <!--3F--><td class='x86 x86-o done'><div><span>3F</span><b>AAS</b></div></td>
 </tr>
 <tr>
     <!--40--><td class='x86 x86-o done'><div><span>40</span><b>INC</b></div>ax</td>
@@ -136,10 +136,10 @@
     <!--61--><td class='x86 x86-o'><div><span>61</span><b>POPA</b></div></td>
     <!--62--><td class='x86 x86-m'><div><span>62</span><b>BOUND</b></div>r16,m</td>
     <!--63--><td class='x86 x86-m'><div><span>63</span><b>ARPL</b></div>rm,r16</td>
-    <!--64--><td class='x86 x86-p done'><div><span>64</span><b>FS:</b></div></td>
-    <!--65--><td class='x86 x86-p done'><div><span>65</span><b>GS:</b></div></td>
-    <!--66--><td class='x86 x86-p done'><div><span>66</span><b>Opsz</b></div></td>
-    <!--67--><td class='x86 x86-p done'><div><span>67</span><b>Rgsz</b></div></td>
+    <!--64--><td class='x86 x86-x done'><div><span>64</span><b>FS:</b></div></td>
+    <!--65--><td class='x86 x86-x done'><div><span>65</span><b>GS:</b></div></td>
+    <!--66--><td class='x86 x86-x done'><div><span>66</span><b>Opsz</b></div></td>
+    <!--67--><td class='x86 x86-x done'><div><span>67</span><b>Rgsz</b></div></td>
     <!--68--><td class='x86 x86-o'><div><span>68</span><b>PUSH</b></div>i16</td>
     <!--69--><td class='x86 x86-m'><div><span>69</span><b>IMUL</b></div>r16,rm,i16</td>
     <!--6A--><td class='x86 x86-o'><div><span>6A</span><b>PUSH</b></div>i8</td>
@@ -150,22 +150,22 @@
     <!--6F--><td class='x86 x86-o'><div><span>6F</span><b>OUTSW</b></div></td>
 </tr>
 <tr>
-    <!--70--><td class='x86 x86-o'><div><span>70</span><b>JO</b></div>b8</td>
-    <!--71--><td class='x86 x86-o'><div><span>71</span><b>JNO</b></div>b8</td>
-    <!--72--><td class='x86 x86-o'><div><span>72</span><b>JB</b></div>b8</td>
-    <!--73--><td class='x86 x86-o'><div><span>73</span><b>JNB</b></div>b8</td>
-    <!--74--><td class='x86 x86-o'><div><span>74</span><b>JE</b></div>b8</td>
-    <!--75--><td class='x86 x86-o'><div><span>75</span><b>JNE</b></div>b8</td>
-    <!--76--><td class='x86 x86-o'><div><span>76</span><b>JBE</b></div>b8</td>
-    <!--77--><td class='x86 x86-o'><div><span>77</span><b>JA</b></div>b8</td>
-    <!--78--><td class='x86 x86-o'><div><span>78</span><b>JS</b></div>b8</td>
-    <!--79--><td class='x86 x86-o'><div><span>79</span><b>JNS</b></div>b8</td>
-    <!--7A--><td class='x86 x86-o'><div><span>7A</span><b>JP</b></div>b8</td>
-    <!--7B--><td class='x86 x86-o'><div><span>7B</span><b>JNP</b></div>b8</td>
-    <!--7C--><td class='x86 x86-o'><div><span>7C</span><b>JL</b></div>b8</td>
-    <!--7D--><td class='x86 x86-o'><div><span>7D</span><b>JNL</b></div>b8</td>
-    <!--7E--><td class='x86 x86-o'><div><span>7E</span><b>JLE</b></div>b8</td>
-    <!--7F--><td class='x86 x86-o'><div><span>7F</span><b>JG</b></div>b8</td>
+    <!--70--><td class='x86 x86-o done'><div><span>70</span><b>JO</b></div>b8</td>
+    <!--71--><td class='x86 x86-o done'><div><span>71</span><b>JNO</b></div>b8</td>
+    <!--72--><td class='x86 x86-o done'><div><span>72</span><b>JB</b></div>b8</td>
+    <!--73--><td class='x86 x86-o done'><div><span>73</span><b>JNB</b></div>b8</td>
+    <!--74--><td class='x86 x86-o done'><div><span>74</span><b>JE</b></div>b8</td>
+    <!--75--><td class='x86 x86-o done'><div><span>75</span><b>JNE</b></div>b8</td>
+    <!--76--><td class='x86 x86-o done'><div><span>76</span><b>JBE</b></div>b8</td>
+    <!--77--><td class='x86 x86-o done'><div><span>77</span><b>JA</b></div>b8</td>
+    <!--78--><td class='x86 x86-o done'><div><span>78</span><b>JS</b></div>b8</td>
+    <!--79--><td class='x86 x86-o done'><div><span>79</span><b>JNS</b></div>b8</td>
+    <!--7A--><td class='x86 x86-o done'><div><span>7A</span><b>JP</b></div>b8</td>
+    <!--7B--><td class='x86 x86-o done'><div><span>7B</span><b>JNP</b></div>b8</td>
+    <!--7C--><td class='x86 x86-o done'><div><span>7C</span><b>JL</b></div>b8</td>
+    <!--7D--><td class='x86 x86-o done'><div><span>7D</span><b>JNL</b></div>b8</td>
+    <!--7E--><td class='x86 x86-o done'><div><span>7E</span><b>JLE</b></div>b8</td>
+    <!--7F--><td class='x86 x86-o done'><div><span>7F</span><b>JG</b></div>b8</td>
 </tr>
 <tr>
     <!--80--><td class='x86 x86-g'><div><span>80</span><b>GRP1</b></div>rm,i8</td>
