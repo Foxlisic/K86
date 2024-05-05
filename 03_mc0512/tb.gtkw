@@ -1,15 +1,15 @@
 [*]
 [*] GTKWave Analyzer v3.3.104 (w)1999-2020 BSI
-[*] Sat May  4 07:05:22 2024
+[*] Sun May  5 02:49:35 2024
 [*]
 [dumpfile] "/home/fox/dev/x86/03_mc0512/tb.vcd"
-[dumpfile_mtime] "Sat May  4 07:05:10 2024"
-[dumpfile_size] 59889
+[dumpfile_mtime] "Sun May  5 02:45:03 2024"
+[dumpfile_size] 84262
 [savefile] "/home/fox/dev/x86/03_mc0512/tb.gtkw"
 [timestart] 0
 [size] 1920 1021
 [pos] -1 -1
-*-7.000000 265 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-7.000000 140 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] tb.
 [sst_width] 274
 [signals_width] 198
@@ -21,11 +21,13 @@ tb.reset_n
 tb.clock
 [color] 2
 tb.clock25
+[color] 3
+tb.TurboCore.m0
 @800200
 -PhysAddr
 @28
 [color] 2
-tb.TurboCore.m0
+tb.TurboCore.cp
 @22
 tb.address[19:0]
 tb.TurboCore.ip[15:0]
@@ -70,8 +72,6 @@ tb.TurboCore.tb[5:0]
 @22
 tb.TurboCore.tm[5:0]
 tb.TurboCore.m[3:0]
-@28
-tb.TurboCore.cp
 @1000200
 -LINE
 @22
@@ -86,12 +86,43 @@ tb.TurboCore.ips[15:0]
 @1000200
 -CTRL
 @800200
+-ALU
+@28
+tb.TurboCore.alu[2:0]
+@22
+tb.TurboCore.op1[15:0]
+tb.TurboCore.op2[15:0]
+tb.TurboCore.wb[15:0]
+tb.TurboCore.alu_res[16:0]
+tb.TurboCore.alu_flag[11:0]
+@c00022
+tb.TurboCore.flag[11:0]
+@28
+(0)tb.TurboCore.flag[11:0]
+(1)tb.TurboCore.flag[11:0]
+(2)tb.TurboCore.flag[11:0]
+(3)tb.TurboCore.flag[11:0]
+(4)tb.TurboCore.flag[11:0]
+(5)tb.TurboCore.flag[11:0]
+(6)tb.TurboCore.flag[11:0]
+(7)tb.TurboCore.flag[11:0]
+(8)tb.TurboCore.flag[11:0]
+(9)tb.TurboCore.flag[11:0]
+(10)tb.TurboCore.flag[11:0]
+(11)tb.TurboCore.flag[11:0]
+@1401200
+-group_end
+@1000200
+-ALU
+@800200
 -REGS
 @22
 [color] 5
 tb.TurboCore.ax[15:0]
+@23
 [color] 5
 tb.TurboCore.cx[15:0]
+@22
 [color] 5
 tb.TurboCore.dx[15:0]
 [color] 5
@@ -118,36 +149,5 @@ tb.TurboCore.ds[15:0]
 @1000200
 -SEG
 -REGS
-@800200
--ALU
-@28
-tb.TurboCore.alu[2:0]
-@23
-tb.TurboCore.op1[15:0]
-@22
-tb.TurboCore.op2[15:0]
-tb.TurboCore.wb[15:0]
-@c00022
-tb.TurboCore.flag[11:0]
-@28
-(0)tb.TurboCore.flag[11:0]
-(1)tb.TurboCore.flag[11:0]
-(2)tb.TurboCore.flag[11:0]
-(3)tb.TurboCore.flag[11:0]
-(4)tb.TurboCore.flag[11:0]
-(5)tb.TurboCore.flag[11:0]
-(6)tb.TurboCore.flag[11:0]
-(7)tb.TurboCore.flag[11:0]
-(8)tb.TurboCore.flag[11:0]
-(9)tb.TurboCore.flag[11:0]
-(10)tb.TurboCore.flag[11:0]
-(11)tb.TurboCore.flag[11:0]
-@1401200
--group_end
-@22
-tb.TurboCore.alu_res[16:0]
-tb.TurboCore.alu_flag[11:0]
-@1000200
--ALU
 [pattern_trace] 1
 [pattern_trace] 0

@@ -29,6 +29,7 @@ if (reset_n == 1'b0) begin
     // F000:FFF0
     ip <= 16'h0000;
     cs <= 16'h0000;
+    pr <= 0;
 
     _overs <= {DS, 1'b0};
     _rep   <= 2'b00;
@@ -47,7 +48,7 @@ end else if (ce) begin
     // -------------------------------------------------------------------------
     LOAD: begin
 
-        ip <= ip + 1;
+        ip <= ipn;
 
         casex (in)
         // Разбор префиксов
@@ -95,6 +96,9 @@ end else if (ce) begin
             8'b1111_100x: begin ta <= LOAD; flag[CF] <= in[0]; end
             8'b1111_101x: begin ta <= LOAD; flag[IF] <= in[0]; end
             8'b1111_110x: begin ta <= LOAD; flag[DF] <= in[0]; end
+            // CBW, CWD
+            8'b1001_1000: begin ta <= LOAD; ax[15:8] <= {8{ax[7]}}; end
+            8'b1001_1001: begin ta <= LOAD; dx <= {16{ax[15]}}; end
             // 4T [06,0E,16,1E] PUSH [es,cs,ss,ds]
             8'b000x_x110: begin
 
@@ -153,6 +157,10 @@ end else if (ce) begin
             end
             // #T [80..83] GRP#1
             8'b1000_00xx: begin dir <= 0; end
+            // [84..85] TEST rmr
+            8'b1000_010x: begin alu <= AND; end
+            // #T [88..89] MOV rm,r
+            8'b1000_100x: begin cpen <= 0; end
             // 2T [90..97] XCHG ax, r
             8'b1001_0xxx: begin
 
@@ -384,6 +392,43 @@ end else if (ce) begin
                 flag <= alu_flag;
 
             end
+
+        endcase
+
+        // 3T+ [88..8B] MOV rmr
+        8'b1000_10xx: begin
+
+            ta <= WB;
+            tb <= LOAD;
+            wb <= op2;
+
+        end
+
+        // 3T+ [84..85] TEST rmr
+        8'b1000_010x: begin
+
+            ta   <= LOAD;
+            flag <= alu_flag;
+
+        end
+
+        // 4*T [A0..A1] MOV a, [m]
+        8'b1010_000x: case (m)
+
+            0: begin m <= 1; ip <= ipn; ea[ 7:0] <= in; end
+            1: begin m <= 2; ip <= ipn; ea[15:8] <= in; cp <= 1; end
+            2: begin m <= 3; cp <= size; ax[7:0] <= in; ea <= ea + 1; ta <= size ? RUN : LOAD; end
+            3: begin cp <= 0; ax[15:8] <= in; ta <= LOAD; end
+
+        endcase
+
+        // 4*T [A2..A3] MOV [m], a
+        8'b1010_001x: case (m)
+
+            0: begin m <= 1; ip <= ipn; ea[ 7:0] <= in; end
+            1: begin m <= 2; ip <= ipn; ea[15:8] <= in; cp <= 1; we <= 1; out <= ax[7:0]; end
+            2: begin m <= 3; cp <= size; we <= size; ea <= ea + 1; out <= ax[15:8]; ta <= size ? RUN : LOAD; end
+            3: begin cp <= 0; ta <= LOAD; end
 
         endcase
 
