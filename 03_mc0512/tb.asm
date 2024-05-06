@@ -1,6 +1,5 @@
 
         org     0
-
-        test    cx, dx
+        test    ax, $AA55
         hlt
-D1:     dw      $42AA
+D1:     dw      $BABE

@@ -173,6 +173,8 @@ end else if (ce) begin
             end
             // C3 RET, C2 RET i
             8'b1100_001x: begin ta <= POP; tb <= RUN; end
+            // [C6..C7] MOV rm, i
+            8'b1100_011x: begin dir <= 0; cpen <= 0; end
             endcase
 
             // Наличие байта modrm у инструкции
@@ -360,6 +362,16 @@ end else if (ce) begin
 
         end
 
+        // 2T [70..7F] Jxxx b8
+        // 2T [EB xx] JMP b8
+        8'b0111_xxxx,
+        8'b1110_1011: begin
+
+            ip <= ipsign;
+            ta <= LOAD;
+
+        end
+
         // 5T+ [80..83] GRP#1
         8'b1000_00xx: case (m)
 
@@ -404,7 +416,7 @@ end else if (ce) begin
 
         end
 
-        // 3T+ [84..85] TEST rmr
+        // 3T+ [84..85] TEST rm, r
         8'b1000_010x: begin
 
             ta   <= LOAD;
@@ -412,23 +424,116 @@ end else if (ce) begin
 
         end
 
-        // 4*T [A0..A1] MOV a, [m]
-        8'b1010_000x: case (m)
+        // 6T+ [86..87] XCHG r, rm
+        8'b1000_011x: case (m)
 
-            0: begin m <= 1; ip <= ipn; ea[ 7:0] <= in; end
-            1: begin m <= 2; ip <= ipn; ea[15:8] <= in; cp <= 1; end
-            2: begin m <= 3; cp <= size; ax[7:0] <= in; ea <= ea + 1; ta <= size ? RUN : LOAD; end
-            3: begin cp <= 0; ax[15:8] <= in; ta <= LOAD; end
+            // Начала пишется r -> rm
+            0: begin
+
+                m   <= 1;
+                ta  <= WB;
+                tb  <= RUN;
+                dir <= 0;
+                op1 <= op2;
+                wb  <= op1;
+
+            end
+
+            // Потом пишется rm -> r
+            1: begin
+
+                ta  <= WB;
+                tb  <= LOAD;
+                dir <= 1;
+                wb  <= op1;
+
+            end
+
 
         endcase
 
+        // 4*T [A0..A1] MOV a, [m]
         // 4*T [A2..A3] MOV [m], a
-        8'b1010_001x: case (m)
+        8'b1010_00xx: case (m)
 
-            0: begin m <= 1; ip <= ipn; ea[ 7:0] <= in; end
-            1: begin m <= 2; ip <= ipn; ea[15:8] <= in; cp <= 1; we <= 1; out <= ax[7:0]; end
-            2: begin m <= 3; cp <= size; we <= size; ea <= ea + 1; out <= ax[15:8]; ta <= size ? RUN : LOAD; end
-            3: begin cp <= 0; ta <= LOAD; end
+            // Читать младший байт адреса
+            0: begin
+
+                m  <= 1;
+                ip <= ipn;
+                ea <= in;
+
+            end
+
+            // Читать старший байт адреса
+            // WRITE: пишется AL
+            1: begin
+
+                m   <= 2;
+                cp  <= 1;
+                we  <= dir;
+                out <= ax[7:0];
+                ip  <= ipn;
+                ea[15:8] <= in;
+
+            end
+            // READ:  Читать в AL (READ)
+            // WRITE: Пишется AH в память
+            2: begin
+
+                m   <= 3;
+                cp  <= size;
+                we  <= size & dir;
+                ea  <= ea + 1;
+                ta  <= size ? RUN : LOAD;
+                out <= ax[15:8];
+
+                if (!dir) ax[7:0] <= in;
+
+            end
+            // READ: Читать AH
+            3: begin
+
+                ta <= LOAD;
+                cp <= 0;
+
+                if (!dir) ax[15:8] <= in;
+
+            end
+
+        endcase
+
+        // 3*T [A8..A9] TEST a, i
+        8'b1010_100x: case (m)
+
+            // Прочесть операнды op1, op2 (byte)
+            0: begin
+
+                m   <= 1;
+                alu <= AND;
+                op1 <= size ? ax : ax[7:0];
+                op2 <= in;
+                ip  <= ipn;
+
+            end
+            // Либо запись результата 8 бит, либо читать старший байт
+            1: begin
+
+                m    <= 2;
+                ta   <= size ? RUN : LOAD;
+                ip   <= size ? ipn : ip;
+                flag <= alu_flag;
+
+                op2[15:8] <= in;
+
+            end
+            // Запись результата 16 бит
+            2: begin
+
+                ta   <= LOAD;
+                flag <= alu_flag;
+
+            end
 
         endcase
 
@@ -480,6 +585,15 @@ end else if (ce) begin
 
         endcase
 
+        // 5T+ [C6..C7] MOV rm, i
+        8'b1100_011x: case (m)
+
+            0: begin m <= 1; cp <= 0; end
+            1: begin m <= 2; ip <= ipn; wb <= in; ta <= size ? RUN : WB; end
+            2: begin ip <= ipn; wb[15:8] <= in; ta <= WB; end
+
+        endcase
+
         // 3T [E9 xx xx] JMP b16
         8'b1110_1001: case (m)
 
@@ -497,16 +611,6 @@ end else if (ce) begin
             3: begin m <= 0; ip <= ipn; cs <= {in, op2[7:0]}; ip <= op1; ta <= LOAD; end
 
         endcase
-
-        // 2T [70..7F] Jxxx b8
-        // 2T [EB xx] JMP b8
-        8'b0111_xxxx,
-        8'b1110_1011: begin
-
-            ip <= ipsign;
-            ta <= LOAD;
-
-        end
 
     endcase
 
