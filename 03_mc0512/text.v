@@ -39,6 +39,7 @@ assign vs = y >= (vt_back + vt_visible + vt_front); // POS.
 // ---------------------------------------------------------------------
 wire        xmax = (x == hz_whole - 1);
 wire        ymax = (y == vt_whole - 1);
+wire        cwin = (x >= hz_back && x < hz_visible + hz_back && y >= vt_back && y < vt_visible + vt_back);
 reg  [10:0] x    = 0;
 reg  [10:0] y    = 0;
 wire [10:0] X    = x - hz_back + 8; // X=[0..639]
@@ -80,12 +81,7 @@ always @(posedge clock) begin
     y <= xmax ? (ymax ? 0 : y + 1) : y;
 
     // Вывод окна видеоадаптера
-    if (x >= hz_back && x < hz_visible + hz_back &&
-        y >= vt_back && y < vt_visible + vt_back)
-    begin
-         {r, g, b} <= color;
-    end
-    else {r, g, b} <= 12'h000;
+    {r, g, b} <= cwin ? color : 12'h000;
 
     // Извлечение текущей маски
     case (X[2:0])
@@ -98,11 +94,12 @@ always @(posedge clock) begin
     endcase
 
     // Каждые 0,5 секунды перебрасывается регистр flash
-    if (timer == 12500000) begin
+    if (timer == 12499999) begin
         timer <= 0;
         flash <= ~flash;
-    end else
+    end else begin
         timer <= timer + 1;
+    end
 
 end
 

@@ -4,3 +4,9 @@ tb.bin
 tb.hex
 main.qqq
 obj_dir
+db
+incremental_db
+output_files
+simulation
+marsohod2.qws
+c5_pin_model_dump.txt
