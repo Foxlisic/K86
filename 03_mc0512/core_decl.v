@@ -36,7 +36,7 @@ reg [15:0]  ip, ips;
 reg         cp, cpen;
 reg [ 3:0]  m;
 reg [ 5:0]  ta, tb, tm;
-reg [15:0]  ea, seg, op1, op2, wb;
+reg [15:0]  ea, seg, op1, op2, wb, segold;
 reg [ 7:0]  opcode, modrm;
 reg [ 2:0]  alu;
 reg         size, dir;

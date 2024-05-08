@@ -8,5 +8,5 @@ db
 incremental_db
 output_files
 simulation
-marsohod2.qws
+*.qws
 c5_pin_model_dump.txt

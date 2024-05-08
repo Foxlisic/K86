@@ -88,6 +88,13 @@ end else if (ce) begin
             SS: seg <= ss; DS: seg <= ds;
             endcase
 
+            // Наличие байта modrm у инструкции
+            casex (in)
+            8'b1000_xxxx, 8'b1100_000x, 8'b1100_01xx, 8'b0110_001x,
+            8'b1101_00xx, 8'b1111_x11x, 8'b1101_1xxx, 8'b0110_10x1,
+            8'b00xx_x0xx: ta <= MODRM;
+            endcase
+
             // Обработка и подготовка инструкции
             casex (in)
             // HLT, CMC, CLC, STC, CLI, STI, CLD, STD
@@ -161,6 +168,12 @@ end else if (ce) begin
             8'b1000_010x: begin alu <= AND; end
             // #T [88..89] MOV rm,r
             8'b1000_100x: begin cpen <= 0; end
+            // LEA r, rm
+            8'b1000_1101: begin cpen <= 0; dir <= 1; end
+            // MOV s,rm|rm,s
+            8'b1000_11x0: begin size <= 1; end
+            // POP rm
+            8'b1000_1111: begin dir <= 0; ta <= POP; tb <= RUN; end
             // 2T [90..97] XCHG ax, r
             8'b1001_0xxx: begin
 
@@ -175,13 +188,6 @@ end else if (ce) begin
             8'b1100_001x: begin ta <= POP; tb <= RUN; end
             // [C6..C7] MOV rm, i
             8'b1100_011x: begin dir <= 0; cpen <= 0; end
-            endcase
-
-            // Наличие байта modrm у инструкции
-            casex (in)
-            8'b1000_xxxx, 8'b1100_000x, 8'b1100_01xx, 8'b0110_001x,
-            8'b1101_00xx, 8'b1111_x11x, 8'b1101_1xxx, 8'b0110_10x1,
-            8'b00xx_x0xx: ta <= MODRM;
             endcase
 
             // @TODO Прерывание
@@ -452,6 +458,64 @@ end else if (ce) begin
 
         endcase
 
+        // 4T+ [8C] MOV rm16, sreg
+        8'b1000_1100: begin
+
+            ta <= WB;
+
+            case (modrm[4:3])
+            ES: wb <= es; CS: wb <= cs;
+            SS: wb <= ss; DS: wb <= ds;
+            endcase
+
+        end
+
+        // 4T+ [8D] LEA r16, rm
+        8'b1000_1101: begin
+
+            ta <= WB;
+            wb <= ea;
+
+        end
+
+        // 3T+ [8E] MOV sreg, rm
+        8'b1000_1110: begin
+
+            ta <= LOAD;
+            cp <= 0;
+
+            case (modrm[4:3])
+            ES: es <= op2;
+            SS: ss <= op2;
+            DS: ds <= op2;
+            endcase
+
+        end
+
+        // [8F] POP rm
+        8'b1000_1111: case (m)
+
+            // Читать адрес ModRM
+            0: begin
+
+                m    <= 1;
+                ta   <= MODRM;
+                tb   <= RUN;
+                cpen <= 0;
+
+            end
+
+            // Писать результат в память или регистр
+            1: begin
+
+                ta  <= WB;
+                tb  <= LOAD;
+                cp  <= 1;
+
+            end
+
+        endcase
+
         // 4*T [A0..A1] MOV a, [m]
         // 4*T [A2..A3] MOV [m], a
         8'b1010_00xx: case (m)
@@ -477,6 +541,7 @@ end else if (ce) begin
                 ea[15:8] <= in;
 
             end
+
             // READ:  Читать в AL (READ)
             // WRITE: Пишется AH в память
             2: begin
@@ -491,6 +556,7 @@ end else if (ce) begin
                 if (!dir) ax[7:0] <= in;
 
             end
+
             // READ: Читать AH
             3: begin
 
@@ -674,6 +740,7 @@ end else if (ce) begin
 
         ta  <= PUSH2;
         we  <= 1;
+        segold <= seg;
         seg <= ss;
         ea  <= sp - 2;
         sp  <= sp - 2;
@@ -693,6 +760,7 @@ end else if (ce) begin
 
         ta <= tb;
         cp <= 0;
+        seg <= segold;
 
     end
 
@@ -702,6 +770,7 @@ end else if (ce) begin
 
         ta  <= POP2;
         cp  <= 1;
+        segold <= seg;
         seg <= ss;
         ea  <= sp;
         sp  <= sp + 2;
@@ -716,8 +785,9 @@ end else if (ce) begin
     end
     POP3: begin
 
-        ta <= tb;
-        cp <= 0;
+        ta   <= tb;
+        cp   <= 0;
+        seg  <= segold;
         wb[15:8] <= in;
 
     end

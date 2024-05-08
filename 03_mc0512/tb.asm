@@ -1,5 +1,5 @@
 
         org     0
-        test    ax, $AA55
+        mov     ss, ax
         hlt
-D1:     dw      $BABE
+D1:     dw      $BAB4
