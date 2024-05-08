@@ -369,8 +369,10 @@ end else if (ce) begin
         end
 
         // 2T [70..7F] Jxxx b8
+        // 2T [E0..E3] LOOPxx
         // 2T [EB xx] JMP b8
         8'b0111_xxxx,
+        8'b1110_00xx,
         8'b1110_1011: begin
 
             ip <= ipsign;
@@ -513,6 +515,18 @@ end else if (ce) begin
                 cp  <= 1;
 
             end
+
+        endcase
+
+        // [9A] CALL far
+        8'b1001_1010: case (m)
+
+            0: begin m  <= 1;   ip <= ipn; op1[ 7:0] <= in; end
+            1: begin m  <= 2;   ip <= ipn; op1[15:8] <= in; end
+            2: begin m  <= 3;   ip <= ipn; op2[ 7:0] <= in; end
+            3: begin m  <= 4;   ip <= ipn; op2[15:8] <= in; ta <= PUSH; tb <= RUN; wb <= cs; end
+            4: begin m  <= 5;   ta <= PUSH; wb <= ip; end
+            5: begin ip <= op1; ta <= LOAD; cs <= op2; end
 
         endcase
 

@@ -1,5 +1,5 @@
 
         org     0
-        mov     ss, ax
+        call    far $1234:$5567
         hlt
 D1:     dw      $BAB4
