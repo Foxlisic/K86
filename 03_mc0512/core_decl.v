@@ -6,7 +6,7 @@ assign address = cp ? {seg, 4'h0} + ea : {cs, 4'h0} + ip;
 localparam
     LOAD    = 0,    RUN     = 1,    WB      = 2,
     PUSH    = 3,    POP     = 4,    MODRM   = 5,
-    INTR    = 6;
+    INTR    = 6,    DIV     = 7;
 
 localparam
     ES = 2'b00,  CS = 2'b01,  SS = 2'b10,  DS = 2'b11,
@@ -27,7 +27,7 @@ localparam
 
 // РЕГИСТРЫ
 // -----------------------------------------------------------------------------
-reg [15:0]  ax = 16'hA28A, bx = 16'h5678, cx = 16'h0007, dx = 16'hEF12,
+reg [15:0]  ax = 16'h005F, bx = 16'h5678, cx = 16'h0007, dx = 16'hEF12,
             sp = 16'hBABA, bp = 16'hDEAD, si = 16'h0001, di = 16'hDADD,
             es = 16'hBEEF, cs = 16'h0000, ss = 16'hDEAD, ds = 16'h0000;
 //                     ODIT SZ A  P C
@@ -38,8 +38,8 @@ reg [15:0]  ip, ips;
 // -----------------------------------------------------------------------------
 reg         cp, cpen;
 reg [ 3:0]  m;
-reg [ 5:0]  ta, tb, tm;
-reg [15:0]  ea, seg, op1, op2, wb, segold;
+reg [ 5:0]  ta, tb, tm, divc;
+reg [15:0]  ea, seg, op1, op2, wb, segold, divr;
 reg [ 7:0]  opcode, modrm, intr;
 reg [ 2:0]  alu;
 reg         size, dir;
@@ -48,10 +48,12 @@ reg [ 1:0]  rep, _rep;              // Repeat:
 
 // ВЫЧИСЛЕНИЯ
 // -----------------------------------------------------------------------------
-wire [15:0] ipn = ip + 1;
-wire [15:0] ipx = ip - preip;
-wire [15:0] signex = {{8{in[7]}}, in};
-wire [15:0] ipsign = ip + 1 + signex;
+wire [15:0] ipn     = ip + 1,
+            ean     = ea + 1,
+            ipx     = ip - preip,
+            signex  = {{8{in[7]}}, in},
+            ipsign  = ip + 1 + signex;
+wire [ 3:0] mn      = m + 1;
 
 // УСЛОВНЫЙ ПЕРЕХОД
 // -----------------------------------------------------------------------------
@@ -169,3 +171,9 @@ wire rot_pf = rot_shft ? ~^rot_r[7:0] : flag[PF];
 
 // Итоговые флаги
 wire [11:0] rot_f = {rot_of, flag[10:8], rot_sf, rot_zf, 1'b0, flag[AF], 1'b0, rot_pf, 1'b1, rot_cf};
+
+// ДЕЛЕНИЕ
+// -----------------------------------------------------------------------------
+
+wire [15:0] divr_next = {divr[14:0], op1[size ? 15 : 7]};
+wire        divr_bit  = (divr_next >= op2);

@@ -608,7 +608,7 @@ end else if (ce) begin
                 m   <= 3;
                 cp  <= size;
                 we  <= size & dir;
-                ea  <= ea + 1;
+                ea  <= ean;
                 ta  <= size ? RUN : LOAD;
                 out <= ax[15:8];
 
@@ -633,7 +633,7 @@ end else if (ce) begin
 
             // Загрузка 8 или 16 бит DS:SI
             0: begin cp       <= 1;  m <= 1;            ea <= si; end
-            1: begin wb[ 7:0] <= in; m <= size ? 2 : 3; ea <= ea + 1; end
+            1: begin wb[ 7:0] <= in; m <= size ? 2 : 3; ea <= ean; end
             2: begin wb[15:8] <= in; m <= 3; end
 
             // Запись 8 или 16 бит ES:DI
@@ -647,7 +647,7 @@ end else if (ce) begin
 
             end
 
-            4: begin m <= 5; we <= 1; ea <= ea + 1; out <= wb[15:8]; end
+            4: begin m <= 5; we <= 1; ea <= ean; out <= wb[15:8]; end
 
             // Инкремент или декремент SI
             5: begin
@@ -758,7 +758,7 @@ end else if (ce) begin
                 ea <= ea + 2;
 
             end
-            1: begin m <= 2; wb[7:0] <= in; ea <= ea + 1; end
+            1: begin m <= 2; wb[7:0] <= in; ea <= ean; end
             2: begin
 
                 ta <= WB;
@@ -788,6 +788,15 @@ end else if (ce) begin
             1: begin ta <= LOAD; cs <= wb; ip <= op1; if (!opcode[0]) sp <= sp + {in, op2[7:0]}; end
 
         endcase
+
+        // 13T [CD] INT i8
+        8'b1100_1101: begin
+
+            ta   <= INTR;
+            intr <= in;
+            ip   <= ipn;
+
+        end
 
         // 13T [CF] IRET
         8'b1100_1111: case (m)
@@ -827,6 +836,22 @@ end else if (ce) begin
             end
 
         endcase
+
+        // [D4] AAM
+        8'b1101_0100: case (m)
+
+            0: begin ta <= DIV;  op1 <= ax[7:0]; op2 <= in; tb <= RUN; m <= mn; end
+            1: begin ta <= LOAD; ax  <= {op1[7:0], divr[7:0]}; end
+
+        endcase
+
+        // 2T [D5] AAD
+        8'b1101_0101: begin
+
+            ta <= LOAD;
+            ax[7:0] <= ax[7:0] + in*ax[15:8];
+
+        end
 
         // 2T [D7] XLATB
         8'b1101_0111: begin ta <= LOAD; ax[7:0] <= in; cp <= 0; end
@@ -903,7 +928,7 @@ end else if (ce) begin
             we  <= size;
             cp  <= size;
             out <= wb[15:8];
-            ea  <= ea + 1;
+            ea  <= ean;
 
         end
 
@@ -940,7 +965,7 @@ end else if (ce) begin
 
             tm  <= 2;
             we  <= 1;
-            ea  <= ea + 1;
+            ea  <= ean;
             out <= wb[15:8];
 
         end
@@ -975,7 +1000,7 @@ end else if (ce) begin
 
             tm <= 2;
             wb <= in;
-            ea <= ea + 1;
+            ea <= ean;
 
         end
 
@@ -995,14 +1020,35 @@ end else if (ce) begin
     // -------------------------------------------------------------
     INTR: case (m)
 
-        0: begin m <= 1; ta <= PUSH; wb <= flag; tb <= INTR; end
-        1: begin m <= 2; ta <= PUSH; wb <= cs; end
-        2: begin m <= 3; ta <= PUSH; wb <= ip; end
-        3: begin m <= 4; ea <= {intr, 2'b00}; seg <= 0; cp <= 1; end
-        4: begin m <= 5; ea <= ea + 1; ip[ 7:0] <= in; end
-        5: begin m <= 6; ea <= ea + 1; ip[15:8] <= in; end
-        6: begin m <= 7; ea <= ea + 1; cs[ 7:0] <= in; end
-        7: begin m <= 0; ea <= ea + 1; cs[15:8] <= in; ta <= LOAD; flag[IF] <= 1'b0; end
+        // Запись IP:CS:FLAGS
+        0:  begin m <= mn; ea <= sp-6; we <= 1; out <= ip[ 7:0]; seg <= ss; cp <= 1; end
+        1:  begin m <= mn; ea <= ean;  we <= 1; out <= ip[15:8]; sp  <= ea; end
+        2:  begin m <= mn; ea <= ean;  we <= 1; out <= cs[ 7:0]; end
+        3:  begin m <= mn; ea <= ean;  we <= 1; out <= cs[15:8]; end
+        4:  begin m <= mn; ea <= ean;  we <= 1; out <= flag[ 7:0]; end
+        5:  begin m <= mn; ea <= ean;  we <= 1; out <= flag[11:8]; end
+        // Чтение нового адреса из IVT
+        6:  begin m <= mn; ea <= {intr, 2'b00}; seg <= 0; cp <= 1; end
+        7:  begin m <= mn; ea <= ean; ip[ 7:0] <= in; end
+        8:  begin m <= mn; ea <= ean; ip[15:8] <= in; end
+        9:  begin m <= mn; ea <= ean; cs[ 7:0] <= in; end
+        10: begin m <= 0;  ea <= ean; cs[15:8] <= in; cp <= 0; ta <= LOAD; flag[IF] <= 1'b0; end
+
+    endcase
+
+    // Деление op1 / op2; size => divr (остаток), op1 (результат)
+    DIV: case (tm)
+
+        0: begin tm <= 1; divc <= size ? 16 : 8; divr <= 0; end
+        1: begin
+
+            op1  <= {op1[14:0], divr_bit};
+            divc <= divc - 1;
+            divr <= divr_next - (divr_bit ? op2 : 0);
+
+            if (divc == 1) begin ta <= tb; tm <= 0; end
+
+        end
 
     endcase
 

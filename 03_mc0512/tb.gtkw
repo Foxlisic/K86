@@ -1,15 +1,15 @@
 [*]
 [*] GTKWave Analyzer v3.3.104 (w)1999-2020 BSI
-[*] Sat May 11 14:27:42 2024
+[*] Sat May 11 17:55:44 2024
 [*]
 [dumpfile] "/home/fox/dev/x86/03_mc0512/tb.vcd"
-[dumpfile_mtime] "Sat May 11 14:25:44 2024"
-[dumpfile_size] 88092
+[dumpfile_mtime] "Sat May 11 17:55:07 2024"
+[dumpfile_size] 99395
 [savefile] "/home/fox/dev/x86/03_mc0512/tb.gtkw"
-[timestart] 304
+[timestart] 0
 [size] 1920 1021
 [pos] -1 -1
-*-7.000000 675 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-7.000000 508 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] tb.
 [sst_width] 274
 [signals_width] 198
@@ -103,7 +103,7 @@ tb.TurboCore.seg[15:0]
 tb.TurboCore.ea[15:0]
 @1000200
 -CTRL
-@c00200
+@800200
 -ALU
 @28
 tb.TurboCore.size
@@ -213,12 +213,14 @@ tb.TurboCore.rot_f[11:0]
 (11)tb.TurboCore.rot_f[11:0]
 @1401200
 -group_end
+@1000200
 -ALU
-@800201
+@800200
 -REGS
 @23
 [color] 5
 tb.TurboCore.ax[15:0]
+@22
 [color] 5
 tb.TurboCore.cx[15:0]
 [color] 5
@@ -233,9 +235,9 @@ tb.TurboCore.bp[15:0]
 tb.TurboCore.si[15:0]
 [color] 5
 tb.TurboCore.di[15:0]
-@800201
+@800200
 -SEG
-@23
+@22
 [color] 5
 tb.TurboCore.es[15:0]
 [color] 5
@@ -244,8 +246,19 @@ tb.TurboCore.cs[15:0]
 tb.TurboCore.ss[15:0]
 [color] 5
 tb.TurboCore.ds[15:0]
-@1000201
+@1000200
 -SEG
 -REGS
+@800200
+-DIV
+@22
+tb.TurboCore.divc[5:0]
+tb.TurboCore.divr[15:0]
+@28
+tb.TurboCore.divr_bit
+@22
+tb.TurboCore.divr_next[15:0]
+@1000200
+-DIV
 [pattern_trace] 1
 [pattern_trace] 0
