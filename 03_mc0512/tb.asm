@@ -1,5 +1,5 @@
 
         org     0
-        call    far $1234:$5567
+        sar     word [D1], cl
         hlt
-D1:     dw      $BAB4
+D1:     dw      $BAB4, $FACE

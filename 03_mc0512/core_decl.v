@@ -5,9 +5,8 @@ assign address = cp ? {seg, 4'h0} + ea : {cs, 4'h0} + ip;
 // -----------------------------------------------------------------------------
 localparam
     LOAD    = 0,    RUN     = 1,    WB      = 2,
-    PUSH    = 3,    PUSH2   = 4,    PUSH3   = 5,
-    POP     = 6,    POP2    = 7,    POP3    = 8,
-    MODRM   = 9,    WB2     = 10,   WB3     = 11;
+    PUSH    = 3,    POP     = 4,    MODRM   = 5,
+    INTR    = 6;
 
 localparam
     ES = 2'b00,  CS = 2'b01,  SS = 2'b10,  DS = 2'b11,
@@ -22,10 +21,14 @@ localparam
     ADD = 3'b000, OR  = 3'b001, ADC = 3'b010, SBB = 3'b011,
     AND = 3'b100, SUB = 3'b101, XOR = 3'b110, CMP = 3'b111;
 
+localparam
+    ROL = 0, ROR = 1, RCL = 2, RCR = 3,
+    SHL = 4, SHR = 5, SAL = 6, SAR = 7;
+
 // РЕГИСТРЫ
 // -----------------------------------------------------------------------------
-reg [15:0]  ax = 16'hA28A, bx = 16'h5678, cx = 16'hFFFF, dx = 16'hEF12,
-            sp = 16'hBABA, bp = 16'hDEAD, si = 16'hBEEF, di = 16'hDADD,
+reg [15:0]  ax = 16'hA28A, bx = 16'h5678, cx = 16'h0007, dx = 16'hEF12,
+            sp = 16'hBABA, bp = 16'hDEAD, si = 16'h0001, di = 16'hDADD,
             es = 16'hBEEF, cs = 16'h0000, ss = 16'hDEAD, ds = 16'h0000;
 //                     ODIT SZ A  P C
 reg [11:0]  flag = 12'b0000_0000_0010;
@@ -37,7 +40,7 @@ reg         cp, cpen;
 reg [ 3:0]  m;
 reg [ 5:0]  ta, tb, tm;
 reg [15:0]  ea, seg, op1, op2, wb, segold;
-reg [ 7:0]  opcode, modrm;
+reg [ 7:0]  opcode, modrm, intr;
 reg [ 2:0]  alu;
 reg         size, dir;
 reg [ 2:0]  preip, overs, _overs;   // Over Segment
@@ -133,3 +136,36 @@ wire [11:0] daa_f = {flag[11:8], daa_r[7], ~|daa_r, 1'b0, flag[AF] | daa_m, 1'b0
 wire [ 8:0] aaa_h = daa_m ? (in[3] ? ax[15:8] - 1'b1 : ax[15:8] + 1'b1) : ax[15:8];
 wire [15:0] aaa_r = {aaa_h, 4'h0, daa_i[3:0]};
 wire [11:0] aaa_f = {flag[11:5], daa_m, flag[3:1], daa_m};
+
+// ВРАЩЕНИЯ 1 БИТ
+// -----------------------------------------------------------------------------
+
+wire rot_left = alu[0] == 1'b0;
+wire rot_shft = (alu == SHL || alu == SHR || alu == SAL || alu == SAR);
+
+// 1 шаг сдвиговой операции
+wire [15:0] rot_r =
+    alu == ROL ? (size ? {op1[14:0], op1[15]}   : {op1[6:0], op1[7]}) :
+    alu == ROR ? (size ? {op1[0],    op1[15:1]} : {op1[0],   op1[7:1]}) :
+    alu == RCL ? (size ? {op1[14:0], flag[CF]}  : {op1[6:0], flag[CF]}) :
+    alu == RCR ? (size ? {flag[CF],  op1[15:1]} : {flag[CF], op1[7:1]}) :
+    alu == SHR ? (size ? {1'b0,      op1[15:1]} : {1'b0,     op1[7:1]}) :
+    alu == SAR ? (size ? {op1[15],   op1[15:1]} : {op1[7],   op1[7:1]}) :
+    /*SAL,SHL*/  (size ? {op1[14:0], 1'b0}      : {op1[6:0], 1'b0});
+
+// Overflow флаг
+wire rot_of =
+    (alu == SHR) ? op1[top] :
+    (rot_left)   ? op1[top] ^ op1[top - 1] :
+    (alu == ROR || alu == RCR) ? (rot_r[top] ^ rot_r[top-1]) : 1'b0;
+
+// CF для любых ставится
+wire rot_cf = rot_left ? op1[top] : op1[0];
+
+// S, Z, P для 4 инструкции
+wire rot_sf = rot_shft ? rot_r[top] : flag[SF];
+wire rot_zf = rot_shft ? (size ? ~|rot_r[15:0] : ~|rot_r[7:0]) : flag[ZF];
+wire rot_pf = rot_shft ? ~^rot_r[7:0] : flag[PF];
+
+// Итоговые флаги
+wire [11:0] rot_f = {rot_of, flag[10:8], rot_sf, rot_zf, 1'b0, flag[AF], 1'b0, rot_pf, 1'b1, rot_cf};

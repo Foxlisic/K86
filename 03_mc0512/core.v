@@ -53,7 +53,7 @@ end else if (ce) begin
         casex (in)
         // Разбор префиксов
         8'b001x_x110: begin preip <= preip + 1; _overs <= {in[4:3], 1'b1}; end
-        8'b1111_101x: begin preip <= preip + 1; _rep   <= in[1:0]; end
+        8'b1111_001x: begin preip <= preip + 1; _rep   <= in[1:0]; end
         8'b0110_01xx,
         8'b1111_0000: begin preip <= preip + 1; end
         // Выполнить опкод
@@ -82,6 +82,10 @@ end else if (ce) begin
             size    <= in[0];
             alu     <= in[5:3];
 
+            // Проверить прерывание
+            // ip <= ipx;
+
+
             // Назначить сегмент по умолчанию
             case (_overs[2:1])
             ES: seg <= es; CS: seg <= cs;
@@ -106,7 +110,7 @@ end else if (ce) begin
             // CBW, CWD
             8'b1001_1000: begin ta <= LOAD; ax[15:8] <= {8{ax[7]}}; end
             8'b1001_1001: begin ta <= LOAD; dx <= {16{ax[15]}}; end
-            // 4T [06,0E,16,1E] PUSH [es,cs,ss,ds]
+            // [06,0E,16,1E] PUSH [es,cs,ss,ds]
             8'b000x_x110: begin
 
                 ta <= PUSH;
@@ -117,10 +121,10 @@ end else if (ce) begin
                 endcase
 
             end
-            // 1T [27,2F,37,3F] DAA, DAS, AAA, AAS
+            // [27,2F,37,3F] DAA, DAS, AAA, AAS
             8'b0010_x111: begin ta <= LOAD; ax[7:0] <= daa_r; flag <= daa_f; end
             8'b0011_x111: begin ta <= LOAD; ax      <= aaa_r; flag <= aaa_f; end
-            // 3T [40..4F] INC, DEC
+            // [40..4F] INC, DEC
             8'b0100_xxxx: begin
 
                 op1  <= r20;
@@ -131,18 +135,21 @@ end else if (ce) begin
                 modrm[5:3] <= in[2:0];
 
             end
-            // 4T [60..67] PUSH r
+            // [60..67] PUSH r
             8'b0101_0xxx: begin
 
                 ta <= PUSH;
                 wb <= r20;
 
             end
-            // 5T [07,17,1F] POP [es,ss,ds]
+            // [07,17,1F,58-5F,9D] POP
             // 6T [58..5F] POP r
-            8'b000x_0111,
-            8'b0001_1111,
-            8'b0101_1xxx: begin
+            8'b000x_0111, // POP es,ss
+            8'b0001_1111, // POP ds
+            8'b1001_1101, // POPF
+            8'b1100_101x, // RETF
+            8'b1100_1111, // IRET
+            8'b0101_1xxx: begin // POP r
 
                 ta <= POP;
                 tb <= RUN;
@@ -150,7 +157,7 @@ end else if (ce) begin
                 modrm[5:3] <= in[2:0];
 
             end
-            // 1T [70..7F] IF [xxx] THEN
+            // [70..7F] IF [xxx] THEN
             8'b0111_xxxx: begin
 
                 // Условие не совпадает, пропуск инструкции
@@ -162,19 +169,19 @@ end else if (ce) begin
                 end
 
             end
-            // #T [80..83] GRP#1
+            // [80..83] GRP#1
             8'b1000_00xx: begin dir <= 0; end
             // [84..85] TEST rmr
             8'b1000_010x: begin alu <= AND; end
-            // #T [88..89] MOV rm,r
+            // [88..89] MOV rm,r
             8'b1000_100x: begin cpen <= 0; end
-            // LEA r, rm
+            // [8D] LEA r, rm
             8'b1000_1101: begin cpen <= 0; dir <= 1; end
-            // MOV s,rm|rm,s
+            // [8C, 8E] MOV s,rm|rm,s
             8'b1000_11x0: begin size <= 1; end
-            // POP rm
+            // [8F] POP rm
             8'b1000_1111: begin dir <= 0; ta <= POP; tb <= RUN; end
-            // 2T [90..97] XCHG ax, r
+            // [90..97] XCHG ax, r
             8'b1001_0xxx: begin
 
                 ta <= WB;               // К записи в регистры
@@ -184,13 +191,43 @@ end else if (ce) begin
                 modrm[5:3] <= in[2:0];  // Номер регистра для записи
 
             end
-            // C3 RET, C2 RET i
+            // [9B] FWAIT
+            8'b1001_1011: begin ta <= LOAD; end
+            // [9C] PUSHF
+            8'b1001_1100: begin ta <= PUSH; wb <= flag; end
+            // [9E..9F] SAHF, LAHF
+            8'b1001_1110: begin ta <= LOAD; flag     <= ax[15:8]; end
+            8'b1001_1111: begin ta <= LOAD; ax[15:8] <= flag[7:0] | 2; end
+            // [C2..C3] RET, RET i
             8'b1100_001x: begin ta <= POP; tb <= RUN; end
+            // [C4..C5] LES|LDS r,m
+            8'b1100_010x: begin ta <= MODRM; {size, dir} <= 2'b11; end
             // [C6..C7] MOV rm, i
             8'b1100_011x: begin dir <= 0; cpen <= 0; end
-            endcase
+            // INT 1,3; INTO
+            8'b1111_0001: begin ta <= INTR; intr <= 1; end
+            8'b1100_1100: begin ta <= INTR; intr <= 3; end
+            8'b1100_1110: begin ta <= flag[OF] ? INTR : LOAD; intr <= 4; end
+            // [D0..D3] Rotate
+            8'b1101_00xx: begin dir <= 0; end
+            // [D6] SALC
+            8'b1101_0110: begin ta <= LOAD; ax[ 7:0] <= {8{flag[CF]}}; end
+            // [D7] XLATB
+            8'b1101_0111: begin ea <= bx + ax[7:0]; cp <= 1; end
+            // [E3] JCXZ b8
+            8'b1110_0011: begin if (cx) begin ta <= LOAD; ip <= ip + 2; end end
+            // [E0..E3] LOOP[NZ|Z] b8
+            8'b1110_00xx: begin
 
-            // @TODO Прерывание
+                // Если CX=1 то в любом случае не переходить по метке
+                // Если это LOOPZ, LOOPNZ, то ZF != bit[0] тоже не переходит
+                if ((cx == 1) || (!in[1] && (in[0] ^ flag[ZF])))
+                begin ta <= LOAD; ip <= ip + 2; end
+
+                cx <= cx - 1;
+
+            end
+            endcase
 
         end
         endcase
@@ -371,9 +408,9 @@ end else if (ce) begin
         // 2T [70..7F] Jxxx b8
         // 2T [E0..E3] LOOPxx
         // 2T [EB xx] JMP b8
-        8'b0111_xxxx,
-        8'b1110_00xx,
-        8'b1110_1011: begin
+        8'b0111_xxxx, // J[ccc]
+        8'b1110_00xx, // LOOP, JCXZ
+        8'b1110_1011: begin // JMP b8
 
             ip <= ipsign;
             ta <= LOAD;
@@ -518,7 +555,7 @@ end else if (ce) begin
 
         endcase
 
-        // [9A] CALL far
+        // 7T [9A] CALL far
         8'b1001_1010: case (m)
 
             0: begin m  <= 1;   ip <= ipn; op1[ 7:0] <= in; end
@@ -530,7 +567,15 @@ end else if (ce) begin
 
         endcase
 
-        // 4*T [A0..A1] MOV a, [m]
+        // 5T [9D] POPF
+        8'b10011101: begin
+
+            ta   <= LOAD;
+            flag <= wb | 2;
+
+        end
+
+        // 4*T [A0..A3] MOV a, [m]
         // 4*T [A2..A3] MOV [m], a
         8'b1010_00xx: case (m)
 
@@ -578,6 +623,45 @@ end else if (ce) begin
                 cp <= 0;
 
                 if (!dir) ax[15:8] <= in;
+
+            end
+
+        endcase
+
+        // 7T+ [A4] MOVSx
+        8'b1010_010x: case (m)
+
+            // Загрузка 8 или 16 бит DS:SI
+            0: begin cp       <= 1;  m <= 1;            ea <= si; end
+            1: begin wb[ 7:0] <= in; m <= size ? 2 : 3; ea <= ea + 1; end
+            2: begin wb[15:8] <= in; m <= 3; end
+
+            // Запись 8 или 16 бит ES:DI
+            3: begin
+
+                m   <= size ? 4 : 5;
+                we  <= 1;
+                seg <= es;
+                ea  <= di;
+                out <= wb[7:0];
+
+            end
+
+            4: begin m <= 5; we <= 1; ea <= ea + 1; out <= wb[15:8]; end
+
+            // Инкремент или декремент SI
+            5: begin
+
+                ta   <= LOAD;
+                m    <= 0;
+                we   <= 0;
+                cp   <= 0;
+                si   <= flag[DF] ? si - (size + 1) : si + (size + 1);
+                di   <= flag[DF] ? di - (size + 1) : di + (size + 1);
+                size <= 1;
+
+                // Если есть префикс REP: то повторяет пока CX не будет =0
+                if (rep[1]) begin cx <= cx - 1; if (cx != 1) ip <= ips; end
 
             end
 
@@ -665,12 +749,93 @@ end else if (ce) begin
 
         endcase
 
+        // 8T+ [C4..C5] LES|LDS r,m
+        8'b1100_010x: case (m)
+
+            0: begin
+
+                m  <= 1;
+                ea <= ea + 2;
+
+            end
+            1: begin m <= 2; wb[7:0] <= in; ea <= ea + 1; end
+            2: begin
+
+                ta <= WB;
+                wb <= op2;
+
+                if (opcode[0])
+                     ds <= {in, wb[7:0]};
+                else es <= {in, wb[7:0]};
+
+            end
+
+        endcase
+
         // 5T+ [C6..C7] MOV rm, i
         8'b1100_011x: case (m)
 
             0: begin m <= 1; cp <= 0; end
             1: begin m <= 2; ip <= ipn; wb <= in; ta <= size ? RUN : WB; end
             2: begin ip <= ipn; wb[15:8] <= in; ta <= WB; end
+
+        endcase
+
+        // 9T [CA..CB] RETF; RETF i16
+        8'b1100_101x: case (m)
+
+            0: begin ta <= POP;  m <= 1;   op1 <= wb; op2 <= in; ip <= ipn; end
+            1: begin ta <= LOAD; cs <= wb; ip <= op1; if (!opcode[0]) sp <= sp + {in, op2[7:0]}; end
+
+        endcase
+
+        // 13T [CF] IRET
+        8'b1100_1111: case (m)
+
+            0: begin m  <= 1; ta <= POP; ip <= wb; end
+            1: begin m  <= 2; ta <= POP; cs <= wb; end
+            2: begin ta <= LOAD; flag <= wb[11:0] | 2; end
+
+        endcase
+
+        // [C0..C1; D0..D3] Сдвиги
+        8'b1100_000x,
+        8'b1101_00xx: case (m)
+
+            // Если тут был указатель на память, то сбросить его
+            0: if (cp && !opcode[4]) cp <= 0;
+            // Выбор второго операнда
+            else begin
+
+                m   <= 1;
+                alu <= modrm[5:3];
+
+                if (opcode[4])
+                     begin op2 <= (opcode[1] ? cx[3:0] : 1); end
+                else begin op2 <= in[3:0]; ip <= ipn; end
+
+            end
+
+            // Процедура сдвига на 0..15 шагов
+            1: begin
+
+                if (op2) begin op1 <= rot_r; flag <= rot_f; end
+                else     begin wb  <= op1;   ta <= WB; end
+
+                op2 <= op2 - 1;
+
+            end
+
+        endcase
+
+        // 2T [D7] XLATB
+        8'b1101_0111: begin ta <= LOAD; ax[7:0] <= in; cp <= 0; end
+
+        // 6T [E8] CALL b16
+        8'b1110_1000: case (m)
+
+            0: begin m  <= 1; ea <= in; ip <= ipn; end
+            1: begin ta <= PUSH; wb <= ipn; ip <= ipn + {in, ea[7:0]}; end
 
         endcase
 
@@ -696,115 +861,150 @@ end else if (ce) begin
 
     // Запись результата
     // -------------------------------------------------------------------------
-    WB: begin
+    WB: case (tm)
 
-        // DIR=1, берем из M[5:3], иначе из M[2:0]
-        if (dir || modrm[7:6] == 2'b11) begin
+        0: begin
 
+            // DIR=1, берем из M[5:3], иначе из M[2:0]
+            if (dir || modrm[7:6] == 2'b11) begin
+
+                ta <= tb;
+                cp <= 0;
+
+                case (dir ? modrm[5:3] : modrm[2:0])
+                AX: if (size) ax <= wb; else ax[ 7:0] <= wb[7:0];
+                CX: if (size) cx <= wb; else cx[ 7:0] <= wb[7:0];
+                DX: if (size) dx <= wb; else dx[ 7:0] <= wb[7:0];
+                BX: if (size) bx <= wb; else bx[ 7:0] <= wb[7:0];
+                SP: if (size) sp <= wb; else ax[15:8] <= wb[7:0];
+                BP: if (size) bp <= wb; else cx[15:8] <= wb[7:0];
+                SI: if (size) si <= wb; else dx[15:8] <= wb[7:0];
+                DI: if (size) di <= wb; else bx[15:8] <= wb[7:0];
+                endcase
+
+            end
+            // Записать байт в память
+            else begin
+
+                tm  <= 1;
+                we  <= 1;
+                cp  <= 1;
+                out <= wb[7:0];
+
+            end
+
+        end
+
+        // Запись старшего байта или выход
+        1:  begin
+
+            ta  <= size ? ta : tb;
+            tm  <= size ? 2 : 0;
+            we  <= size;
+            cp  <= size;
+            out <= wb[15:8];
+            ea  <= ea + 1;
+
+        end
+
+        // Возврат из процедуры записи результат
+        2: begin
+
+            ea <= ea - 1;
             ta <= tb;
+            tm <= 0;
             cp <= 0;
 
-            case (dir ? modrm[5:3] : modrm[2:0])
-            AX: if (size) ax <= wb; else ax[ 7:0] <= wb[7:0];
-            CX: if (size) cx <= wb; else cx[ 7:0] <= wb[7:0];
-            DX: if (size) dx <= wb; else dx[ 7:0] <= wb[7:0];
-            BX: if (size) bx <= wb; else bx[ 7:0] <= wb[7:0];
-            SP: if (size) sp <= wb; else ax[15:8] <= wb[7:0];
-            BP: if (size) bp <= wb; else cx[15:8] <= wb[7:0];
-            SI: if (size) si <= wb; else dx[15:8] <= wb[7:0];
-            DI: if (size) di <= wb; else bx[15:8] <= wb[7:0];
-            endcase
-
-        end
-        // Записать байт в память
-        else begin
-
-            ta  <= WB2;
-            we  <= 1;
-            cp  <= 1;
-            out <= wb[7:0];
-
         end
 
-    end
-
-    // Запись старшего байта или выход
-    WB2: begin
-
-        ta  <= size ? WB3 : tb;
-        we  <= size;
-        cp  <= size;
-        out <= wb[15:8];
-        ea  <= ea + 1;
-
-    end
-
-    // Возврат из процедуры записи результат
-    WB3: begin
-
-        ea <= ea - 1;
-        ta <= tb;
-        cp <= 0;
-
-    end
+    endcase
 
     // Запись в стек
     // -------------------------------------------------------------------------
-    PUSH: begin
+    PUSH: case (tm)
 
-        ta  <= PUSH2;
-        we  <= 1;
-        segold <= seg;
-        seg <= ss;
-        ea  <= sp - 2;
-        sp  <= sp - 2;
-        out <= wb[7:0];
-        cp  <= 1;
+        0: begin
 
-    end
-    PUSH2: begin
+            tm  <= 1;
+            we  <= 1;
+            segold <= seg;
+            seg <= ss;
+            ea  <= sp - 2;
+            sp  <= sp - 2;
+            out <= wb[7:0];
+            cp  <= 1;
 
-        ta  <= PUSH3;
-        we  <= 1;
-        ea  <= ea + 1;
-        out <= wb[15:8];
+        end
 
-    end
-    PUSH3: begin
+        1: begin
 
-        ta <= tb;
-        cp <= 0;
-        seg <= segold;
+            tm  <= 2;
+            we  <= 1;
+            ea  <= ea + 1;
+            out <= wb[15:8];
 
-    end
+        end
+
+        2: begin
+
+            ta  <= tb;
+            tm  <= 0;
+            cp  <= 0;
+            seg <= segold;
+
+        end
+
+    endcase
 
     // Чтение из стека
     // -------------------------------------------------------------------------
-    POP: begin
+    POP: case (tm)
 
-        ta  <= POP2;
-        cp  <= 1;
-        segold <= seg;
-        seg <= ss;
-        ea  <= sp;
-        sp  <= sp + 2;
+        0: begin
 
-    end
-    POP2: begin
+            tm  <= 1;
+            cp  <= 1;
+            seg <= ss;
+            ea  <= sp;
+            sp  <= sp + 2;
+            segold <= seg;
 
-        ta <= POP3;
-        wb <= in;
-        ea <= ea + 1;
+        end
 
-    end
-    POP3: begin
+        1: begin
 
-        ta   <= tb;
-        cp   <= 0;
-        seg  <= segold;
-        wb[15:8] <= in;
+            tm <= 2;
+            wb <= in;
+            ea <= ea + 1;
 
-    end
+        end
+
+        2: begin
+
+            ta  <= tb;
+            tm  <= 0;
+            cp  <= 0;
+            seg <= segold;
+            wb[15:8] <= in;
+
+        end
+
+    endcase
+
+    // Прерывание INT
+    // -------------------------------------------------------------
+    INTR: case (m)
+
+        0: begin m <= 1; ta <= PUSH; wb <= flag; tb <= INTR; end
+        1: begin m <= 2; ta <= PUSH; wb <= cs; end
+        2: begin m <= 3; ta <= PUSH; wb <= ip; end
+        3: begin m <= 4; ea <= {intr, 2'b00}; seg <= 0; cp <= 1; end
+        4: begin m <= 5; ea <= ea + 1; ip[ 7:0] <= in; end
+        5: begin m <= 6; ea <= ea + 1; ip[15:8] <= in; end
+        6: begin m <= 7; ea <= ea + 1; cs[ 7:0] <= in; end
+        7: begin m <= 0; ea <= ea + 1; cs[15:8] <= in; ta <= LOAD; flag[IF] <= 1'b0; end
+
+    endcase
 
     endcase
 

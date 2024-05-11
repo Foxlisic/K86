@@ -1,0 +1,19 @@
+DE0: 308K
+
+    160k    RAM (128+32)
+    128k    VIDEO 640x400x4
+    16k     BIOS
+    4k      FONT
+
+MC3: 46k
+
+    34k     RAM (32+2)
+    4k      VIDEO
+    4k      FONT
+    4k      BIOS
+
+C4: 720k
+
+    576k    RAM (512+64)
+    128k    VGA
+    16k     BIOS
