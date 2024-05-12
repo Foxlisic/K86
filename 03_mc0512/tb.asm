@@ -1,5 +1,8 @@
 
         org     0
-        idiv    bx
+        mov     si, D1
+        mov     di, D2
+        scasw
         hlt
-D1:     dw      $BA00, $FACE
+D1:     dw      $BAAD, $FACE
+D2:     dw      $DEAD, $BEEF

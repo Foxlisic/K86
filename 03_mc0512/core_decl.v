@@ -6,7 +6,7 @@ assign address = cp ? {seg, 4'h0} + ea : {cs, 4'h0} + ip;
 localparam
     LOAD    = 0,    RUN     = 1,    WB      = 2,
     PUSH    = 3,    POP     = 4,    MODRM   = 5,
-    INTR    = 6,    DIV     = 7;
+    INTR    = 6,    DIV     = 7,    UNDEF   = 8;
 
 localparam
     ES = 2'b00,  CS = 2'b01,  SS = 2'b10,  DS = 2'b11,
@@ -28,8 +28,8 @@ localparam
 // РЕГИСТРЫ
 // -----------------------------------------------------------------------------
 reg [15:0]  ax = 16'hFFFA, bx = 16'h0002, cx = 16'h0007, dx = 16'hFFFF,
-            sp = 16'hBABA, bp = 16'hDEAD, si = 16'h0001, di = 16'hDADD,
-            es = 16'hBEEF, cs = 16'h0000, ss = 16'hDEAD, ds = 16'h0000;
+            sp = 16'hBABA, bp = 16'hDEAD, si = 16'h0011, di = 16'hDADD,
+            es = 16'h0000, cs = 16'h0000, ss = 16'hDEAD, ds = 16'h0000;
 //                     ODIT SZ A  P C
 reg [11:0]  flag = 12'b0000_0000_0010;
 reg [15:0]  ip, ips;

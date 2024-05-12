@@ -169,10 +169,11 @@ end else if (ce) begin
                 end
 
             end
-            // [80..83] GRP#1
-            // [F6..F7] GRP#3
+            // [D0..D3] Rotate
+            // [80..83, F6..F7, FE..FF] Group#1..3
             8'b1000_00xx,
-            8'b1111_011x: begin dir <= 0; end
+            8'b1101_00xx,
+            8'b1111_x11x: begin dir <= 0; end
             // [84..85] TEST rmr
             8'b1000_010x: begin alu <= AND; end
             // [88..89] MOV rm,r
@@ -200,18 +201,22 @@ end else if (ce) begin
             // [9E..9F] SAHF, LAHF
             8'b1001_1110: begin ta <= LOAD; flag     <= ax[15:8]; end
             8'b1001_1111: begin ta <= LOAD; ax[15:8] <= flag[7:0] | 2; end
+            // [AC..AD] LODSx
+            // [A4..A5] MOVSx
+            // [A6..A7] CMPSx
+            8'b1010_110x,
+            8'b1010_010x,
+            8'b1010_011x: begin cp <= 1; ea <= si; alu <= SUB; end
             // [C2..C3] RET, RET i
             8'b1100_001x: begin ta <= POP; tb <= RUN; end
             // [C4..C5] LES|LDS r,m
             8'b1100_010x: begin ta <= MODRM; {size, dir} <= 2'b11; end
             // [C6..C7] MOV rm, i
             8'b1100_011x: begin dir <= 0; cpen <= 0; end
-            // INT 1,3; INTO
+            // [CC,F1,CE] INT 1,3; INTO
             8'b1111_0001: begin ta <= INTR; wb <= 1; end
             8'b1100_1100: begin ta <= INTR; wb <= 3; end
             8'b1100_1110: begin ta <= flag[OF] ? INTR : LOAD; wb <= 4; end
-            // [D0..D3] Rotate
-            8'b1101_00xx: begin dir <= 0; end
             // [D6] SALC
             8'b1101_0110: begin ta <= LOAD; ax[ 7:0] <= {8{flag[CF]}}; end
             // [D7] XLATB
@@ -630,18 +635,17 @@ end else if (ce) begin
 
         endcase
 
-        // 7T+ [A4] MOVSx
+        // 7T+ [A4..A5] MOVSx
         8'b1010_010x: case (m)
 
             // Загрузка 8 или 16 бит DS:SI
-            0: begin cp       <= 1;  m <= 1;            ea <= si; end
-            1: begin wb[ 7:0] <= in; m <= size ? 2 : 3; ea <= ean; end
-            2: begin wb[15:8] <= in; m <= 3; end
+            0: begin wb[ 7:0] <= in; m <= size ? 1 : 2; ea <= ean; end
+            1: begin wb[15:8] <= in; m <= mn; end
 
             // Запись 8 или 16 бит ES:DI
-            3: begin
+            2: begin
 
-                m   <= size ? 4 : 5;
+                m   <= size ? 3 : 4;
                 we  <= 1;
                 seg <= es;
                 ea  <= di;
@@ -649,10 +653,10 @@ end else if (ce) begin
 
             end
 
-            4: begin m <= 5; we <= 1; ea <= ean; out <= wb[15:8]; end
+            3: begin m <= 5; we <= 1; ea <= ean; out <= wb[15:8]; end
 
             // Инкремент или декремент SI
-            5: begin
+            4: begin
 
                 ta   <= LOAD;
                 m    <= 0;
@@ -660,10 +664,44 @@ end else if (ce) begin
                 cp   <= 0;
                 si   <= flag[DF] ? si - (size + 1) : si + (size + 1);
                 di   <= flag[DF] ? di - (size + 1) : di + (size + 1);
-                size <= 1;
 
                 // Если есть префикс REP: то повторяет пока CX не будет =0
                 if (rep[1]) begin cx <= cx - 1; if (cx != 1) ip <= ips; end
+
+            end
+
+        endcase
+
+        // 4T+2T [A6..A7] CMPSx
+        8'b1010_011x: case (m)
+
+            // Операнд DS:SI
+            0: begin
+
+                op1 <= in;
+                m   <= size ? 1 : 2;
+                ea  <= size ? ean : di;
+                seg <= size ? seg : es;
+
+            end
+            1: begin m <= mn; ea  <= di; seg <= es; op1[15:8] <= in; end
+
+            // Операнд ES:DI
+            2: begin m <= size ? 3 : 4; op2       <= in; ea <= ean; end
+            3: begin m <= mn;           op2[15:8] <= in; end
+
+            // Вычисление, инкремент, повтор
+            4: begin
+
+                ta   <= LOAD;
+                flag <= alu_flag;
+                si   <= flag[DF] ? si - (opcode[0] + 1) : si + (opcode[0] + 1);
+                di   <= flag[DF] ? di - (opcode[0] + 1) : di + (opcode[0] + 1);
+                cp   <= 0;
+
+                // Проверять на REPNZ или REPZ
+                // Если есть префикс REP: то повторяет пока CX не будет =0
+                if (rep[1]) begin cx <= cx - 1; if (cx != 1 && rep[0] == alu_flag[ZF]) ip <= ips; end
 
             end
 
@@ -698,6 +736,93 @@ end else if (ce) begin
 
                 ta   <= LOAD;
                 flag <= alu_flag;
+
+            end
+
+        endcase
+
+        // 3*T [AA..AB] STOSx
+        8'b1010_101x: case (m)
+
+            // STOSB
+            0: begin
+
+                m   <= size ? 1 : 2;
+                cp  <= 1;
+                we  <= 1;
+                ea  <= di;
+                out <= ax[7:0];
+                seg <= es;
+
+            end
+            // STOSW
+            1: begin
+
+                m   <= mn;
+                we  <= 1;
+                ea  <= ean;
+                out <= ax[15:8];
+
+            end
+            2: begin
+
+                ta  <= LOAD;
+                we  <= 0;
+                cp  <= 0;
+                di  <= flag[DF] ? di - (size + 1) : di + (size + 1);
+
+                // Если есть префикс REP: то повторяет пока CX не будет =0
+                if (rep[1]) begin cx <= cx - 1; if (cx != 1) ip <= ips; end
+
+            end
+
+        endcase
+
+        // 3*T [AC..AD] LODSx
+        8'b1010_110x: case (m)
+
+            0: begin m <= size ? 1 : 2; ea <= ean; ax[7:0] <= in; end
+            1: begin m <= mn; ax[15:8] <= in; end
+            2: begin
+
+                ta <= LOAD;
+                cp <= 0;
+                si <= flag[DF] ? si - (opcode[0] + 1) : si + (opcode[0] + 1);
+
+                // Если есть префикс REP: то повторяет пока CX не будет =0
+                if (rep[1]) begin cx <= cx - 1; if (cx != 1) ip <= ips; end
+
+            end
+
+        endcase
+
+        // 4*T [AE..AF] SCASx
+        8'b1010_111x: case (m)
+
+            0: begin
+
+                m    <= mn;
+                cp   <= 1;
+                alu  <= SUB;
+                op1  <= size ? ax : ax[7:0];
+                ea   <= di;
+                seg  <= es;
+
+            end
+            1: begin m <= size ? 2 : 3; op2       <= in; ea <= ean; end
+            2: begin m <= 3;            op2[15:8] <= in; end
+
+            // Инкремент или декремент DI
+            3: begin
+
+                ta   <= LOAD;
+                cp   <= 0;
+                flag <= alu_flag;
+                di   <= flag[DF] ? di - (opcode[0] + 1) : di + (opcode[0] + 1);
+
+                // Проверять на REPNZ или REPZ
+                // Если есть префикс REP: то повторяет пока CX не будет =0
+                if (rep[1]) begin cx <= cx - 1; if (cx != 1 && rep[0] == alu_flag[ZF]) ip <= ips; end
 
             end
 
@@ -1000,6 +1125,70 @@ end else if (ce) begin
 
         endcase
 
+        // [FE..FF] Group #4
+        8'b1111_111x: case (modrm[5:3])
+
+            // INC|DEC rm
+            0,
+            1: case (m)
+
+                0: begin
+
+                    m   <= mn;
+                    alu <= modrm[3] ? SUB : ADD;
+                    op2 <= 1;
+
+                end
+                1: begin
+
+                    ta   <= WB;
+                    wb   <= alu_res;
+                    flag <= alu_flag;
+
+                end
+
+            endcase
+
+            // CALL rm
+            2: begin
+
+                ip <= op1;
+                wb <= ip;
+                ta <= size ? PUSH : UNDEF;
+
+            end
+
+            // CALL far rm
+            3: case (m)
+
+                0: begin m  <= mn; ea <= ea + 2; ip <= op1; op1 <= ip; op2 <= cs; if (!size) ta <= UNDEF; end
+                1: begin m  <= mn; ea <= ean;    wb <= in;  tb <= RUN; end
+                2: begin m  <= mn; ta <= PUSH;   cs <= {in, wb[7:0]}; wb <= op2;  end
+                3: begin m  <= mn; ta <= PUSH;   wb <= op1; end
+                4: begin ta <= LOAD; end
+
+            endcase
+
+            // JMP rm
+            4: begin ip <= op1; cp <= 0; ta <= size ? LOAD : UNDEF; end
+
+            // JMP far rm
+            5: case (m)
+
+                0: begin m <= mn; ea <= ea + 2; ip <= op1; if (size == 0) ta <= UNDEF; end
+                1: begin m <= mn; ea <= ean;    wb <= in; end
+                2: begin ta <= LOAD; cp <= 0;   cs <= {in, wb[7:0]}; end
+
+            endcase
+
+            // PUSH rm
+            6: begin wb <= op1; ta <= PUSH; end
+
+            // BAD instruction
+            7: begin ta <= UNDEF; end
+
+        endcase
+
     endcase
 
     // Запись результата
@@ -1164,6 +1353,9 @@ end else if (ce) begin
         if (divc == 0) begin ta <= tb; tm <= 0; end
 
     end
+
+    // #UD Инструкция не распознана
+    UNDEF: begin end
 
     endcase
 

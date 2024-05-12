@@ -134,7 +134,7 @@
 <tr>
     <!--60--><td class='x86 x86-x'><div><span>60</span><b>PUSHA</b></div></td>
     <!--61--><td class='x86 x86-x'><div><span>61</span><b>POPA</b></div></td>
-    <!--62--><td class='x86 x86-o'><div><span>62</span><b>BOUND</b></div>r16,m</td>
+    <!--62--><td class='x86 x86-x'><div><span>62</span><b>BOUND</b></div>r16,m</td>
     <!--63--><td class='x86 x86-x'><div><span>63</span><b>ARPL</b></div>rm,r16</td>
     <!--64--><td class='x86 x86-x done'><div><span>64</span><b>FS:</b></div></td>
     <!--65--><td class='x86 x86-x done'><div><span>65</span><b>GS:</b></div></td>
@@ -144,10 +144,10 @@
     <!--69--><td class='x86 x86-m'><div><span>69</span><b>IMUL</b></div>r16,rm,i16</td>
     <!--6A--><td class='x86 x86-o'><div><span>6A</span><b>PUSH</b></div>i8</td>
     <!--6B--><td class='x86 x86-m'><div><span>6B</span><b>IMUL</b></div>r16,rm,i8</td>
-    <!--6C--><td class='x86 x86-o'><div><span>6C</span><b>INSB</b></div></td>
-    <!--6D--><td class='x86 x86-o'><div><span>6D</span><b>INSW</b></div></td>
-    <!--6E--><td class='x86 x86-o'><div><span>6E</span><b>OUTSB</b></div></td>
-    <!--6F--><td class='x86 x86-o'><div><span>6F</span><b>OUTSW</b></div></td>
+    <!--6C--><td class='x86 x86-x'><div><span>6C</span><b>INSB</b></div></td>
+    <!--6D--><td class='x86 x86-x'><div><span>6D</span><b>INSW</b></div></td>
+    <!--6E--><td class='x86 x86-x'><div><span>6E</span><b>OUTSB</b></div></td>
+    <!--6F--><td class='x86 x86-x'><div><span>6F</span><b>OUTSW</b></div></td>
 </tr>
 <tr>
     <!--70--><td class='x86 x86-o done'><div><span>70</span><b>JO</b></div>b8</td>
@@ -210,16 +210,16 @@
     <!--A3--><td class='x86 x86-o done'><div><span>A3</span><b>MOV</b></div>[m],ax</td>
     <!--A4--><td class='x86 x86-o done'><div><span>A4</span><b>MOVSB</b></div></td>
     <!--A5--><td class='x86 x86-o done'><div><span>A5</span><b>MOVSW</b></div></td>
-    <!--A6--><td class='x86 x86-o'><div><span>A6</span><b>CMPSB</b></div></td>
-    <!--A7--><td class='x86 x86-o'><div><span>A7</span><b>CMPSW</b></div></td>
+    <!--A6--><td class='x86 x86-o done'><div><span>A6</span><b>CMPSB</b></div></td>
+    <!--A7--><td class='x86 x86-o done'><div><span>A7</span><b>CMPSW</b></div></td>
     <!--A8--><td class='x86 x86-o done'><div><span>A8</span><b>TEST</b></div>al,i8</td>
     <!--A9--><td class='x86 x86-o done'><div><span>A9</span><b>TEST</b></div>ax,i16</td>
-    <!--AA--><td class='x86 x86-o'><div><span>AA</span><b>STOSB</b></div></td>
-    <!--AB--><td class='x86 x86-o'><div><span>AB</span><b>STOSW</b></div></td>
-    <!--AC--><td class='x86 x86-o'><div><span>AC</span><b>LODSB</b></div></td>
-    <!--AD--><td class='x86 x86-o'><div><span>AD</span><b>LODSW</b></div></td>
-    <!--AE--><td class='x86 x86-o'><div><span>AE</span><b>SCASB</b></div></td>
-    <!--AF--><td class='x86 x86-o'><div><span>AF</span><b>SCASW</b></div></td>
+    <!--AA--><td class='x86 x86-o done'><div><span>AA</span><b>STOSB</b></div></td>
+    <!--AB--><td class='x86 x86-o done'><div><span>AB</span><b>STOSW</b></div></td>
+    <!--AC--><td class='x86 x86-o done'><div><span>AC</span><b>LODSB</b></div></td>
+    <!--AD--><td class='x86 x86-o done'><div><span>AD</span><b>LODSW</b></div></td>
+    <!--AE--><td class='x86 x86-o done'><div><span>AE</span><b>SCASB</b></div></td>
+    <!--AF--><td class='x86 x86-o done'><div><span>AF</span><b>SCASW</b></div></td>
 </tr>
 <tr>
     <!--B0--><td class='x86 x86-o done'><div><span>B0</span><b>MOV</b></div>al,i8</td>
@@ -308,8 +308,8 @@
     <!--FB--><td class='x86 x86-o done'><div><span>FB</span><b>STI</b></div></td>
     <!--FC--><td class='x86 x86-o done'><div><span>FC</span><b>CLD</b></div></td>
     <!--FD--><td class='x86 x86-o done'><div><span>FD</span><b>STD</b></div></td>
-    <!--FE--><td class='x86 x86-g'><div><span>FE</span><b>GRP4</b></div>8*</td>
-    <!--FF--><td class='x86 x86-g'><div><span>FF</span><b>GRP4</b></div>16*</td>
+    <!--FE--><td class='x86 x86-g done'><div><span>FE</span><b>GRP4</b></div>8*</td>
+    <!--FF--><td class='x86 x86-g done'><div><span>FF</span><b>GRP4</b></div>16*</td>
 </tr>
 </table>
 <b>ГРУППЫ</b>
