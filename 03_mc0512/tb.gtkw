@@ -1,15 +1,15 @@
 [*]
 [*] GTKWave Analyzer v3.3.104 (w)1999-2020 BSI
-[*] Sat May 11 17:55:44 2024
+[*] Sun May 12 13:59:33 2024
 [*]
 [dumpfile] "/home/fox/dev/x86/03_mc0512/tb.vcd"
-[dumpfile_mtime] "Sat May 11 17:55:07 2024"
-[dumpfile_size] 99395
+[dumpfile_mtime] "Sun May 12 13:59:18 2024"
+[dumpfile_size] 88572
 [savefile] "/home/fox/dev/x86/03_mc0512/tb.gtkw"
-[timestart] 0
+[timestart] 752
 [size] 1920 1021
 [pos] -1 -1
-*-7.000000 508 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-7.000000 1116 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] tb.
 [sst_width] 274
 [signals_width] 198
@@ -105,6 +105,27 @@ tb.TurboCore.ea[15:0]
 -CTRL
 @800200
 -ALU
+@c00022
+tb.TurboCore.wb[15:0]
+@28
+(0)tb.TurboCore.wb[15:0]
+(1)tb.TurboCore.wb[15:0]
+(2)tb.TurboCore.wb[15:0]
+(3)tb.TurboCore.wb[15:0]
+(4)tb.TurboCore.wb[15:0]
+(5)tb.TurboCore.wb[15:0]
+(6)tb.TurboCore.wb[15:0]
+(7)tb.TurboCore.wb[15:0]
+(8)tb.TurboCore.wb[15:0]
+(9)tb.TurboCore.wb[15:0]
+(10)tb.TurboCore.wb[15:0]
+(11)tb.TurboCore.wb[15:0]
+(12)tb.TurboCore.wb[15:0]
+(13)tb.TurboCore.wb[15:0]
+(14)tb.TurboCore.wb[15:0]
+(15)tb.TurboCore.wb[15:0]
+@1401200
+-group_end
 @28
 tb.TurboCore.size
 @22
@@ -135,46 +156,46 @@ tb.TurboCore.op1[15:0]
 @22
 tb.TurboCore.op2[15:0]
 @c00022
-tb.TurboCore.wb[15:0]
-@28
-(0)tb.TurboCore.wb[15:0]
-(1)tb.TurboCore.wb[15:0]
-(2)tb.TurboCore.wb[15:0]
-(3)tb.TurboCore.wb[15:0]
-(4)tb.TurboCore.wb[15:0]
-(5)tb.TurboCore.wb[15:0]
-(6)tb.TurboCore.wb[15:0]
-(7)tb.TurboCore.wb[15:0]
-(8)tb.TurboCore.wb[15:0]
-(9)tb.TurboCore.wb[15:0]
-(10)tb.TurboCore.wb[15:0]
-(11)tb.TurboCore.wb[15:0]
-(12)tb.TurboCore.wb[15:0]
-(13)tb.TurboCore.wb[15:0]
-(14)tb.TurboCore.wb[15:0]
-(15)tb.TurboCore.wb[15:0]
-@1401200
--group_end
-@22
 tb.TurboCore.alu_res[16:0]
-tb.TurboCore.alu_flag[11:0]
-@c00022
-tb.TurboCore.flag[11:0]
 @28
-(0)tb.TurboCore.flag[11:0]
-(1)tb.TurboCore.flag[11:0]
-(2)tb.TurboCore.flag[11:0]
-(3)tb.TurboCore.flag[11:0]
-(4)tb.TurboCore.flag[11:0]
-(5)tb.TurboCore.flag[11:0]
-(6)tb.TurboCore.flag[11:0]
-(7)tb.TurboCore.flag[11:0]
-(8)tb.TurboCore.flag[11:0]
-(9)tb.TurboCore.flag[11:0]
-(10)tb.TurboCore.flag[11:0]
-(11)tb.TurboCore.flag[11:0]
+(0)tb.TurboCore.alu_res[16:0]
+(1)tb.TurboCore.alu_res[16:0]
+(2)tb.TurboCore.alu_res[16:0]
+(3)tb.TurboCore.alu_res[16:0]
+(4)tb.TurboCore.alu_res[16:0]
+(5)tb.TurboCore.alu_res[16:0]
+(6)tb.TurboCore.alu_res[16:0]
+(7)tb.TurboCore.alu_res[16:0]
+(8)tb.TurboCore.alu_res[16:0]
+(9)tb.TurboCore.alu_res[16:0]
+(10)tb.TurboCore.alu_res[16:0]
+(11)tb.TurboCore.alu_res[16:0]
+(12)tb.TurboCore.alu_res[16:0]
+(13)tb.TurboCore.alu_res[16:0]
+(14)tb.TurboCore.alu_res[16:0]
+(15)tb.TurboCore.alu_res[16:0]
+(16)tb.TurboCore.alu_res[16:0]
 @1401200
 -group_end
+@c00022
+tb.TurboCore.alu_flag[11:0]
+@28
+(0)tb.TurboCore.alu_flag[11:0]
+(1)tb.TurboCore.alu_flag[11:0]
+(2)tb.TurboCore.alu_flag[11:0]
+(3)tb.TurboCore.alu_flag[11:0]
+(4)tb.TurboCore.alu_flag[11:0]
+(5)tb.TurboCore.alu_flag[11:0]
+(6)tb.TurboCore.alu_flag[11:0]
+(7)tb.TurboCore.alu_flag[11:0]
+(8)tb.TurboCore.alu_flag[11:0]
+(9)tb.TurboCore.alu_flag[11:0]
+(10)tb.TurboCore.alu_flag[11:0]
+(11)tb.TurboCore.alu_flag[11:0]
+@1401200
+-group_end
+@800200
+-ROT
 @c00022
 tb.TurboCore.rot_r[15:0]
 @28
@@ -214,13 +235,61 @@ tb.TurboCore.rot_f[11:0]
 @1401200
 -group_end
 @1000200
+-ROT
+@800200
+-DIV
+@c00022
+tb.TurboCore.diva[31:0]
+@28
+(0)tb.TurboCore.diva[31:0]
+(1)tb.TurboCore.diva[31:0]
+(2)tb.TurboCore.diva[31:0]
+(3)tb.TurboCore.diva[31:0]
+(4)tb.TurboCore.diva[31:0]
+(5)tb.TurboCore.diva[31:0]
+(6)tb.TurboCore.diva[31:0]
+(7)tb.TurboCore.diva[31:0]
+(8)tb.TurboCore.diva[31:0]
+(9)tb.TurboCore.diva[31:0]
+(10)tb.TurboCore.diva[31:0]
+(11)tb.TurboCore.diva[31:0]
+(12)tb.TurboCore.diva[31:0]
+(13)tb.TurboCore.diva[31:0]
+(14)tb.TurboCore.diva[31:0]
+(15)tb.TurboCore.diva[31:0]
+(16)tb.TurboCore.diva[31:0]
+(17)tb.TurboCore.diva[31:0]
+(18)tb.TurboCore.diva[31:0]
+(19)tb.TurboCore.diva[31:0]
+(20)tb.TurboCore.diva[31:0]
+(21)tb.TurboCore.diva[31:0]
+(22)tb.TurboCore.diva[31:0]
+(23)tb.TurboCore.diva[31:0]
+(24)tb.TurboCore.diva[31:0]
+(25)tb.TurboCore.diva[31:0]
+(26)tb.TurboCore.diva[31:0]
+(27)tb.TurboCore.diva[31:0]
+(28)tb.TurboCore.diva[31:0]
+(29)tb.TurboCore.diva[31:0]
+(30)tb.TurboCore.diva[31:0]
+(31)tb.TurboCore.diva[31:0]
+@1401200
+-group_end
+@22
+tb.TurboCore.divc[5:0]
+tb.TurboCore.divr[15:0]
+@23
+tb.TurboCore.divr_next[16:0]
+@28
+tb.TurboCore.divr_bit
+@1000200
+-DIV
 -ALU
 @800200
 -REGS
-@23
+@22
 [color] 5
 tb.TurboCore.ax[15:0]
-@22
 [color] 5
 tb.TurboCore.cx[15:0]
 [color] 5
@@ -248,17 +317,25 @@ tb.TurboCore.ss[15:0]
 tb.TurboCore.ds[15:0]
 @1000200
 -SEG
--REGS
-@800200
--DIV
-@22
-tb.TurboCore.divc[5:0]
-tb.TurboCore.divr[15:0]
+@c00022
+[color] 5
+tb.TurboCore.flag[11:0]
 @28
-tb.TurboCore.divr_bit
-@22
-tb.TurboCore.divr_next[15:0]
+(0)tb.TurboCore.flag[11:0]
+(1)tb.TurboCore.flag[11:0]
+(2)tb.TurboCore.flag[11:0]
+(3)tb.TurboCore.flag[11:0]
+(4)tb.TurboCore.flag[11:0]
+(5)tb.TurboCore.flag[11:0]
+(6)tb.TurboCore.flag[11:0]
+(7)tb.TurboCore.flag[11:0]
+(8)tb.TurboCore.flag[11:0]
+(9)tb.TurboCore.flag[11:0]
+(10)tb.TurboCore.flag[11:0]
+(11)tb.TurboCore.flag[11:0]
+@1401200
+-group_end
 @1000200
--DIV
+-REGS
 [pattern_trace] 1
 [pattern_trace] 0

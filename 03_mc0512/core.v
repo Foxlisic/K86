@@ -170,7 +170,9 @@ end else if (ce) begin
 
             end
             // [80..83] GRP#1
-            8'b1000_00xx: begin dir <= 0; end
+            // [F6..F7] GRP#3
+            8'b1000_00xx,
+            8'b1111_011x: begin dir <= 0; end
             // [84..85] TEST rmr
             8'b1000_010x: begin alu <= AND; end
             // [88..89] MOV rm,r
@@ -205,9 +207,9 @@ end else if (ce) begin
             // [C6..C7] MOV rm, i
             8'b1100_011x: begin dir <= 0; cpen <= 0; end
             // INT 1,3; INTO
-            8'b1111_0001: begin ta <= INTR; intr <= 1; end
-            8'b1100_1100: begin ta <= INTR; intr <= 3; end
-            8'b1100_1110: begin ta <= flag[OF] ? INTR : LOAD; intr <= 4; end
+            8'b1111_0001: begin ta <= INTR; wb <= 1; end
+            8'b1100_1100: begin ta <= INTR; wb <= 3; end
+            8'b1100_1110: begin ta <= flag[OF] ? INTR : LOAD; wb <= 4; end
             // [D0..D3] Rotate
             8'b1101_00xx: begin dir <= 0; end
             // [D6] SALC
@@ -792,9 +794,9 @@ end else if (ce) begin
         // 13T [CD] INT i8
         8'b1100_1101: begin
 
-            ta   <= INTR;
-            intr <= in;
-            ip   <= ipn;
+            ta <= INTR;
+            wb <= in;
+            ip <= ipn;
 
         end
 
@@ -840,8 +842,24 @@ end else if (ce) begin
         // [D4] AAM
         8'b1101_0100: case (m)
 
-            0: begin ta <= DIV;  op1 <= ax[7:0]; op2 <= in; tb <= RUN; m <= mn; end
-            1: begin ta <= LOAD; ax  <= {op1[7:0], divr[7:0]}; end
+            0: begin
+
+                m    <= mn;
+                ta   <= DIV;
+                tb   <= RUN;
+                diva <= {ax[7:0], 24'h0};
+                divc <= 7;
+                divr <= 0;
+                op2  <= in;
+
+            end
+
+            1: begin
+
+                ta <= LOAD;
+                ax <= {diva[7:0], divr[7:0]};
+
+            end
 
         endcase
 
@@ -879,6 +897,106 @@ end else if (ce) begin
             1: begin m <= 2; ip <= ipn; op1[15:8] <= in; ip <= ipn; end
             2: begin m <= 3; ip <= ipn; op2[ 7:0] <= in; ip <= ipn; end
             3: begin m <= 0; ip <= ipn; cs <= {in, op2[7:0]}; ip <= op1; ta <= LOAD; end
+
+        endcase
+
+        // [F6..F7] Group #3
+        8'b1111011x: case (modrm[5:3])
+
+            // TEST rm, imm8/16
+            0, 1: case (m)
+
+                0: begin m <= mn;            cp <= 0;   alu <= AND; end
+                1: begin m <= size ? mn : 3; ip <= ipn; op2 <= in; end
+                2: begin m <= mn;            ip <= ipn; op2[15:8] <= in; end
+                3: begin ta <= LOAD; flag <= alu_flag; end
+
+            endcase
+
+            // NOT rm
+            2: begin wb <= ~op1; ta <= WB; end
+
+            // NEG rm
+            3: case (m)
+
+                0: begin m  <= mn; alu <= SUB; op2 <= op1; op1 <= 0; end
+                1: begin ta <= WB; wb  <= alu_res; flag <= alu_flag; end
+
+            endcase
+
+            // MUL, IMUL
+            4,5: case (m)
+
+                // Запрос
+                0: begin
+                    m <= 1;
+                    if (modrm[3]) begin
+                        op1 <= size ? op1 : {{8{op1[7]}}, op1[7:0]};
+                        op2 <= size ? ax  : {{8{ax[7]}},  ax[7:0]};
+                    end else begin
+                        op2 <= size ? ax : ax[7:0];
+                    end
+                end
+
+                // Запись
+                1: begin
+
+                    cp <= 0;
+                    ta <= LOAD;
+                    ax <= mult[15:0];
+                    dx <= size ? mult[31:16] : dx;
+
+                    // CF,OF устанавливаются при переполнении
+                    // ZF при нулевом результате
+                    flag[ZF] <= size ? ~|mult[31:0] : ~|mult[15:0];
+                    flag[CF] <= size ? |dx : |ax[15:8];
+                    flag[OF] <= size ? |dx : |ax[15:8];
+
+                end
+
+            endcase
+
+            // DIV
+            6, 7: case (m)
+
+                0: begin
+
+                    m    <= mn;
+                    ta   <= DIV;
+                    tb   <= RUN;
+                    cp   <= 0;
+                    divr <= 0;
+                    divc <= size ? 31 : 15;
+
+                    // IMUL: Отрицательные числа заменить на положительные
+                    if (modrm[3]) begin
+
+                        diva  <= size ? (dx[15] ? -dxax : dxax) : (ax[15] ? -ax00 : ax00);
+                        op2   <= size ? (op1[15] ? -op1 : op1)  : (op1[7] ? {-op1[7:0], 8'h00} : op1);
+                        signd <= (size ? dx[15] : ax[15]) ^ (size ? op1[15] : op1[7]);
+
+                    end
+                    else begin
+
+                        diva  <= size ? dxax : ax00;
+                        op2   <= op1;
+                        signd <= 0;
+
+                    end
+
+                end
+
+                1: begin
+
+                    m  <= 0;
+                    wb <= 0; // INT#0
+                    ta <= (op2 == 0 || (size ? |diva[31:16] : |diva[15:8])) ? INTR : LOAD;
+                    ax <= size ? (signd ? -diva[15:0] : diva[15:0]) : {divr[7:0], signd ? -diva[7:0] : diva[7:0]};
+                    dx <= size ? divr : dx;
+
+                end
+
+            endcase
 
         endcase
 
@@ -1028,7 +1146,7 @@ end else if (ce) begin
         4:  begin m <= mn; ea <= ean;  we <= 1; out <= flag[ 7:0]; end
         5:  begin m <= mn; ea <= ean;  we <= 1; out <= flag[11:8]; end
         // Чтение нового адреса из IVT
-        6:  begin m <= mn; ea <= {intr, 2'b00}; seg <= 0; cp <= 1; end
+        6:  begin m <= mn; ea <= {wb[7:0], 2'b00}; seg <= 0; cp <= 1; end
         7:  begin m <= mn; ea <= ean; ip[ 7:0] <= in; end
         8:  begin m <= mn; ea <= ean; ip[15:8] <= in; end
         9:  begin m <= mn; ea <= ean; cs[ 7:0] <= in; end
@@ -1036,21 +1154,16 @@ end else if (ce) begin
 
     endcase
 
-    // Деление op1 / op2; size => divr (остаток), op1 (результат)
-    DIV: case (tm)
+    // Деление diva / op2; size => divr (остаток), diva (результат)
+    DIV: begin
 
-        0: begin tm <= 1; divc <= size ? 16 : 8; divr <= 0; end
-        1: begin
+        diva <= {diva[30:0], divr_bit};
+        divc <= divc - 1;
+        divr <= divr_next - (divr_bit ? op2 : 0);
 
-            op1  <= {op1[14:0], divr_bit};
-            divc <= divc - 1;
-            divr <= divr_next - (divr_bit ? op2 : 0);
+        if (divc == 0) begin ta <= tb; tm <= 0; end
 
-            if (divc == 1) begin ta <= tb; tm <= 0; end
-
-        end
-
-    endcase
+    end
 
     endcase
 

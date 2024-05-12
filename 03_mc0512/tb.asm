@@ -1,5 +1,5 @@
 
         org     0
-        aam
+        idiv    bx
         hlt
-D1:     dw      $BAB4, $FACE
+D1:     dw      $BA00, $FACE

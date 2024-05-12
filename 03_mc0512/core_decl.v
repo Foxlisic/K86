@@ -27,7 +27,7 @@ localparam
 
 // РЕГИСТРЫ
 // -----------------------------------------------------------------------------
-reg [15:0]  ax = 16'h005F, bx = 16'h5678, cx = 16'h0007, dx = 16'hEF12,
+reg [15:0]  ax = 16'hFFFA, bx = 16'h0002, cx = 16'h0007, dx = 16'hFFFF,
             sp = 16'hBABA, bp = 16'hDEAD, si = 16'h0001, di = 16'hDADD,
             es = 16'hBEEF, cs = 16'h0000, ss = 16'hDEAD, ds = 16'h0000;
 //                     ODIT SZ A  P C
@@ -40,9 +40,10 @@ reg         cp, cpen;
 reg [ 3:0]  m;
 reg [ 5:0]  ta, tb, tm, divc;
 reg [15:0]  ea, seg, op1, op2, wb, segold, divr;
-reg [ 7:0]  opcode, modrm, intr;
+reg [31:0]  diva;
+reg [ 7:0]  opcode, modrm;
 reg [ 2:0]  alu;
-reg         size, dir;
+reg         size, dir, signd;
 reg [ 2:0]  preip, overs, _overs;   // Over Segment
 reg [ 1:0]  rep, _rep;              // Repeat:
 
@@ -172,8 +173,11 @@ wire rot_pf = rot_shft ? ~^rot_r[7:0] : flag[PF];
 // Итоговые флаги
 wire [11:0] rot_f = {rot_of, flag[10:8], rot_sf, rot_zf, 1'b0, flag[AF], 1'b0, rot_pf, 1'b1, rot_cf};
 
-// ДЕЛЕНИЕ
+// ДЕЛЕНИЕ И УМНОЖЕНИЕ
 // -----------------------------------------------------------------------------
 
-wire [15:0] divr_next = {divr[14:0], op1[size ? 15 : 7]};
+wire [16:0] divr_next = {divr, diva[31]};
+wire [31:0] dxax      = {dx, ax};
+wire [31:0] ax00      = {ax, 16'h0000};
 wire        divr_bit  = (divr_next >= op2);
+wire [31:0] mult      = op1 * op2;
