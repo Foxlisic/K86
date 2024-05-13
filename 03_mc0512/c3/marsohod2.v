@@ -72,8 +72,11 @@ core IntelCore
     .in         (in),
     .out        (out),
     .we         (we),
-    .pr         (pr),
-    .pw         (pw)
+    // Тестово
+    .pin        (adc_input),
+    .pa         (sdram_dq[15:0]),
+    .pr         (sdram_addr[0]),
+    .pw         (sdram_addr[1])
 );
 
 // -----------------------------------------------------------------------------

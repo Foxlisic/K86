@@ -144,6 +144,8 @@ end else if (ce) begin
                 wb <= r20;
 
             end
+            // IMUL r,m,imm
+            8'b0110_10x1: begin {size, dir} <= 2'b11; end
             // [07,17,1F,58-5F,9D] POP
             // 6T [58..5F] POP r
             8'b000x_0111, // POP es,ss
@@ -413,6 +415,63 @@ end else if (ce) begin
             tb <= LOAD;
 
         end
+
+        // 5*T [68, 6A] PUSH imm
+        8'b0110_10x0: case (m)
+
+            0: begin
+
+                ta <= dir ? PUSH : RUN;
+                tb <= LOAD;
+                wb <= signex;
+                ip <= ipn;
+                m  <= mn;
+
+            end
+            1: begin
+
+                ta <= PUSH;
+                ip <= ipn;
+                wb[15:8] <= in;
+
+            end
+
+        endcase
+
+        // IMUL r, rm, imm
+        8'b0110_10x1: case (m)
+
+            // 8 BIT
+            0: if (cp) cp <= 0;
+            else begin
+
+                m   <= opcode[1] ? 2 : 1;
+                op1 <= op2;
+                op2 <= signex;
+                ip  <= ipn;
+
+            end
+
+            // 16 BIT
+            1: begin
+
+                m  <= mn;
+                ip <= ipn;
+                op2[15:8] <= in;
+
+            end
+
+            // Запись
+            2: begin
+
+                ta <= WB;
+                wb <= mult[15:0];
+                flag[CF] <= |mult[31:16];
+                flag[OF] <= |mult[31:16];
+
+            end
+
+        endcase
 
         // 2T [70..7F] Jxxx b8
         // 2T [E0..E3] LOOPxx

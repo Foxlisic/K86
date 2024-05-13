@@ -1,6 +1,6 @@
 
         org     0
-        out     $56, al
+        imul    ax, [D1], -2
         hlt
-D1:     dw      $BAAD, $FACE
+D1:     dw      $FFFE, $FACE
 D2:     dw      $DEAD, $BEEF
