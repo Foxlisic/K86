@@ -40,7 +40,8 @@ const static int font[4096] = {
     0x00,0x00,0x18,0x3c,0x3c,0x3c,0x3c,0x18,0x18,0x18,0x00,0x00,0x18,0x00,0x00,0x00, // 21 !
     0x00,0x66,0x66,0x66,0x66,0x66,0x24,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, // 22 "
     0x00,0x00,0x6c,0x6c,0x6c,0xfe,0x6c,0x6c,0x6c,0xfe,0x6c,0x6c,0x6c,0x00,0x00,0x00, // 23 #
-    0x18,0x18,0x18,0x7c,0xc6,0xc2,0xc0,0x7c,0x06,0x86,0xc6,0x7c,0x18,0x18,0x18,0x00, // 24 $
+    // 0x18,0x18,0x18,0x7c,0xc6,0xc2,0xc0,0x7c,0x06,0x86,0xc6,0x7c,0x18,0x18,0x18,0x00, // 24 $
+    0x00,0x00,0x00,0x00,0x66,0x3c,0x66,0x66,0x66,0x66,0x3c,0x66,0x00,0x00,0x00,0x00, // 25 $
     0x00,0x00,0x00,0x00,0x00,0xc2,0xc6,0x0c,0x18,0x30,0x66,0xc6,0x00,0x00,0x00,0x00, // 25 %
     0x00,0x00,0x38,0x6c,0x6c,0x6c,0x38,0x76,0xdc,0xcc,0xcc,0xcc,0x76,0x00,0x00,0x00, // 26 &
     0x00,0x30,0x30,0x30,0x30,0x60,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, // 27 '
@@ -271,55 +272,74 @@ protected:
     Uint32*             screen_buffer;
 
     // SYSTEM
-    int     pticks = 0, width, height, scale;
+    int         pticks = 0, width, height, scale;
 
     // VGA
-    int     x = 0, y = 0, _hs = 1, _vs = 0;
-    uint8_t charmem[4096];
+    int         x = 0, y = 0, _hs = 1, _vs = 0;
+    uint8_t     charmem[4096];
+    uint8_t*    memory;
 
     // PS2-KEYBOARD
-    int     ps_clock = 0, ps_data = 0, kbd_phase = 0, kbd_ticker = 0;
-    uint8_t kbd[256], kbd_top = 0, kb_hit_cnt = 0, kb_latch = 0, kb_data = 0;
+    int         ps_clock = 0, ps_data = 0, kbd_phase = 0, kbd_ticker = 0;
+    uint8_t     kbd[256], kbd_top = 0, kb_hit_cnt = 0, kb_latch = 0, kb_data = 0;
 
     // SD-CARD
-    int     sd_data_o, sd_data_i, sd_timeout = 1;
-    int     sd_state,  sd_arg,    sd_next_cmd, sd_count;
-    uint8_t sd_sector[512];
+    int         sd_data_o, sd_data_i, sd_timeout = 1;
+    int         sd_state,  sd_arg,    sd_next_cmd, sd_count;
+    uint8_t     sd_sector[512];
 
     // MODULES
-    Vcpu* mod_cpu;
-    Vgpu* mod_gpu;
+    Vcpu*       mod_cpu;
+    Vgpu*       mod_gpu;
 
 public:
 
-    App(int w = 640, int h = 400, int s = 2, const char* name = "VERILATED APPLICATION") {
+    App(int argc, char* argv[]) {
 
         if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) {
             exit(1);
         }
+
+        Verilated::commandArgs(argc, argv);
+
+        int w = 640, h = 400, s = 2;
 
         width  = w;
         height = h;
         scale  = s;
 
         screen_buffer = (Uint32*) malloc(w * h * sizeof(Uint32));
-        sdl_window    = SDL_CreateWindow(name, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, s*w, s*h, SDL_WINDOW_SHOWN);
+        sdl_window    = SDL_CreateWindow("8088 HOMEBREW OWN", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, s*w, s*h, SDL_WINDOW_SHOWN);
         sdl_renderer  = SDL_CreateRenderer(sdl_window, -1, SDL_RENDERER_PRESENTVSYNC);
         sdl_screen_texture = SDL_CreateTexture(sdl_renderer, SDL_PIXELFORMAT_BGRA32, SDL_TEXTUREACCESS_STREAMING, w, h);
         SDL_SetTextureBlendMode(sdl_screen_texture, SDL_BLENDMODE_NONE);
 
-        init();
-    }
-
-    // Инициализация
-    void init() {
-
+        // Создать модули
         mod_gpu = new Vgpu;
         mod_cpu = new Vcpu;
 
+        memory = (uint8_t*) malloc(1024*1024);
+
+        // Сброс процессора
+        mod_cpu->reset_n = 0;
+        mod_cpu->ce      = 1;
+        mod_cpu->clock   = 0; mod_cpu->eval();
+        mod_cpu->clock   = 1; mod_cpu->eval();
+        mod_cpu->reset_n = 1;
+
+        // Загрузка BIOS 4K
+        for (int i = 1; i < argc; i++) {
+
+            FILE* fp = fopen(argv[i], "rb");
+            if (fp) {
+                fread(memory + 0xFF000, 1, 4096, fp);
+                fclose(fp);
+            }
+        }
+
         // Заполнение видеопамяти знаками
         for (int i = 0; i < 4000; i += 2) {
-            charmem[i+0] = 0x40;
+            charmem[i+0] = '$';
             charmem[i+1] = 0x17;
         }
 
@@ -333,11 +353,21 @@ public:
         kbd_pop(ps_clock, ps_data);
 
         // ------------------------------------------------------
+        uint32_t A = mod_cpu->address;
+
+        // Запись в память
+        if (mod_cpu->we) {
+
+            memory[A] = mod_cpu->out;
+            if (A >= 0xB8000 && A <= 0xB8FFF) charmem[A - 0xB8000] = mod_cpu->out;
+        }
+
+        mod_cpu->in = memory[A];
 
         // Реализация видеоадаптера
+        // ------------------------------------------------------
         mod_gpu->char_data = charmem[mod_gpu->char_address];
         mod_gpu->font_data = font   [mod_gpu->font_address];
-
         // ------------------------------------------------------
 
         // Такт на процессор
@@ -660,6 +690,8 @@ public:
     int destroy() {
 
         free(screen_buffer);
+        free(memory);
+
         SDL_DestroyTexture  (sdl_screen_texture);
         SDL_DestroyRenderer (sdl_renderer);
         SDL_DestroyWindow   (sdl_window);
@@ -700,7 +732,7 @@ public:
         _vs = vs;
 
         // Вывод на экран
-        pset(x-48, y-35, color);
+        pset(x-49, y-35, color);
     }
 
     // Процессинг SPI

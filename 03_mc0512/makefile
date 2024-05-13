@@ -1,7 +1,7 @@
 VLIB=/usr/share/verilator/include
 
 all: ica app
-	./tb
+	./tb tb.bin
 ica:
 	fasm tb.asm tb.bin
 	php tb.php

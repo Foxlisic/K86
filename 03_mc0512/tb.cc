@@ -8,13 +8,11 @@ App* app;
 // Основной файл
 int main(int argc, char* argv[]) {
 
-    app = new App();
+    app = new App(argc, argv);
 
     int   instr   = 125000;
     int   maximum = 0;
     float target  = 100;
-
-    Verilated::commandArgs(argc, argv);
 
     // Исполнение одного фрейма
     while (app->main()) {
@@ -23,6 +21,8 @@ int main(int argc, char* argv[]) {
 
         // Есть ограничение по скорости
         if (maximum && maximum < instr) instr = maximum;
+
+        // instr = 1;
 
         // Автоматическая коррекция кол-ва инструкции в секунду
         for (int i = 0; i < instr; i++) {

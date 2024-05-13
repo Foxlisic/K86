@@ -211,9 +211,9 @@ if (reset_n == 1'b0) begin
     cp <= 0;
     ta <= 0;
 
-    // F000:FFF0
-    ip <= 16'h0000;
-    cs <= 16'h0000;
+    // CS:IP == F000:FFF0
+    ip <= 16'hFFF0;
+    cs <= 16'hF000;
     pr <= 0;
 
     _overs <= {DS, 1'b0};
