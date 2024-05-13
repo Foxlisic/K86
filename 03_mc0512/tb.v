@@ -18,7 +18,8 @@ initial begin $dumpfile("tb.vcd"); $dumpvars(0, tb); end
 
 reg  [ 7:0] memory[1048576];
 wire [19:0] address;
-reg  [ 7:0] in;
+wire [15:0] pa;
+reg  [ 7:0] in, pin;
 wire [ 7:0] out;
 wire        we, pr, pw;
 
@@ -45,11 +46,14 @@ core TurboCore
     .ce         (1'b1),
     .reset_n    (reset_n),
     .address    (address),
-    .in         (pr ? 8'hFF : in),
+    .in         (in),
     .out        (out),
     .we         (we),
+    // Порты
+    .pa         (pa),
     .pr         (pr),
-    .pw         (pw)
+    .pw         (pw),
+    .pin        (8'hFF)
 );
 
 endmodule

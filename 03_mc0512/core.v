@@ -10,6 +10,8 @@ module core
     output reg  [ 7:0]  out,        // Запись в память или порт
     output reg          we,
     // Порты
+    input       [ 7:0]  pin,
+    output reg  [15:0]  pa,
     output reg          pr,         // Сигнал чтения из порта
     output reg          pw          // Сигнал записи в порт
 );
@@ -998,6 +1000,61 @@ end else if (ce) begin
 
         // 2T [D7] XLATB
         8'b1101_0111: begin ta <= LOAD; ax[7:0] <= in; cp <= 0; end
+
+        // [E4..E5, EC..ED] IN a,p
+        8'b1110_x10x: case (m)
+
+            // Чтение номера порта
+            0: begin
+
+                m    <= mn;
+                cpen <= 0;
+                pr   <= 1;
+                pa   <= opcode[3] ? dx : in;
+                ip   <= opcode[3] ? ip : ipn;
+
+            end
+
+            // Чтение, ожидание результата 1 такт
+            1: begin m <= mn; end
+
+            // Запись ответа в AL|AH
+            2: begin
+
+                size <= 0;
+                ta   <= size ? RUN : LOAD;
+                pa   <= pa + 1;
+
+                if (size) begin m <= 1; pr <= 1; cpen <= 1; end
+                if (cpen) ax[15:8] <= pin; else ax[ 7:0] <= pin;
+
+            end
+
+        endcase
+
+        // [E6..E7, EE..EF] OUT p,a
+        8'b1110_x11x: case (m)
+
+            0: begin
+
+                ta  <= size ? RUN : LOAD;
+                m   <= mn;
+                ip  <= opcode[3] ? ip : ipn;
+                pa  <= opcode[3] ? dx : in;
+                out <= ax[7:0];
+                pw  <= 1;
+
+            end
+            1: begin
+
+                pa  <= pa + 1;
+                out <= ax[15:8];
+                pw  <= 1;
+                ta  <= LOAD;
+
+            end
+
+        endcase
 
         // 6T [E8] CALL b16
         8'b1110_1000: case (m)

@@ -1,15 +1,15 @@
 [*]
 [*] GTKWave Analyzer v3.3.104 (w)1999-2020 BSI
-[*] Sun May 12 16:59:24 2024
+[*] Mon May 13 02:29:56 2024
 [*]
 [dumpfile] "/home/fox/dev/x86/03_mc0512/tb.vcd"
-[dumpfile_mtime] "Sun May 12 16:57:49 2024"
-[dumpfile_size] 88674
+[dumpfile_mtime] "Mon May 13 02:29:15 2024"
+[dumpfile_size] 85657
 [savefile] "/home/fox/dev/x86/03_mc0512/tb.gtkw"
-[timestart] 0
+[timestart] 17
 [size] 1920 1021
 [pos] -1 -1
-*-7.000000 87 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-7.000000 124 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] tb.
 [sst_width] 274
 [signals_width] 198
@@ -196,9 +196,9 @@ tb.TurboCore.alu_flag[11:0]
 -group_end
 @800200
 -ROT
-@c00023
+@c00022
 tb.TurboCore.rot_r[15:0]
-@29
+@28
 (0)tb.TurboCore.rot_r[15:0]
 (1)tb.TurboCore.rot_r[15:0]
 (2)tb.TurboCore.rot_r[15:0]
@@ -215,11 +215,11 @@ tb.TurboCore.rot_r[15:0]
 (13)tb.TurboCore.rot_r[15:0]
 (14)tb.TurboCore.rot_r[15:0]
 (15)tb.TurboCore.rot_r[15:0]
-@1401201
+@1401200
 -group_end
-@c00023
+@c00022
 tb.TurboCore.rot_f[11:0]
-@29
+@28
 (0)tb.TurboCore.rot_f[11:0]
 (1)tb.TurboCore.rot_f[11:0]
 (2)tb.TurboCore.rot_f[11:0]
@@ -232,11 +232,11 @@ tb.TurboCore.rot_f[11:0]
 (9)tb.TurboCore.rot_f[11:0]
 (10)tb.TurboCore.rot_f[11:0]
 (11)tb.TurboCore.rot_f[11:0]
-@1401201
+@1401200
 -group_end
 @1000200
 -ROT
-@800200
+@c00200
 -DIV
 @c00022
 tb.TurboCore.diva[31:0]
@@ -281,8 +281,9 @@ tb.TurboCore.divr[15:0]
 tb.TurboCore.divr_next[16:0]
 @28
 tb.TurboCore.divr_bit
-@1000200
+@1401200
 -DIV
+@1000200
 -ALU
 @800200
 -REGS
@@ -336,5 +337,15 @@ tb.TurboCore.flag[11:0]
 -group_end
 @1000200
 -REGS
+@800201
+-PORT
+@23
+tb.TurboCore.pa[15:0]
+tb.TurboCore.pin[7:0]
+@29
+tb.TurboCore.pr
+tb.TurboCore.pw
+@1000201
+-PORT
 [pattern_trace] 1
 [pattern_trace] 0
