@@ -1,12 +1,22 @@
 VLIB=/usr/share/verilator/include
 
-all: ica
-ica: fsm
-	iverilog -g2005-sv -DICARUS=1 -o main.qqq tb.v core.v
-	vvp main.qqq >> /dev/null
-fsm:
+all: ica app
+	./tb
+ica:
 	fasm tb.asm tb.bin
 	php tb.php
+	iverilog -g2005-sv -DICARUS=1 -o main.qqq tb.v cpu.v
+	vvp main.qqq >> /dev/null
+app: com
+	g++ -o tb -I${VLIB} ${VLIB}/verilated.cpp tb.cc \
+		obj_dir/Vgpu__ALL.a \
+		obj_dir/Vcpu__ALL.a \
+		-lSDL2_mixer -lSDL2
+com:
+	verilator -cc gpu.v
+	verilator -cc cpu.v
+	cd obj_dir && make -f Vgpu.mk
+	cd obj_dir && make -f Vcpu.mk
 vcd:
 	gtkwave tb.vcd
 wav:

@@ -1,6 +1,6 @@
 /* verilator lint_off WIDTH */
 
-module text
+module gpu
 (
     // Опорная частота 25 мгц
     input   wire        clock,

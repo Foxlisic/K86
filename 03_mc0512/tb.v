@@ -40,7 +40,7 @@ always @(posedge clock) begin in <= memory[address]; if (we) memory[address] <= 
 
 // ---------------------------------------------------------------------
 
-core TurboCore
+cpu TurboCore
 (
     .clock      (clock25),
     .ce         (1'b1),

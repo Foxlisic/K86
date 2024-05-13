@@ -117,7 +117,7 @@ wire [ 7:0] in =
     we_data ? in_data :
         8'hFF;
 
-core IntelCore
+cpu IntelCore
 (
     .clock      (clock_25),
     .ce         (1'b1),
@@ -166,7 +166,7 @@ font T3(.clock  (clock_100), .a0 (font_address), .q0 (font_data));
 // Текстовый терминал. Выводит на экран 8x8 шрифт из данных в памяти `char`
 // -----------------------------------------------------------------------------
 
-text T1
+gpu T1
 (
     // Опорная частота 25 мгц
     .clock  (clock_25),
@@ -187,8 +187,8 @@ text T1
 
 endmodule
 
-`include "../core.v"
-`include "../text.v"
+`include "../cpu.v"
+`include "../gpu.v"
 `include "module/base.v"
 `include "module/char.v"
 `include "module/font.v"
