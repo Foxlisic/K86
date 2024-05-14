@@ -18,8 +18,6 @@ START:  xor     ax, ax              ; Активация
 
         hlt
 
-HELLO:  db      "Hello World",0
-
 
 ; Очистка экрана; AH-параметры цвета
 ; ------------------------------------------------------------------------------
@@ -54,17 +52,18 @@ LOC:    mov     [cs:CONF.locxy], ax
 
 ; Печать символа AL
 ; ------------------------------------------------------------------------------
-PRN:    push    ax bx cx dx di
-        mov     cl, al
+PRN:    push    ax bx cx dx di es
         mov     bx, [cs:CONF.locxy]
+        cmp     al, 10
+        je      short .rtn
+        mov     cl, al
         mov     al, bh
-        mov     ah, 160
+        mov     ah, 80
         mul     ah
         add     al, bl
         adc     ah, 0
         xchg    ax, di
         add     di, di
-        push    es
         mov     es, [cs:B800]
         mov     al, cl
         mov     ah, [cs:CONF.clr]
@@ -72,7 +71,7 @@ PRN:    push    ax bx cx dx di
         inc     bl
         cmp     bl, 80
         jne     @f
-        mov     bl, 0
+.rtn:   mov     bl, 0
         inc     bh
         cmp     bh, 25
         jne     @f
@@ -80,8 +79,7 @@ PRN:    push    ax bx cx dx di
         ; S:KROLL
 @@:     xchg    ax, bx
         call    LOC
-        pop     es
-        pop     di dx cx bx ax
+        pop     es di dx cx bx ax
         ret
 
 ; Параметры и конфигурации

@@ -38,7 +38,7 @@ module de0
     input       [3:0]  KEY,
 
     // LED
-    output      [9:0]  LEDR,
+    output reg  [9:0]  LEDR,
 
     // PS/2
     inout              PS2_CLK,
@@ -113,6 +113,7 @@ wire we_bios = (address >= 20'hFF000); // 4K BIOS
 wire        we, pr, pw;
 wire [19:0] address;
 wire [15:0] pa;
+reg  [ 7:0] pin;
 wire [ 7:0] out, in_data, in_char, in_bios;
 wire [ 7:0] in =
     we_char ? in_char :
@@ -129,6 +130,7 @@ cpu IntelCore
     .in         (in),
     .out        (out),
     .we         (we),
+    .pin        (pin),
     .pa         (pa),
     .pr         (pr),
     .pw         (pw)
@@ -202,6 +204,36 @@ gpu T1
 );
 
 // -----------------------------------------------------------------------------
+// Клавиатура
+// -----------------------------------------------------------------------------
+
+wire        kb_done;
+wire [7:0]  kb_data;
+reg         kb_hit;
+reg  [7:0]  kb_key;
+
+/*
+kbd KBD
+(
+    .clock      (clock_25),
+    .ps_clock   (PS2_CLK),
+    .ps_data    (PS2_DAT),
+    .done       (kb_done),
+    .data       (kb_data)
+);
+*/
+
+// Контроллер клавиатуры
+ps2 KBD
+(
+    .CLOCK_25           (clock_25),
+    .PS2_CLK            (PS2_CLK),
+    .PS2_DAT            (PS2_DAT),
+    .received_data      (kb_data),
+    .received_data_en   (kb_done),
+);
+
+// -----------------------------------------------------------------------------
 // УПРАВЛЕНИЕ ПОРТАМИ
 // -----------------------------------------------------------------------------
 
@@ -210,13 +242,28 @@ reg [ 7:0] vga_reg_id;
 
 always @(posedge clock_25) begin
 
+    // Получение скан-кода с клавиатуры // vect <= 1'b0; intr <= ~intr;
+    if (kb_done) begin kb_key <= kb_data; kb_hit <= 1; end
+
     if (pw)
     case (pa)
     // VGA порты
-    16'h03D4: vga_reg_id <= out;
-    16'h03D5: case (vga_reg_id)
+    16'h3D4: vga_reg_id <= out;
+    16'h3D5: case (vga_reg_id)
         8'h0E: cursor[10:8] <= out;
         8'h0F: cursor[ 7:0] <= out;
+    endcase
+    endcase
+
+    // Чтение из портов
+    if (pr)
+    case (pa)
+    16'h060: begin pin <= kb_key; end
+    16'h064: begin pin <= kb_hit; kb_hit <= 0; end
+    16'h3D4: begin pin <= vga_reg_id; end
+    16'h3D5: case (vga_reg_id)
+        8'h0E: pin <= cursor[10:8];
+        8'h0F: pin <= cursor[ 7:0];
     endcase
     endcase
 
@@ -226,4 +273,6 @@ endmodule
 
 `include "../cpu.v"
 `include "../gpu.v"
+`include "../kbd.v"
+`include "../ps2.v"
 
