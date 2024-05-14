@@ -112,6 +112,7 @@ wire we_bios = (address >= 20'hFF000); // 4K BIOS
 
 wire        we, pr, pw;
 wire [19:0] address;
+wire [15:0] pa;
 wire [ 7:0] out, in_data, in_char, in_bios;
 wire [ 7:0] in =
     we_char ? in_char :
@@ -128,6 +129,7 @@ cpu IntelCore
     .in         (in),
     .out        (out),
     .we         (we),
+    .pa         (pa),
     .pr         (pr),
     .pw         (pw)
 );
@@ -195,8 +197,30 @@ gpu T1
     .char_address   (char_address),
     .font_address   (font_address),
     .char_data      (char_data),
-    .font_data      (font_data)
+    .font_data      (font_data),
+    .cursor         (cursor),
 );
+
+// -----------------------------------------------------------------------------
+// УПРАВЛЕНИЕ ПОРТАМИ
+// -----------------------------------------------------------------------------
+
+reg [10:0] cursor;
+reg [ 7:0] vga_reg_id;
+
+always @(posedge clock_25) begin
+
+    if (pw)
+    case (pa)
+    // VGA порты
+    16'h03D4: vga_reg_id <= out;
+    16'h03D5: case (vga_reg_id)
+        8'h0E: cursor[10:8] <= out;
+        8'h0F: cursor[ 7:0] <= out;
+    endcase
+    endcase
+
+end
 
 endmodule
 

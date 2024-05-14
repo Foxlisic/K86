@@ -52,7 +52,7 @@ reg  [23:0] timer;
 // ---------------------------------------------------------------------
 
 wire [10:0] id = X[9:3] + (Y[8:4] * 80);
-wire        maskbit = (char[ ~X[2:0] ]) | (flash && (id == cursor + 1) && Y[3:0] >= 14);
+wire        maskbit = (char[ ~X[2:0] ]) | (!flash && (id == cursor + 1) && Y[3:0] >= 14);
 wire [ 3:0] kcolor = maskbit ? (attr[7] & flash ? attr[6:4] : attr[3:0]) : attr[6:4];
 wire [15:0] color =
 

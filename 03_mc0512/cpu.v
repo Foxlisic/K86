@@ -9,6 +9,7 @@ module cpu
     input               clock,
     input               ce,
     input               reset_n,
+    output              m0,
     // Память
     output      [19:0]  address,
     input       [ 7:0]  in,         // Чтение и из памяти или порта
@@ -97,8 +98,8 @@ wire [7:0] branches =
 // -----------------------------------------------------------------------------
 
 // 16-битные операнды на LOAD-секции
-wire m0    = (ta == LOAD);
-wire rsize = m0 | size;
+assign m0    = (ta == LOAD);
+wire   rsize = m0 | size;
 
 // Входящие из 2:0
 wire [15:0] r20 =

@@ -1,6 +1,7 @@
 #include "obj_dir/Vgpu.h"
 #include "obj_dir/Vcpu.h"
 
+#include "disasm.cc"
 #include "tb.h"
 
 App* app;
@@ -21,8 +22,6 @@ int main(int argc, char* argv[]) {
 
         // Есть ограничение по скорости
         if (maximum && maximum < instr) instr = maximum;
-
-        // instr = 1;
 
         // Автоматическая коррекция кол-ва инструкции в секунду
         for (int i = 0; i < instr; i++) {

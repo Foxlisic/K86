@@ -272,12 +272,15 @@ protected:
     Uint32*             screen_buffer;
 
     // SYSTEM
-    int         pticks = 0, width, height, scale;
+    int         pticks = 0, width, height, scale, tstate = 0, tstate_prev = 0;
+    FILE*       debug_stream;
+    Disassemble* dasm;
 
     // VGA
     int         x = 0, y = 0, _hs = 1, _vs = 0;
     uint8_t     charmem[4096];
     uint8_t*    memory;
+    int         vga_reg_id = 0;
 
     // PS2-KEYBOARD
     int         ps_clock = 0, ps_data = 0, kbd_phase = 0, kbd_ticker = 0;
@@ -293,6 +296,8 @@ protected:
     Vgpu*       mod_gpu;
 
 public:
+
+    int debug_enable = 0;
 
     App(int argc, char* argv[]) {
 
@@ -343,7 +348,12 @@ public:
             charmem[i+1] = 0x17;
         }
 
-        sd_timeout = 1;
+        dasm = new Disassemble(memory);
+
+        debug_enable = 0;
+        debug_stream = NULL;
+
+        sd_timeout   = 1;
     }
 
     // Обработка одного такта
@@ -353,16 +363,57 @@ public:
         kbd_pop(ps_clock, ps_data);
 
         // ------------------------------------------------------
-        uint32_t A = mod_cpu->address;
+        uint32_t A   = mod_cpu->address;
+        uint8_t  out = mod_cpu->out;
 
         // Запись в память
         if (mod_cpu->we) {
 
-            memory[A] = mod_cpu->out;
-            if (A >= 0xB8000 && A <= 0xB8FFF) charmem[A - 0xB8000] = mod_cpu->out;
+            memory[A] = out;
+            if (A >= 0xB8000 && A <= 0xB8FFF) charmem[A - 0xB8000] = out;
         }
 
         mod_cpu->in = memory[A];
+
+        // FWAIT инструкция
+        if (mod_cpu->in == 0x9B && mod_cpu->m0) {
+            if (debug_enable == 0) {
+                debug_enable = 1;
+                debug_stream = fopen("debug.txt", "w");
+            }
+        }
+
+        if (debug_enable && mod_cpu->m0) {
+
+            dasm->disassemble(A);
+            fprintf(debug_stream, "+%d [%08X] %05X ", tstate - tstate_prev, tstate, A);
+            dasm->output(debug_stream);
+            fputs("\n", debug_stream);
+            tstate_prev = tstate;
+        }
+
+        tstate++;
+
+        // Управление портами
+        // ------------------------------------------------------
+        if (mod_cpu->pw) {
+
+            switch (mod_cpu->pa) {
+
+                case 0x3D4: vga_reg_id = out; break;
+                case 0x3D5:
+
+                    switch (vga_reg_id) {
+
+                        // Позиция курсора через порты VGA
+                        case 0x0E: mod_gpu->cursor = (mod_gpu->cursor & 0xF0FF) | (out & 15)*256; break;
+                        case 0x0F: mod_gpu->cursor = (mod_gpu->cursor & 0xFF00) | (out); break;
+                    }
+
+                    break;
+            }
+        }
+        // ------------------------------------------------------
 
         // Реализация видеоадаптера
         // ------------------------------------------------------
@@ -692,10 +743,15 @@ public:
         free(screen_buffer);
         free(memory);
 
+        if (debug_stream) {
+            fclose(debug_stream);
+        }
+
         SDL_DestroyTexture  (sdl_screen_texture);
         SDL_DestroyRenderer (sdl_renderer);
         SDL_DestroyWindow   (sdl_window);
         SDL_Quit();
+
         return 0;
     }
 
