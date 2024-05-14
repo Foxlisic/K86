@@ -1,7 +1,6 @@
 
         org     0
-
-        xor     ax, ax              ; Активация
+START:  xor     ax, ax              ; Активация
         mov     es, ax
         mov     ds, ax
         mov     ss, ax
@@ -9,16 +8,23 @@
         mov     ah, $07
         call    CLS
 
-        mov     ax, $014F
-        call    LOC
+        ; Прием данных от клавы
+@@:     in      al, $64
+        and     al, 1
+        je      @b
+        in      al, $60
+        call    PRN
+        jmp     @b
 
         hlt
+
+HELLO:  db      "Hello World",0
+
 
 ; Очистка экрана; AH-параметры цвета
 ; ------------------------------------------------------------------------------
 CLS:    push    es
-        push    $B800
-        pop     es
+        mov     es, [cs:B800]
         mov     [cs:CONF.clr], ah
         mov     al, 0
         xor     di, di
@@ -38,25 +44,54 @@ LOC:    mov     [cs:CONF.locxy], ax
         mul     ah              ; AX=80*y
         add     bx, ax          ; BX=80*y + x
         mov     ah, bh
-        mov     al, 0x0E
-        mov     dx, 0x3D4       ; Старший байт курсора
+        mov     al, $0E
+        mov     dx, $3D4        ; Старший байт курсора
         out     dx, ax
-        mov     al, 0x0F
+        mov     al, $0F
         mov     ah, bl
         out     dx, ax          ; Младший байт курсора
         ret
 
-; Печать символа
+; Печать символа AL
 ; ------------------------------------------------------------------------------
-PRN:    ret
+PRN:    push    ax bx cx dx di
+        mov     cl, al
+        mov     bx, [cs:CONF.locxy]
+        mov     al, bh
+        mov     ah, 160
+        mul     ah
+        add     al, bl
+        adc     ah, 0
+        xchg    ax, di
+        add     di, di
+        push    es
+        mov     es, [cs:B800]
+        mov     al, cl
+        mov     ah, [cs:CONF.clr]
+        stosw
+        inc     bl
+        cmp     bl, 80
+        jne     @f
+        mov     bl, 0
+        inc     bh
+        cmp     bh, 25
+        jne     @f
+        mov     bh, 24
+        ; S:KROLL
+@@:     xchg    ax, bx
+        call    LOC
+        pop     es
+        pop     di dx cx bx ax
+        ret
 
 ; Параметры и конфигурации
 ; ------------------------------------------------------------------------------
+B800:   dw      $B800
 CONF:
 .clr:   db      0                   ; Текущий цвет символов
 .locxy: dw      0
 
 ; ------------------------------------------------------------------------------
-times   (4096-16-$) db 0
+        times   (4096-16-$) db 0
         jmp     $FF00 : $0000
-times   11      db 0
+        times   11      db 0

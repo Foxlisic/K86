@@ -280,7 +280,7 @@ protected:
     int         x = 0, y = 0, _hs = 1, _vs = 0;
     uint8_t     charmem[4096];
     uint8_t*    memory;
-    int         vga_reg_id = 0;
+    int         vga_reg_id = 0, kbd_hit = 0, kbd_key = 0;
 
     // PS2-KEYBOARD
     int         ps_clock = 0, ps_data = 0, kbd_phase = 0, kbd_ticker = 0;
@@ -294,6 +294,7 @@ protected:
     // MODULES
     Vcpu*       mod_cpu;
     Vgpu*       mod_gpu;
+    Vkbd*       mod_kbd;
 
 public:
 
@@ -322,6 +323,7 @@ public:
         // Создать модули
         mod_gpu = new Vgpu;
         mod_cpu = new Vcpu;
+        mod_kbd = new Vkbd;
 
         memory = (uint8_t*) malloc(1024*1024);
 
@@ -359,12 +361,24 @@ public:
     // Обработка одного такта
     void tick() {
 
-        // Обработка клавиатуры
-        kbd_pop(ps_clock, ps_data);
-
-        // ------------------------------------------------------
         uint32_t A   = mod_cpu->address;
         uint8_t  out = mod_cpu->out;
+
+        // Обработка клавиатуры
+        // ---------------------------------------------------------------------
+
+        kbd_pop(ps_clock, ps_data);
+
+        mod_kbd->ps_clock = ps_clock;
+        mod_kbd->ps_data  = ps_data;
+
+        // Пришли данные с клавиатуры
+        if (mod_kbd->done) {
+            kbd_hit |= 1;
+            kbd_key  = mod_kbd->data;
+        }
+
+        // ---------------------------------------------------------------------
 
         // Запись в память
         if (mod_cpu->we) {
@@ -376,6 +390,8 @@ public:
         mod_cpu->in = memory[A];
 
         // FWAIT инструкция
+        // ---------------------------------------------------------------------
+
         if (mod_cpu->in == 0x9B && mod_cpu->m0) {
             if (debug_enable == 0) {
                 debug_enable = 1;
@@ -386,7 +402,7 @@ public:
         if (debug_enable && mod_cpu->m0) {
 
             dasm->disassemble(A);
-            fprintf(debug_stream, "+%d [%08X] %05X ", tstate - tstate_prev, tstate, A);
+            fprintf(debug_stream, "+%d [%05X] ", tstate - tstate_prev, A);
             dasm->output(debug_stream);
             fputs("\n", debug_stream);
             tstate_prev = tstate;
@@ -394,8 +410,9 @@ public:
 
         tstate++;
 
-        // Управление портами
         // ------------------------------------------------------
+
+        // Запись в порт
         if (mod_cpu->pw) {
 
             switch (mod_cpu->pa) {
@@ -413,12 +430,24 @@ public:
                     break;
             }
         }
-        // ------------------------------------------------------
+
+        // Чтение из порта
+        if (mod_cpu->pr) {
+
+            switch (mod_cpu->pa) {
+
+                // Читать данные с клавиатуры
+                case 0x060: mod_cpu->pin = kbd_key; break;
+                case 0x064: mod_cpu->pin = kbd_hit; kbd_hit &= ~1; break;
+                default:    mod_cpu->pin = 0xFF; break;
+            }
+        }
 
         // Реализация видеоадаптера
         // ------------------------------------------------------
         mod_gpu->char_data = charmem[mod_gpu->char_address];
         mod_gpu->font_data = font   [mod_gpu->font_address];
+
         // ------------------------------------------------------
 
         // Такт на процессор
@@ -428,6 +457,10 @@ public:
         // Такт на видеопроцессор
         mod_gpu->clock = 0; mod_gpu->eval();
         mod_gpu->clock = 1; mod_gpu->eval();
+
+        // Такт на клавиатуру
+        mod_kbd->clock = 0; mod_kbd->eval();
+        mod_kbd->clock = 1; mod_kbd->eval();
 
         // Вывод на экран
         vga(mod_gpu->hs, mod_gpu->vs, (mod_gpu->r*16)*65536 + (mod_gpu->g*16)*256 + (mod_gpu->b*16));

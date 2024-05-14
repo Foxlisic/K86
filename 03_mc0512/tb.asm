@@ -1,6 +1,6 @@
 
         org     0
-        fwait
+
         mov     ax, bx
         hlt
 

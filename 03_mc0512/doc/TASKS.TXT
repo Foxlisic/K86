@@ -4,3 +4,5 @@ Snake
 Tetris
 Formula-1
 DOOM
+---
+Fucktorial

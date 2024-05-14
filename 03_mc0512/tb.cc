@@ -1,5 +1,6 @@
 #include "obj_dir/Vgpu.h"
 #include "obj_dir/Vcpu.h"
+#include "obj_dir/Vkbd.h"
 
 #include "disasm.cc"
 #include "tb.h"
