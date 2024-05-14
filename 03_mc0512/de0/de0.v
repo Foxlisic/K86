@@ -108,13 +108,15 @@ pll PLL0
 
 wire we_data = (address <  20'h20000); // 128K RAM
 wire we_char = (address >= 20'hB8000) && (address <= 20'hB8FFF); // 4K CHAR
+wire we_bios = (address >= 20'hFF000); // 4K BIOS
 
 wire        we, pr, pw;
 wire [19:0] address;
-wire [ 7:0] out, in_data, in_char;
+wire [ 7:0] out, in_data, in_char, in_bios;
 wire [ 7:0] in =
     we_char ? in_char :
     we_data ? in_data :
+    we_bios ? in_bios :
         8'hFF;
 
 cpu IntelCore
@@ -134,6 +136,7 @@ cpu IntelCore
 // Внутрисхемная память
 // -----------------------------------------------------------------------------
 
+// 00000..1FFFF 128K
 base M1
 (
     .clock (clock_100),
@@ -143,7 +146,17 @@ base M1
     .w     (we & we_data)
 );
 
-// $B8000-$B8FFF 4K
+// FF000..FFFFF 4K
+bios M2
+(
+    .clock (clock_100),
+    .a     (address[11:0]),
+    .d     (out),
+    .q     (in_bios),
+    .w     (we & we_bios)
+);
+
+// B8000-B8FFF 4K
 char T2
 (
     .clock  (clock_100),
@@ -160,7 +173,7 @@ char T2
 );
 
 // Шрифты 4K
-font T3(.clock  (clock_100), .a0 (font_address), .q0 (font_data));
+font T3(.clock(clock_100), .a0(font_address), .q0(font_data));
 
 // -----------------------------------------------------------------------------
 // Текстовый терминал. Выводит на экран 8x8 шрифт из данных в памяти `char`
@@ -189,6 +202,7 @@ endmodule
 
 `include "../cpu.v"
 `include "../gpu.v"
+`include "module/bios.v"
 `include "module/base.v"
 `include "module/char.v"
 `include "module/font.v"
