@@ -202,8 +202,4 @@ endmodule
 
 `include "../cpu.v"
 `include "../gpu.v"
-`include "module/bios.v"
-`include "module/base.v"
-`include "module/char.v"
-`include "module/font.v"
 
