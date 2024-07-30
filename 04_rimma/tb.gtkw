@@ -1,0 +1,34 @@
+[*]
+[*] GTKWave Analyzer v3.3.114 (w)1999-2023 BSI
+[*] Wed Dec 13 17:29:00 2023
+[*]
+[dumpfile] "/home/fox/dev/11_dg8088/tb.vcd"
+[dumpfile_mtime] "Wed Dec 13 17:28:00 2023"
+[dumpfile_size] 52678
+[savefile] "/home/fox/dev/11_dg8088/tb.gtkw"
+[timestart] 0
+[size] 2560 1365
+[pos] -1 -1
+*-6.000000 30 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] tb.
+[sst_width] 319
+[signals_width] 181
+[sst_expanded] 1
+[sst_vpaned_height] 412
+@29
+tb.clock
+@28
+tb.clock25
+tb.IntelCore9xxxTurbo.reset_n
+@800200
+-PhysIFace
+@22
+tb.IntelCore9xxxTurbo.address[19:0]
+tb.IntelCore9xxxTurbo.in[7:0]
+tb.IntelCore9xxxTurbo.out[7:0]
+@28
+tb.IntelCore9xxxTurbo.we
+@1000200
+-PhysIFace
+[pattern_trace] 1
+[pattern_trace] 0
