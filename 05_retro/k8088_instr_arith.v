@@ -27,19 +27,19 @@ endcase
     // LO байт
     0: begin
 
-        m   <= size ? 1 : 2;
         ip  <= ip + 1;
-        alu <= `OPC53;
-        op1 <= ax;
+        m   <= size ? 1 : 2;
+        op1 <= size ? ax : ax[7:0];
         op2 <= in;
+        alu <= `OPC53;
 
     end
 
     // HI байт
     1: begin
 
-        m   <= 2;
         ip  <= ip + 1;
+        m   <= 2;
         op2[15:8] <= in;
 
     end
