@@ -1,6 +1,8 @@
 // Объявление макро
 `define MRM53 modrm[5:3]
 `define MRM20 modrm[2:0]
+`define OPC53 opcode[5:3]
+`define OPC20 opcode[2:0]
 
 // Этапы исполнения инструкции
 localparam

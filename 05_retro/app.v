@@ -26,11 +26,11 @@ initial begin
 
     // 4096 ROM BASIC I/O SYSTEM
     // :::: JMP FAR $FFF0:$0000
-    ram[20'hFFFF0] = 8'hEA;
-    ram[20'hFFFF1] = 8'h00;
-    ram[20'hFFFF2] = 8'h00;
-    ram[20'hFFFF3] = 8'h00;
-    ram[20'hFFFF4] = 8'hFF;
+    ram[20'hFFFF0] = 8'h04; // EA
+    ram[20'hFFFF1] = 8'hFE; // 00
+    ram[20'hFFFF2] = 8'h00; // 00
+    ram[20'hFFFF3] = 8'h00; // 00
+    ram[20'hFFFF4] = 8'hFF; // FF
 
 end
 

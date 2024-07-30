@@ -30,8 +30,18 @@ end else if (chipen) begin
     we <= 1'b0;
 
     case (t)
+
+    // Считывание и процедуры
     `include "k8088_fetch.v"
-    `include "k8088_instr.v"
+
+    // Исполнение микрокода
+    INSTR: casex (opcode)
+
+        `include "k8088_instr_arith.v"
+        `include "k8088_instr_jump.v"
+
+    endcase
+
     endcase
 
 end
