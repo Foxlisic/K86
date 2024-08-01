@@ -1,0 +1,79 @@
+[*]
+[*] GTKWave Analyzer v3.3.82 (w)1999-2017 BSI
+[*] Wed Jul  4 18:57:17 2018
+[*]
+[dumpfile] "/home/fox/marsohod2/projects/09_8632/main.vcd"
+[dumpfile_mtime] "Wed Jul  4 18:55:21 2018"
+[dumpfile_size] 87953
+[savefile] "/home/fox/marsohod2/projects/09_8632/main.gtkw"
+[timestart] 71
+[size] 1920 938
+[pos] -1 -1
+*-6.000000 106 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] main.
+[sst_width] 219
+[signals_width] 261
+[sst_expanded] 1
+[sst_vpaned_height] 311
+@28
+main.clk
+main.clk25
+@22
+main.CPU.m[7:0]
+@28
+main.CPU.mm[2:0]
+@22
+main.address[19:0]
+main.data_in[7:0]
+main.CPU.opcode[8:0]
+main.CPU.ip[15:0]
+@28
+main.CPU.osize
+main.CPU.asize
+main.CPU.direction
+main.CPU.bitsize
+@22
+main.CPU.segment[15:0]
+[color] 6
+main.CPU.ea[31:0]
+@800200
+-Регистры
+@22
+[color] 6
+main.CPU.eax[31:0]
+[color] 6
+main.CPU.ebx[31:0]
+[color] 6
+main.CPU.ecx[31:0]
+[color] 6
+main.CPU.edx[31:0]
+[color] 6
+main.CPU.esp[31:0]
+[color] 6
+main.CPU.ebp[31:0]
+[color] 6
+main.CPU.esi[31:0]
+[color] 6
+main.CPU.edi[31:0]
+@1000200
+-Регистры
+@28
+main.CPU.A[2:0]
+@22
+main.CPU.R[31:0]
+@23
+main.CPU.Op1[31:0]
+@22
+main.CPU.Op2[31:0]
+@28
+main.CPU.immsize[1:0]
+@22
+main.CPU.immresult[31:0]
+@28
+main.CPU.func[2:0]
+main.CPU.phase[2:0]
+@22
+main.CPU.prea[31:0]
+main.CPU.modrm[7:0]
+[pattern_trace] 1
+[pattern_trace] 0

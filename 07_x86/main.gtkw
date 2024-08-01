@@ -1,0 +1,32 @@
+[*]
+[*] GTKWave Analyzer v3.3.86 (w)1999-2017 BSI
+[*] Sun Nov 10 12:57:59 2019
+[*]
+[dumpfile] "/home/fox/dev/marsohod2/projects/22_x86/main.vcd"
+[dumpfile_mtime] "Sun Nov 10 12:56:09 2019"
+[dumpfile_size] 41151
+[savefile] "/home/fox/dev/marsohod2/projects/22_x86/main.gtkw"
+[timestart] 0
+[size] 1920 1031
+[pos] -1 -1
+*-4.000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[sst_width] 228
+[signals_width] 134
+[sst_expanded] 1
+[sst_vpaned_height] 302
+@800200
+-TOP
+@22
+main.address[19:0]
+@28
+main.clock
+main.clock25
+@22
+main.data_in[7:0]
+main.data_out[7:0]
+@29
+main.write_ena
+@1000200
+-TOP
+[pattern_trace] 1
+[pattern_trace] 0

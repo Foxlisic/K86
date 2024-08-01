@@ -1,0 +1,293 @@
+[*]
+[*] GTKWave Analyzer v3.3.86 (w)1999-2017 BSI
+[*] Tue Oct 20 11:55:19 2020
+[*]
+[dumpfile] "/disk/fox/dev/x8086/de0/tb.vcd"
+[dumpfile_mtime] "Tue Oct 20 11:54:52 2020"
+[dumpfile_size] 110314
+[savefile] "/disk/fox/dev/x8086/de0/tb.gtkw"
+[timestart] 0
+[size] 1920 1029
+[pos] -1 -1
+*-7.000000 313 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] tb.
+[sst_width] 254
+[signals_width] 242
+[sst_expanded] 1
+[sst_vpaned_height] 363
+@28
+[color] 3
+tb.clock
+[color] 4
+tb.clock25
+tb.CTLPORT.clock_50
+tb.CPU86.halt
+@800200
+-tb.CPU86._debug_
+@22
+[color] 5
+tb.CPU86.dr_ax[15:0]
+[color] 5
+tb.CPU86.dr_cx[15:0]
+[color] 5
+tb.CPU86.dr_sp[15:0]
+[color] 5
+tb.CPU86.dr_se[15:0]
+@1000200
+-group_end
+@28
+[color] 4
+tb.CPU86._strob_
+@800200
+-Address
+@28
+[color] 2
+tb.CPU86.bus
+@22
+[color] 6
+tb.CPU86.address[19:0]
+[color] 7
+tb.CPU86.ip[15:0]
+@28
+[color] 6
+tb.CPU86.segment_id[2:0]
+@22
+[color] 6
+tb.CPU86.ea[15:0]
+[color] 7
+tb.CPU86.i_data[7:0]
+[color] 6
+tb.CPU86.o_data[7:0]
+@28
+[color] 3
+tb.CPU86.we
+@1000200
+-Address
+@800200
+-Subroutines
+@c00022
+[color] 5
+tb.CPU86.fn[3:0]
+@28
+[color] 5
+(0)tb.CPU86.fn[3:0]
+[color] 5
+(1)tb.CPU86.fn[3:0]
+[color] 5
+(2)tb.CPU86.fn[3:0]
+[color] 5
+(3)tb.CPU86.fn[3:0]
+@1401200
+-group_end
+@22
+[color] 5
+tb.CPU86.fnext[3:0]
+@28
+[color] 5
+tb.CPU86.s1[2:0]
+[color] 5
+tb.CPU86.s2[2:0]
+[color] 5
+tb.CPU86.s3[2:0]
+[color] 5
+tb.CPU86.s4[2:0]
+[color] 5
+tb.CPU86.s5[2:0]
+@29
+[color] 7
+tb.CPU86.rep_ft
+@1000200
+-Subroutines
+@c00200
+-Opcode
+@22
+tb.CPU86.opcode[8:0]
+tb.CPU86.modrm[7:0]
+@28
+tb.CPU86.i_dir
+tb.CPU86.i_size
+@1401200
+-Opcode
+@800200
+-ALU
+@28
+[color] 7
+tb.CPU86.alu[2:0]
+@22
+[color] 7
+tb.CPU86.op1[15:0]
+[color] 7
+tb.CPU86.op2[15:0]
+[color] 7
+tb.CPU86.alu_r[16:0]
+@c00022
+[color] 7
+tb.CPU86.alu_f[11:0]
+@28
+[color] 7
+(0)tb.CPU86.alu_f[11:0]
+[color] 7
+(1)tb.CPU86.alu_f[11:0]
+[color] 7
+(2)tb.CPU86.alu_f[11:0]
+[color] 7
+(3)tb.CPU86.alu_f[11:0]
+[color] 7
+(4)tb.CPU86.alu_f[11:0]
+[color] 7
+(5)tb.CPU86.alu_f[11:0]
+[color] 7
+(6)tb.CPU86.alu_f[11:0]
+[color] 7
+(7)tb.CPU86.alu_f[11:0]
+[color] 7
+(8)tb.CPU86.alu_f[11:0]
+[color] 7
+(9)tb.CPU86.alu_f[11:0]
+[color] 7
+(10)tb.CPU86.alu_f[11:0]
+[color] 7
+(11)tb.CPU86.alu_f[11:0]
+@1401200
+-group_end
+@22
+[color] 7
+tb.CPU86.alu_top[3:0]
+@c00022
+[color] 7
+tb.CPU86.flags[11:0]
+@28
+[color] 7
+(0)tb.CPU86.flags[11:0]
+[color] 7
+(1)tb.CPU86.flags[11:0]
+[color] 7
+(2)tb.CPU86.flags[11:0]
+[color] 7
+(3)tb.CPU86.flags[11:0]
+[color] 7
+(4)tb.CPU86.flags[11:0]
+[color] 7
+(5)tb.CPU86.flags[11:0]
+[color] 7
+(6)tb.CPU86.flags[11:0]
+[color] 7
+(7)tb.CPU86.flags[11:0]
+[color] 7
+(8)tb.CPU86.flags[11:0]
+[color] 7
+(9)tb.CPU86.flags[11:0]
+[color] 7
+(10)tb.CPU86.flags[11:0]
+[color] 7
+(11)tb.CPU86.flags[11:0]
+@1401200
+-group_end
+@1000200
+-ALU
+@800200
+-WB
+@28
+[color] 2
+tb.CPU86.wb
+[color] 2
+tb.CPU86.wf
+@22
+[color] 6
+tb.CPU86.wb_data[15:0]
+@c00022
+[color] 6
+tb.CPU86.wb_flag[11:0]
+@28
+[color] 6
+(0)tb.CPU86.wb_flag[11:0]
+[color] 6
+(1)tb.CPU86.wb_flag[11:0]
+[color] 6
+(2)tb.CPU86.wb_flag[11:0]
+[color] 6
+(3)tb.CPU86.wb_flag[11:0]
+[color] 6
+(4)tb.CPU86.wb_flag[11:0]
+[color] 6
+(5)tb.CPU86.wb_flag[11:0]
+[color] 6
+(6)tb.CPU86.wb_flag[11:0]
+[color] 6
+(7)tb.CPU86.wb_flag[11:0]
+[color] 6
+(8)tb.CPU86.wb_flag[11:0]
+[color] 6
+(9)tb.CPU86.wb_flag[11:0]
+[color] 6
+(10)tb.CPU86.wb_flag[11:0]
+[color] 6
+(11)tb.CPU86.wb_flag[11:0]
+@1401200
+-group_end
+@28
+[color] 6
+tb.CPU86.wb_reg[2:0]
+[color] 7
+tb.CPU86.i_size
+[color] 7
+tb.CPU86.i_dir
+@1000200
+-WB
+@c00200
+-IRQ
+@c00022
+[color] 5
+tb.CPU86.irq[7:0]
+@28
+(0)tb.CPU86.irq[7:0]
+(1)tb.CPU86.irq[7:0]
+(2)tb.CPU86.irq[7:0]
+(3)tb.CPU86.irq[7:0]
+(4)tb.CPU86.irq[7:0]
+(5)tb.CPU86.irq[7:0]
+(6)tb.CPU86.irq[7:0]
+(7)tb.CPU86.irq[7:0]
+@1401200
+-group_end
+@28
+tb.CPU86.irq_signal
+tb.CPU86.irq_accept
+@22
+[color] 5
+tb.CPU86.intr[7:0]
+@28
+tb.CPU86.trace_ff
+@1401200
+-IRQ
+@c00200
+-Port
+@22
+[color] 5
+tb.CTLPORT.port_address[15:0]
+[color] 5
+tb.CPU86.port_in[7:0]
+[color] 5
+tb.CPU86.port_out[7:0]
+@28
+tb.CPU86.port_read
+tb.CPU86.port_write
+@22
+[color] 5
+tb.CTLPORT.kb_data[7:0]
+[color] 5
+tb.CTLPORT.kb_scancode[7:0]
+@28
+tb.CTLPORT.kb_flipflop_1
+tb.CTLPORT.kb_flipflop_2
+tb.CTLPORT.kb_hit
+[color] 2
+tb.CTLPORT.kb_latch
+tb.CTLPORT.kb_unpress
+tb.CTLPORT.pic_block
+@22
+tb.CTLPORT.pic_irr[15:0]
+@1401200
+-Port
+[pattern_trace] 1
+[pattern_trace] 0

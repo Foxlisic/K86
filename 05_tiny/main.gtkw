@@ -1,0 +1,55 @@
+[*]
+[*] GTKWave Analyzer v3.3.86 (w)1999-2017 BSI
+[*] Sat Apr 13 09:17:22 2019
+[*]
+[dumpfile] "/home/fox/dev/marsohod/projects/21_tiny8086/main.vcd"
+[dumpfile_mtime] "Sat Apr 13 09:15:44 2019"
+[dumpfile_size] 42863
+[savefile] "/home/fox/dev/marsohod/projects/21_tiny8086/main.gtkw"
+[timestart] 0
+[size] 1920 1029
+[pos] -1 -1
+*-5.000000 10 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] main.
+[treeopen] main.TINY8086.
+[sst_width] 248
+[signals_width] 256
+[sst_expanded] 1
+[sst_vpaned_height] 304
+@28
+main.clk
+main.clock
+@22
+main.pc[19:0]
+main.instr[47:0]
+@23
+main.address[19:0]
+@22
+main.data[15:0]
+@28
+main.store
+@22
+main.write[15:0]
+@800200
+-REG
+@22
+[color] 5
+main.TINY8086.REGFILE.ax[15:0]
+[color] 5
+main.TINY8086.REGFILE.bx[15:0]
+[color] 5
+main.TINY8086.REGFILE.cx[15:0]
+[color] 5
+main.TINY8086.REGFILE.dx[15:0]
+[color] 5
+main.TINY8086.REGFILE.sp[15:0]
+[color] 5
+main.TINY8086.REGFILE.bp[15:0]
+[color] 5
+main.TINY8086.REGFILE.si[15:0]
+[color] 5
+main.TINY8086.REGFILE.di[15:0]
+@1000200
+-REG
+[pattern_trace] 1
+[pattern_trace] 0
