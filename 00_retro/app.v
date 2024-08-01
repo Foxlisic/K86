@@ -20,19 +20,8 @@ reg  [ 7:0] in;
 wire [ 7:0] out;
 wire        we;
 
-initial begin
-
-    $readmemh("app.hex", ram, 20'hFF000);
-
-    // 4096 ROM BASIC I/O SYSTEM
-    // :::: JMP FAR $FFF0:$0000
-    ram[20'hFFFF0] = 8'h04; // EA
-    ram[20'hFFFF1] = 8'hFE; // 00
-    ram[20'hFFFF2] = 8'h00; // 00
-    ram[20'hFFFF3] = 8'h00; // 00
-    ram[20'hFFFF4] = 8'hFF; // FF
-
-end
+// 4096 ROM BASIC I/O SYSTEM :: 20'hFF000
+initial $readmemh("app.hex", ram, 20'hFFFF0);
 
 // Формируется логика чтения и записи в память
 always @(posedge clock)

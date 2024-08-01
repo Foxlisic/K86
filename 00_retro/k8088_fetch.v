@@ -4,10 +4,10 @@
 
 LOAD: begin
 
-    cp      <= 1'b0;
+    cp      <= 0;
     seg     <= ds;
     ea      <= 16'h0000;
-    over    <= 1'b0;
+    over    <= 0;
     rep     <= 2'b00;
     rep_ip  <= ip;
     a       <= 0;
@@ -148,7 +148,7 @@ MODRM: case (a)
         if (dir) op2 <= in; else op1 <= in;
 
         a  <= size ? 5 : 0;
-        t  <= size ? INSTR : MODRM;
+        t  <= size ? MODRM : INSTR;
         ea <= ea + size;
 
     end
@@ -177,7 +177,7 @@ WB: case (a)
 
         if (dir || modrm[7:6] == 2'b11) begin
 
-            case (dir ? `MRM53 : `MRM20)
+            case (dir ? `M53 : `M20)
             AX: if (size) ax <= wb; else ax[ 7:0] <= wb[7:0];
             CX: if (size) cx <= wb; else cx[ 7:0] <= wb[7:0];
             DX: if (size) dx <= wb; else dx[ 7:0] <= wb[7:0];
