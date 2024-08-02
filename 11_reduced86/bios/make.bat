@@ -1,0 +1,3 @@
+fasm bios.asm
+
+pause

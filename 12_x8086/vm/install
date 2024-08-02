@@ -1,0 +1,7 @@
+1474560 Floppy Disk size
+1440 Kb
+1,44 Mb
+2880  x 512 sectors
+32768 x 512 = 16 Mb
+
+dd if=/dev/zero of=disk.img count=32768 bs=512
