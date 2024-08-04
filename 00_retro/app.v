@@ -21,7 +21,7 @@ wire [ 7:0] out;
 wire        we;
 
 // 4096 ROM BASIC I/O SYSTEM :: 20'hFF000
-initial $readmemh("app.hex", ram, 20'hFFFF0);
+initial $readmemh("boot.hex", ram, 20'hFFFF0);
 
 // Формируется логика чтения и записи в память
 always @(posedge clock)

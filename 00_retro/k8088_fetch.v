@@ -130,7 +130,7 @@ MODRM: case (a)
         a  <= skip ? 0 : 4;
         t  <= skip ? INSTR : MODRM;
         ip <= ip + 1;
-        ea <= in[7] ? ea - (~in) - 1 : ea + in;
+        ea <= in[7] ? ea -1 - (~in) : ea + in;
         // Важно считать именно так, поскольку EA не 16-битный
 
     end
@@ -152,7 +152,7 @@ MODRM: case (a)
         a  <= skip ? 0 : 4;
         t  <= skip ? INSTR : MODRM;
         ip <= ip + 1;
-        ea <= in[7] ? ea - ({~in, ~t8}) - 1 : ea + {in, t8};
+        ea <= in[7] ? ea - 1 - ({~in, ~t8}) : ea + {in, t8};
         // Важно считать именно так, поскольку EA не 16-битный
 
     end
