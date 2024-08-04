@@ -10,6 +10,7 @@ LOAD: begin
     over    <= 0;
     rep     <= 2'b00;
     rep_ip  <= ip;
+    skip    <= 0;
     a       <= 0;
     m       <= 0;
     t       <= FETCH;
@@ -27,12 +28,12 @@ FETCH: begin
 
     case (in)
     // Прочитать префиксы
-    8'h26: seg <= es;
-    8'h2E: seg <= cs;
-    8'h36: seg <= ss;
-    8'h3E: seg <= ds;
+    8'h26: begin seg <= es; over <= 1; end
+    8'h2E: begin seg <= cs; over <= 1; end
+    8'h36: begin seg <= ss; over <= 1; end
+    8'h3E: begin seg <= ds; over <= 1; end
     8'hF2, // REPZ: REPNZ:
-    8'hF3: rep <= in[1:0];
+    8'hF3: begin rep <= in[1:0]; end
     8'h0F, // Extend:
     8'hF0, // LOCK:
     8'h64, // FS:
@@ -110,37 +111,53 @@ MODRM: case (a)
         endcase
 
         // Автозамещение сегмента на SS: если использован BP регистр
-        if (over == 1'b0 && (^in[7:6]) && in[2:0] == 3'b110 || in[2:1] == 2'b01)
+        if (over == 1'b0 && (^in[7:6] && in[2:0] == 3'b110 || in[2:1] == 2'b01))
             seg <= ss;
 
+        // Не читать операнды
+        if (in[7:6] == 2'b00 && skip) begin
+            a <= 0;
+            t <= INSTR;
+        end
+
     end
 
-    // Читать +D8
+    // ------------------
+
+    // Читать +D8 и перейти к чтению операнда
     1: begin
 
-        a  <= 5;
+        a  <= skip ? 0 : 4;
+        t  <= skip ? INSTR : MODRM;
         ip <= ip + 1;
-        ea <= ea + {{8{in[7]}}, in};
+        ea <= in[7] ? ea - (~in) - 1 : ea + in;
+        // Важно считать именно так, поскольку EA не 16-битный
 
     end
+
+    // ------------------
 
     // Читать +D16 :: LOW
     2: begin
 
         a  <= 3;
         ip <= ip + 1;
-        ea <= ea + {8'h00, in};
+        t8 <= in;
 
     end
 
-    // Читать +D16 :: HIGH
+    // Читать +D16 :: HIGH и перейти к чтению операнда
     3: begin
 
-        a  <= 4;
+        a  <= skip ? 0 : 4;
+        t  <= skip ? INSTR : MODRM;
         ip <= ip + 1;
-        ea <= ea + {in, 8'h00};
+        ea <= in[7] ? ea - ({~in, ~t8}) - 1 : ea + {in, t8};
+        // Важно считать именно так, поскольку EA не 16-битный
 
     end
+
+    // ------------------
 
     // Читать LO операнд OP1,2
     4: begin
