@@ -127,6 +127,7 @@ MODRM: case (a)
     // Читать +D8 и перейти к чтению операнда
     1: begin
 
+        cp <= 1;
         a  <= skip ? 0 : 4;
         t  <= skip ? INSTR : MODRM;
         ip <= ip + 1;
@@ -153,6 +154,7 @@ MODRM: case (a)
         t  <= skip ? INSTR : MODRM;
         ip <= ip + 1;
         ea <= in[7] ? ea - 1 - ({~in, ~t8}) : ea + {in, t8};
+        cp <= 1;
         // Важно считать именно так, поскольку EA не 16-битный
 
     end

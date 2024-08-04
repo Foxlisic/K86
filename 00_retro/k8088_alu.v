@@ -2,7 +2,7 @@
 wire [16:0] alu_r =
     alu == ADD ? op1 + op2 :
     alu == ADC ? op1 + op2 + flags[CF] :
-    alu == SBB ? op1 + op2 - flags[CF] :
+    alu == SBB ? op1 - op2 - flags[CF] :
     alu == OR  ? op1 | op2 :
     alu == AND ? op1 & op2 :
     alu == XOR ? op1 ^ op2 :

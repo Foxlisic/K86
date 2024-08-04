@@ -1,3 +1,5 @@
 
         org     0
-        add     ah, al
+        mov     ax, $FFFF
+        dec     sp
+r1:     db      $92, $03

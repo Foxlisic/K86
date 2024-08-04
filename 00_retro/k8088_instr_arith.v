@@ -53,7 +53,7 @@ endcase
         if (alu != CMP) begin
 
             if (size) ax[15:0] <= alu_r[15:0];
-            else      ax[ 7:0] <= alu_r[7:0];
+            else      ax[ 7:0] <= alu_r[ 7:0];
 
         end
 
@@ -81,7 +81,7 @@ endcase
 
         t       <= WB;
         wb      <= alu_r;
-        flags   <= alu_f;
+        flags   <= {alu_f[11:1], flags[CF]};
         `M53    <= `OPC20;
 
     end
