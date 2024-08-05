@@ -38,9 +38,10 @@ end else if (chipen) begin
 
     // Исполнение микрокода
     INSTR: casex (opcode)
-    `include "k8088_instr_arith.v"
-    `include "k8088_instr_jump.v"
-    `include "k8088_instr_move.v"
+    `include "k8088__arith.v"
+    `include "k8088__jump.v"
+    `include "k8088__move.v"
+    `include "k8088__misc.v"
     endcase
     endcase
 
