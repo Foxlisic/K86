@@ -41,7 +41,6 @@ end else if (chipen) begin
     `include "k8088__arith.v"
     `include "k8088__jump.v"
     `include "k8088__move.v"
-    `include "k8088__misc.v"
     endcase
     endcase
 

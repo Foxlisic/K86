@@ -26,14 +26,14 @@ FETCH: begin
 
     ip <= ip + 1;
 
-    case (in)
+    casex (in)
     // Прочитать префиксы
     8'h26: begin seg <= es; over <= 1; end
     8'h2E: begin seg <= cs; over <= 1; end
     8'h36: begin seg <= ss; over <= 1; end
     8'h3E: begin seg <= ds; over <= 1; end
     8'hF2, // REPZ: REPNZ:
-    8'hF3: begin rep <= in[1:0]; end
+    8'hF3: rep <= in[1:0];
     8'h8B, // FWAIT
     8'h0F, // Extend:
     8'hF0, // LOCK:
@@ -41,6 +41,9 @@ FETCH: begin
     8'h65, // GS:
     8'h66, // OpSize
     8'h67: begin end // Adsize
+    // Быстрые операции
+    `include "k8088__misc.v"
+    8'hF4: begin t <= LOAD; end
     // Записать опкод
     default: begin
 
