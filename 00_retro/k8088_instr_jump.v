@@ -39,3 +39,14 @@
     end
 
 endcase
+
+// JMP CCC short rel8
+8'b0111_xxxx: begin
+
+    if (jump[ opcode[3:1] ] != opcode[0]) begin
+        ip <= ip + 1 + {{8{in[7]}}, in};
+    end else begin
+        ip <= ip + 2;
+    end
+
+end

@@ -1,15 +1,15 @@
 [*]
 [*] GTKWave Analyzer v3.3.116 (w)1999-2023 BSI
-[*] Sun Aug  4 16:11:53 2024
+[*] Mon Aug  5 04:02:16 2024
 [*]
 [dumpfile] "/home/fox/dev/03_x86/00_retro/app.vcd"
-[dumpfile_mtime] "Sun Aug  4 16:10:44 2024"
-[dumpfile_size] 55956
+[dumpfile_mtime] "Mon Aug  5 03:52:08 2024"
+[dumpfile_size] 55464
 [savefile] "/home/fox/dev/03_x86/00_retro/app.gtkw"
 [timestart] 0
 [size] 1920 1008
 [pos] -1 -1
-*-6.900000 458 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-6.900000 124 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] tb.
 [sst_width] 319
 [signals_width] 194
@@ -26,6 +26,9 @@ tb.clock
 tb.AMDK62.clock
 @800200
 -SIGNAL
+@28
+[color] 3
+tb.AMDK62.cp
 @22
 tb.AMDK62.address[19:0]
 tb.AMDK62.in[7:0]
@@ -50,6 +53,8 @@ tb.AMDK62.seg[15:0]
 tb.AMDK62.ea[19:0]
 @28
 tb.AMDK62.over
+@29
+tb.AMDK62.skip
 @1000200
 -PTR
 @800200
@@ -64,9 +69,9 @@ tb.AMDK62.op1[15:0]
 tb.AMDK62.op2[15:0]
 tb.AMDK62.alu_f[11:0]
 tb.AMDK62.alu_r[16:0]
-@c00023
+@c00022
 tb.AMDK62.flags[11:0]
-@29
+@28
 (0)tb.AMDK62.flags[11:0]
 (1)tb.AMDK62.flags[11:0]
 (2)tb.AMDK62.flags[11:0]
@@ -79,7 +84,7 @@ tb.AMDK62.flags[11:0]
 (9)tb.AMDK62.flags[11:0]
 (10)tb.AMDK62.flags[11:0]
 (11)tb.AMDK62.flags[11:0]
-@1401201
+@1401200
 -group_end
 @1000200
 -ALU

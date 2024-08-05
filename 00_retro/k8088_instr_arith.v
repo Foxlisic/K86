@@ -132,7 +132,7 @@ endcase
 
         wb      <= alu_r;
         flags   <= alu_f;
-        cp      <= 1;
+        cp      <= alu != CMP;
         t       <= alu == CMP ? LOAD : WB;
 
     end

@@ -1,5 +1,6 @@
 
         org     0
-        mov     ax, $FFFF
-        dec     sp
+        jc      r2
+        hlt
 r1:     db      $92, $03
+r2:     hlt
