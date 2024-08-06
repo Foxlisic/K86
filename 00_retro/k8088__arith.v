@@ -138,3 +138,23 @@ endcase
     end
 
 endcase
+
+// TEST rm, r
+8'b1000_010x: case (m)
+
+    0: begin
+
+        t   <= MODRM;
+        m   <= 1;
+        alu <= AND;
+
+    end
+
+    1: begin
+
+        t     <= LOAD;
+        flags <= alu_f;
+
+    end
+
+endcase

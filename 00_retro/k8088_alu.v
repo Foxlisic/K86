@@ -21,7 +21,7 @@ wire zf = (0 == (size ? alu_r[15:0] : alu_r[7:0]));
 wire af = op1[4] ^ op2[4] ^ alu_r[4];
 wire pf = ~^alu_r[7:0];
 wire cf = alu_r[size ? 16 : 8];
-wire of = ((op1[top] ^ op2[top] ^ alu_add) & (op1[top] ^ alu_r[top])) & alu_arith;
+wire of = ((op1[top] ^ op2[top] ^ alu_add) & (op1[top] ^ alu_r[top]));
 
 // Итоговые флаги
-wire [11:0] alu_f = {of, flags[10:8], sf, zf, 1'b0, af, 1'b0, pf, 1'b1, cf};
+wire [11:0] alu_f = {of & alu_arith, flags[10:8], sf, zf, 1'b0, af & alu_arith, 1'b0, pf, 1'b1, cf & alu_arith};

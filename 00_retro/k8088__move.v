@@ -58,3 +58,89 @@ endcase
     `M53 <= `OPC20;
 
 end
+
+// XCHG rm, r
+8'b1000_011x: case (m)
+
+    // op1=rm, op2=r
+    0: begin
+
+        t   <= MODRM;
+        m   <= 1;
+        dir <= 0;
+
+    end
+
+    // Записать op2 -> rm
+    1: begin
+
+        t    <= WB;
+        m    <= 2;
+        wb   <= op2;
+        next <= INSTR;
+
+    end
+
+    // Записать op1 -> r
+    2: begin
+
+        t    <= WB;
+        wb   <= op1;
+        dir  <= 1;
+        next <= LOAD;
+
+    end
+
+
+endcase
+
+// MOV rm <=> sreg
+8'b1000_11x0: case (m)
+
+    0: begin
+
+        t    <= MODRM;
+        m    <= 1;
+        size <= 1;
+        skip <= !dir;
+
+    end
+
+    1: begin
+
+        t  <= dir ? LOAD : WB;
+        wb <= modrm[4:3] == ES ? es :
+              modrm[4:3] == CS ? cs :
+              modrm[4:3] == SS ? ss : ds;
+
+        if (dir)
+        case (modrm[4:3])
+        ES: es <= op2;
+        SS: ss <= op2;
+        DS: ds <= op2;
+        endcase
+
+    end
+
+endcase
+
+// LEA r16, rm
+8'b1000_1101: case (m)
+
+    0: begin
+
+        t    <= MODRM;
+        m    <= 1;
+        dir  <= 1;
+        skip <= 1;
+
+    end
+
+    1: begin
+
+        t   <= WB;
+        wb  <= ea[15:0];
+
+    end
+
+endcase

@@ -27,3 +27,49 @@ end
     endcase
 
 end
+
+// 4T PUSH sreg
+8'b000x_x110: begin
+
+    t   <= PUSH;
+    wb  <= in[4:3] == ES ? es :
+           in[4:3] == CS ? cs :
+           in[4:3] == SS ? ss : ds;
+
+end
+
+// 4T PUSH r16
+8'b0101_0xxx: begin
+
+    t   <= PUSH;
+    wb  <= op20;
+
+end
+
+// 2T CBW
+8'b1001_1000: begin
+
+    ax[15:8] <= {8{ax[7]}};
+
+end
+
+// 2T CWD
+8'b1001_1001: begin
+
+    dx <= {16{ax[15]}};
+
+end
+
+// 2T SAHF
+8'b1001_1110: begin
+
+    flags[7:0] <= (ax[15:8] & 8'hD5) | 2'b10;
+
+end
+
+// 2T LAHF
+8'b1001_1111: begin
+
+    ax[15:8] <= (flags[7:0] & 8'hD5) | 2'b10;
+
+end

@@ -1,6 +1,5 @@
 
         org     0
-        cmc
-        cmc
-        cli
+        lahf
         hlt
+r1:     db      $12,$34
