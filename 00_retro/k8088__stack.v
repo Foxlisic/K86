@@ -79,3 +79,58 @@ endcase
     end
 
 endcase
+
+// CALL 16:16
+8'b1001_1010: case (m)
+
+    // Прочесть новый CS:IP
+    0, 1, 2, 3: begin
+
+        m   <= m + 1;
+        ip  <= ip + 1;
+        {op1, op2} <= {in, op1, op2[15:8]};
+
+    end
+
+    // Сохранить старый CS:IP в стек
+    4, 5: begin
+
+        m    <= m + 1;
+        t    <= PUSH;
+        next <= INSTR;
+        wb   <= m[0] ? ip : cs;
+
+    end
+
+    // И перейти
+    6: begin
+
+        t  <= LOAD;
+        cs <= op1;
+        ip <= op2;
+
+    end
+
+
+endcase
+
+// POPF
+8'b1001_1101: case (m)
+
+    // Запрос чтения
+    0: begin
+
+        m <= 1;
+        t <= POP;
+
+    end
+
+    // Запись в flags
+    1: begin
+
+        t <= LOAD;
+        flags <= (wb & 12'hFD5) | 2'b10;
+
+    end
+
+endcase

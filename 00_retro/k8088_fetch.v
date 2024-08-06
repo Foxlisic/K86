@@ -270,7 +270,7 @@ PUSH: case (a)
     // Запись HI
     1: begin
 
-        t    <= LOAD;
+        t    <= next;
         a    <= 0;
         we   <= 1;
         out  <= wb[15:8];

@@ -46,6 +46,14 @@ end
 
 end
 
+// 4T PUSHF
+8'b1001_1100: begin
+
+    t   <= PUSH;
+    wb  <= (flags & 12'hFD5) | 2'b10;
+
+end
+
 // 2T CBW
 8'b1001_1000: begin
 
