@@ -108,10 +108,10 @@ MODRM: case (a)
         // Распределить
         casex (in)
         8'b00_xxx_110,
-        8'b10_xxx_xxx: a <= 2;      // +D16
-        8'b00_xxx_xxx: a <= 4;      // MEMORY
-        8'b01_xxx_xxx: a <= 1;      // +D8
-        8'b11_xxx_xxx: t <= INSTR;  // REG
+        8'b10_xxx_xxx: begin a <= 2; end            // +D16
+        8'b00_xxx_xxx: begin a <= 4; cp <= 1; end   // MEM
+        8'b01_xxx_xxx: begin a <= 1; end            // +D8
+        8'b11_xxx_xxx: begin t <= INSTR; end        // REG
         endcase
 
         // Автозамещение сегмента на SS: если использован BP регистр

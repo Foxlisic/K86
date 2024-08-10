@@ -57,6 +57,7 @@ end
 // 2T CBW
 8'b1001_1000: begin
 
+    t <= LOAD;
     ax[15:8] <= {8{ax[7]}};
 
 end
@@ -64,6 +65,7 @@ end
 // 2T CWD
 8'b1001_1001: begin
 
+    t  <= LOAD;
     dx <= {16{ax[15]}};
 
 end
@@ -71,6 +73,7 @@ end
 // 2T SAHF
 8'b1001_1110: begin
 
+    t <= LOAD;
     flags[7:0] <= (ax[15:8] & 8'hD5) | 2'b10;
 
 end
@@ -78,6 +81,15 @@ end
 // 2T LAHF
 8'b1001_1111: begin
 
+    t <= LOAD;
     ax[15:8] <= (flags[7:0] & 8'hD5) | 2'b10;
+
+end
+
+// 2T SALC
+8'b1101_0110: begin
+
+    t <= LOAD;
+    ax[7:0] <= {8{flags[CF]}};
 
 end

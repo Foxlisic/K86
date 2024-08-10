@@ -212,3 +212,38 @@ endcase
     end
 
 endcase
+
+// LES|LDS r, rm
+8'b1100_010x: case (m)
+
+    // Запросить операнды
+    0: begin
+
+        t    <= MODRM;
+        m    <= 1;
+        dir  <= 1;
+        size <= 1;
+        skip <= 1;
+
+    end
+
+    // Чтение reg + seg
+    1, 2, 3, 4: begin
+
+        m   <= m + 1;
+        ea  <= ea + 1;
+        {op1, op2} <= {in, op1, op2[15:8]};
+
+    end
+
+    // Запись в регистр и в сегмент
+    5: begin
+
+        t  <= WB;
+        wb <= op2;
+
+        if (opcode[0]) ds <= op1; else es <= op1;
+
+    end
+
+endcase

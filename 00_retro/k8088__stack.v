@@ -133,3 +133,35 @@ endcase
     end
 
 endcase
+
+// RET i, RET
+8'b1100_001x: case (m)
+
+    // Значение из стека
+    0: begin
+
+        t   <= POP;
+        m   <= opcode[0] ? 3 : 1;
+        op1 <= 0;
+
+    end
+
+    // Imm16
+    1, 2: begin
+
+        m   <= m + 1;
+        op1 <= {in, op1[15:8]};
+        ip  <= ip + 1;
+
+    end
+
+    // RET [+u16]
+    3: begin
+
+        t  <= LOAD;
+        ip <= wb;
+        sp <= sp + op1;
+
+    end
+
+endcase

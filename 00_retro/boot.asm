@@ -1,5 +1,5 @@
 
         org     0
-        test    ax, $0001
+        les     bx, [bx+$1]
         hlt
-r1:     db      $21, $81
+r1:     db      $21, $81, $BE, $BA

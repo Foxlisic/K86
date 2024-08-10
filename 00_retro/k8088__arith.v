@@ -195,7 +195,7 @@ endcase
 
 // [GROUP:SHIFT]
 8'b1100_000x,
-8'b110x_00xx: case (m)
+8'b1101_00xx: case (m)
 
     // Читать MODRM
     0: begin
