@@ -158,3 +158,52 @@ endcase
     end
 
 endcase
+
+// [GROUP:SHIFT]
+8'b1100_000x,
+8'b110x_00xx: case (m)
+
+    // Читать MODRM
+    0: begin
+
+        t   <= MODRM;
+        m   <= 1;
+        dir <= 0;
+
+    end
+
+    // Либо операнд CL или 1
+    1: begin
+
+        m   <= opcode[4] ? 3 : 2;
+        cp  <= 0;
+        op2 <= opcode[1] ? cx[7:0] : 1;
+        alu <= `M53;
+
+    end
+
+    // Либо читать u8
+    2: begin
+
+        op2 <= in;
+        m   <= 3;
+        ip  <= ip + 1;
+
+    end
+
+    // Запись результата
+    3: begin
+
+        t  <= WB;
+        wb <= wbr;
+
+        flags[OF] <= 1'b0;
+        flags[SF] <= wbr[size ? 15 : 7];
+        flags[ZF] <= (size ? wbr : wbr[7:0]) == 0;
+        flags[AF] <= 1'b0;
+        flags[PF] <= ~^wbr[7:0];
+        flags[CF] <= alu[0] ? (size ? shrw[0] : shrb[0]) : (size ? shlw[32] : shlb[16]);
+
+    end
+
+endcase

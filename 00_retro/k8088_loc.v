@@ -32,4 +32,6 @@ localparam
 localparam
 
     ADD = 0, OR  = 1, ADC = 2, SBB = 3,
-    AND = 4, SUB = 5, XOR = 6, CMP = 7;
+    AND = 4, SUB = 5, XOR = 6, CMP = 7,
+    ROL = 0, ROR = 1, RCL = 2, RCR = 3,
+    SHL = 4, SHR = 5, SAL = 6, SAR = 7;

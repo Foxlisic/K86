@@ -102,7 +102,7 @@ endcase
 
     end
 
-    // И перейти
+    // И перейти на новый адрес
     6: begin
 
         t  <= LOAD;
@@ -110,7 +110,6 @@ endcase
         ip <= op2;
 
     end
-
 
 endcase
 

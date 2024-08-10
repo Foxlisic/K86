@@ -144,3 +144,71 @@ endcase
     end
 
 endcase
+
+// MOV a, [m16]
+8'b1010_000x: case (m)
+
+    // Читать M16
+    0, 1: begin
+
+        m   <= m + 1;
+        ea  <= {in, ea[15:8]};
+        ip  <= ip + 1;
+        cp  <= m;
+
+    end
+
+    // Читать AL
+    2: begin
+
+        m   <= 3;
+        t   <= size ? INSTR : LOAD;
+        ea  <= ea + 1;
+        ax[7:0] <= in;
+
+    end
+
+    // Читать AX
+    3: begin
+
+        t   <= LOAD;
+        ax[15:8] <= in;
+
+    end
+
+endcase
+
+// MOV [m16], a
+8'b1010_001x: case (m)
+
+    // Читать M16
+    0, 1: begin
+
+        m   <= m + 1;
+        ea  <= {in, ea[15:8]};
+        ip  <= ip + 1;
+        cp  <= m;
+
+    end
+
+    // Писать AL
+    2: begin
+
+        t   <= size ? INSTR : LOAD;
+        m   <= 3;
+        we  <= 1;
+        out <= ax[7:0];
+
+    end
+
+    // Писать AX
+    3: begin
+
+        t   <= LOAD;
+        we  <= 1;
+        ea  <= ea + 1;
+        out <= ax[15:8];
+
+    end
+
+endcase

@@ -1,15 +1,15 @@
 [*]
 [*] GTKWave Analyzer v3.3.116 (w)1999-2023 BSI
-[*] Tue Aug  6 16:47:45 2024
+[*] Sat Aug 10 05:54:21 2024
 [*]
 [dumpfile] "/home/fox/dev/03_x86/00_retro/app.vcd"
-[dumpfile_mtime] "Tue Aug  6 16:47:25 2024"
-[dumpfile_size] 73776
+[dumpfile_mtime] "Sat Aug 10 05:54:17 2024"
+[dumpfile_size] 72704
 [savefile] "/home/fox/dev/03_x86/00_retro/app.gtkw"
 [timestart] 0
 [size] 1920 1008
 [pos] -1 -1
-*-7.200000 170 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-7.200000 525 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] tb.
 [sst_width] 319
 [signals_width] 194
@@ -65,8 +65,28 @@ tb.AMDK62.skip
 tb.AMDK62.alu[2:0]
 tb.AMDK62.size
 tb.AMDK62.dir
-@22
+@c00022
 tb.AMDK62.wb[15:0]
+@28
+(0)tb.AMDK62.wb[15:0]
+(1)tb.AMDK62.wb[15:0]
+(2)tb.AMDK62.wb[15:0]
+(3)tb.AMDK62.wb[15:0]
+(4)tb.AMDK62.wb[15:0]
+(5)tb.AMDK62.wb[15:0]
+(6)tb.AMDK62.wb[15:0]
+(7)tb.AMDK62.wb[15:0]
+(8)tb.AMDK62.wb[15:0]
+(9)tb.AMDK62.wb[15:0]
+(10)tb.AMDK62.wb[15:0]
+(11)tb.AMDK62.wb[15:0]
+(12)tb.AMDK62.wb[15:0]
+(13)tb.AMDK62.wb[15:0]
+(14)tb.AMDK62.wb[15:0]
+(15)tb.AMDK62.wb[15:0]
+@1401200
+-group_end
+@22
 tb.AMDK62.op1[15:0]
 tb.AMDK62.op2[15:0]
 tb.AMDK62.alu_f[11:0]
@@ -92,7 +112,7 @@ tb.AMDK62.flags[11:0]
 -ALU
 @800200
 -REG
-@800023
+@c00023
 [color] 5
 tb.AMDK62.ax[15:0]
 @29
@@ -128,15 +148,88 @@ tb.AMDK62.ax[15:0]
 (14)tb.AMDK62.ax[15:0]
 [color] 5
 (15)tb.AMDK62.ax[15:0]
-@1001201
+@1401201
 -group_end
 @22
 [color] 5
 tb.AMDK62.cx[15:0]
+@c00022
 [color] 5
 tb.AMDK62.dx[15:0]
+@28
+[color] 5
+(0)tb.AMDK62.dx[15:0]
+[color] 5
+(1)tb.AMDK62.dx[15:0]
+[color] 5
+(2)tb.AMDK62.dx[15:0]
+[color] 5
+(3)tb.AMDK62.dx[15:0]
+[color] 5
+(4)tb.AMDK62.dx[15:0]
+[color] 5
+(5)tb.AMDK62.dx[15:0]
+[color] 5
+(6)tb.AMDK62.dx[15:0]
+[color] 5
+(7)tb.AMDK62.dx[15:0]
+[color] 5
+(8)tb.AMDK62.dx[15:0]
+[color] 5
+(9)tb.AMDK62.dx[15:0]
+[color] 5
+(10)tb.AMDK62.dx[15:0]
+[color] 5
+(11)tb.AMDK62.dx[15:0]
+[color] 5
+(12)tb.AMDK62.dx[15:0]
+[color] 5
+(13)tb.AMDK62.dx[15:0]
+[color] 5
+(14)tb.AMDK62.dx[15:0]
+[color] 5
+(15)tb.AMDK62.dx[15:0]
+@1401200
+-group_end
+@c00022
 [color] 5
 tb.AMDK62.bx[15:0]
+@28
+[color] 5
+(0)tb.AMDK62.bx[15:0]
+[color] 5
+(1)tb.AMDK62.bx[15:0]
+[color] 5
+(2)tb.AMDK62.bx[15:0]
+[color] 5
+(3)tb.AMDK62.bx[15:0]
+[color] 5
+(4)tb.AMDK62.bx[15:0]
+[color] 5
+(5)tb.AMDK62.bx[15:0]
+[color] 5
+(6)tb.AMDK62.bx[15:0]
+[color] 5
+(7)tb.AMDK62.bx[15:0]
+[color] 5
+(8)tb.AMDK62.bx[15:0]
+[color] 5
+(9)tb.AMDK62.bx[15:0]
+[color] 5
+(10)tb.AMDK62.bx[15:0]
+[color] 5
+(11)tb.AMDK62.bx[15:0]
+[color] 5
+(12)tb.AMDK62.bx[15:0]
+[color] 5
+(13)tb.AMDK62.bx[15:0]
+[color] 5
+(14)tb.AMDK62.bx[15:0]
+[color] 5
+(15)tb.AMDK62.bx[15:0]
+@1401200
+-group_end
+@22
 [color] 5
 tb.AMDK62.sp[15:0]
 [color] 5
