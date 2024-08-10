@@ -1,5 +1,5 @@
 
         org     0
-        sar     word [cs:r1], 3
+        test    ax, $0001
         hlt
 r1:     db      $21, $81

@@ -159,6 +159,40 @@ endcase
 
 endcase
 
+// 4-5T TEST a, u
+8'b1010_100x: case (m)
+
+    // LO
+    0: begin
+
+        m   <= size ? 1 : 2;
+        alu <= AND;
+        op1 <= size ? ax : ax[7:0];
+        op2 <= in;
+        ip  <= ip + 1;
+
+    end
+
+    // HI
+    1: begin
+
+        m  <= 2;
+        ip <= ip + 1;
+        op1[15:8] <= in;
+
+    end
+
+    // Запись флагов
+    2: begin
+
+        t <= LOAD;
+        flags <= alu_f;
+
+
+    end
+
+endcase
+
 // [GROUP:SHIFT]
 8'b1100_000x,
 8'b110x_00xx: case (m)
