@@ -136,7 +136,7 @@ MODRM: case (a)
         a  <= skip ? 0 : 4;
         t  <= skip ? INSTR : MODRM;
         ip <= ip + 1;
-        ea[15:0] <= ea[15:0] + {{8{in[7]}}, in};
+        ea[15:0] <= ea[15:0] + signex;
 
     end
 

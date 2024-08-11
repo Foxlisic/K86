@@ -247,3 +247,68 @@ endcase
     end
 
 endcase
+
+// MOV rm, u
+8'b1100_011x: case (m)
+
+    // Прочесть ModRM
+    0: begin
+
+        t    <= MODRM;
+        m    <= 1;
+        dir  <= 0;
+        skip <= 1;
+
+    end
+
+    // Запросить Immediate
+    1: begin
+
+        m   <= 2;
+        cp  <= 0;
+
+    end
+
+    // u8
+    2: begin
+
+        m  <= size ? 3 : 4;
+        t  <= size ? INSTR : WB;
+        wb <= in;
+        ip <= ip + 1;
+
+    end
+
+    // u16
+    3: begin
+
+        m <= 4;
+        t <= WB;
+        wb[15:8] <= in;
+        ip <= ip + 1;
+
+    end
+
+endcase
+
+// 4T XLATB
+8'b1101_0111: case (m)
+
+    // Запросить
+    0: begin
+
+        m  <= 1;
+        cp <= 1;
+        ea <= bx + ax[7:0];
+
+    end
+
+    // Прочесть
+    1: begin
+
+        t <= LOAD;
+        ax[7:0] <= in;
+
+    end
+
+endcase

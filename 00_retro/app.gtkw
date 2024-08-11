@@ -1,15 +1,15 @@
 [*]
 [*] GTKWave Analyzer v3.3.116 (w)1999-2023 BSI
-[*] Sat Aug 10 12:23:23 2024
+[*] Sun Aug 11 11:03:03 2024
 [*]
 [dumpfile] "/home/fox/dev/03_x86/00_retro/app.vcd"
-[dumpfile_mtime] "Sat Aug 10 12:22:34 2024"
-[dumpfile_size] 64441
+[dumpfile_mtime] "Sun Aug 11 11:01:02 2024"
+[dumpfile_size] 73712
 [savefile] "/home/fox/dev/03_x86/00_retro/app.gtkw"
 [timestart] 0
 [size] 1920 1008
 [pos] -1 -1
-*-7.200000 226 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-7.200000 655 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] tb.
 [sst_width] 319
 [signals_width] 194
@@ -112,10 +112,10 @@ tb.AMDK62.flags[11:0]
 -ALU
 @800200
 -REG
-@c00023
+@c00022
 [color] 5
 tb.AMDK62.ax[15:0]
-@29
+@28
 [color] 5
 (0)tb.AMDK62.ax[15:0]
 [color] 5
@@ -148,9 +148,9 @@ tb.AMDK62.ax[15:0]
 (14)tb.AMDK62.ax[15:0]
 [color] 5
 (15)tb.AMDK62.ax[15:0]
-@1401201
+@1401200
 -group_end
-@22
+@23
 [color] 5
 tb.AMDK62.cx[15:0]
 @c00022

@@ -43,10 +43,33 @@ endcase
 // JMP CCC short rel8
 8'b0111_xxxx: begin
 
-    if (jump[ opcode[3:1] ] != opcode[0]) begin
-        ip <= ip + 1 + {{8{in[7]}}, in};
-    end else begin
-        ip <= ip + 2;
-    end
+    t  <= LOAD;
+    ip <= ip + 1 + (jump[ opcode[3:1] ] != opcode[0] ? signex : 0);
+
+end
+
+// 3T LOOP<c> b8
+8'b1110_000x: begin
+
+    t  <= LOAD;
+    ip <= ip + 1 + (cx != 1 && flags[ZF] == opcode[0] ? signex : 0);
+    cx <= cx - 1;
+
+end
+
+// 3T LOOP b8
+8'b1110_0010: begin
+
+    t  <= LOAD;
+    ip <= ip + 1 + (cx != 1 ? signex : 0);
+    cx <= cx - 1;
+
+end
+
+// 3T JCXZ b8
+8'b1110_0011: begin
+
+    t  <= LOAD;
+    ip <= ip + 1 + (cx == 0 ? signex : 0);
 
 end

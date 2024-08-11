@@ -114,7 +114,7 @@ endcase
 
         ip  <= ip + 1;
         m   <= opcode[1:0] == 2'b01 ? 3 : 4;
-        op2 <= opcode[1:0] == 2'b11 ? {{8{in[7]}}, in} : in;
+        op2 <= opcode[1:0] == 2'b11 ? signex : in;
 
     end
 

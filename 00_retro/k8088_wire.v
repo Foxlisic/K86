@@ -22,3 +22,5 @@ wire [7:0] jump = {
     flags[CF],
     flags[OF]
 };
+
+wire [15:0] signex = {{8{in[7]}}, in};
