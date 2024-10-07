@@ -32,11 +32,11 @@ module cga
 // ---------------------------------------------------------------------
 
 parameter
-    hz_visible = 640, vt_visible = 400,
-    hz_front   = 16,  vt_front   = 12,
+    hz_visible = 640, vt_visible = 480,
+    hz_front   = 16,  vt_front   = 10,
     hz_sync    = 96,  vt_sync    = 2,
-    hz_back    = 48,  vt_back    = 35,
-    hz_whole   = 800, vt_whole   = 449;
+    hz_back    = 48,  vt_back    = 33,
+    hz_whole   = 800, vt_whole   = 525;
 
 assign HS = x  < (hz_back + hz_visible + hz_front); // NEG.
 assign VS = y >= (vt_back + vt_visible + vt_front); // POS.

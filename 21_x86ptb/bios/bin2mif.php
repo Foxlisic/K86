@@ -9,7 +9,7 @@ ADDRESS_RADIX=HEX;
 DATA_RADIX=HEX;
 
 CONTENT BEGIN
-<? for ($n = 0; $n < strlen($m); $n++)
+<?php for ($n = 0; $n < strlen($m); $n++)
     echo sprintf("  %04x: %02x;\n", $n, ord($m[$n]));
 
 echo "  [".sprintf("%04x", strlen($m))."..1FFF]: 00;\n";
