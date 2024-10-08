@@ -15,10 +15,10 @@ protected:
     SDL_Event           evt;
     Uint32*             screen_buffer;
 
-    int vga_hs = 1, vga_vs = 1, vga_x = 0, vga_y = 2;
-    int tps = 50000;
-    int irq_mask = 0;
-    int irq_pend = 0;
+    int cursor_blink = 0;
+    int cursor       = 0;
+    int irq_mask     = 0;
+    int irq_pend     = 0;
 
     // PS2-KEYBOARD
     int     ps_clock = 0, ps_data = 0, kbd_phase = 0, kbd_ticker = 0;
@@ -36,13 +36,11 @@ protected:
 
     // Модули
     Vcore*  mod_core;
-    Vga*    mod_vga;
-    Vps2*   mod_ps2;
 
 public:
 
-    TB(int argc, char** argv) {
-
+    TB(int argc, char** argv)
+    {
         x   = 0; y   = 0;
         _hs = 1; _vs = 1;
 
@@ -50,25 +48,25 @@ public:
         memory  = (uint8_t*) malloc(1024*1024 + 65536);
 
         pticks      = 0;
-        mod_core   = new Vcore();
-        mod_vga    = new Vga();
-        mod_ps2    = new Vps2();
+        mod_core    = new Vcore();
 
         // Удвоение пикселей
         scale        = 2;
         width        = 640;
         height       = 400;
-        frame_length = 50;      // 20 кадров в секунду
+        frame_length = (1000/30);  // 30 FPS
 
         if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) {
             exit(1);
         }
 
         SDL_ClearError();
-        sdl_window          = SDL_CreateWindow("SDL2", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, scale*width, scale*height, SDL_WINDOW_SHOWN);
+        sdl_window          = SDL_CreateWindow("16BIT 8086 EMULATOR VERILATOR", SDL_WINDOWPOS_CENTERED,
+                              SDL_WINDOWPOS_CENTERED, scale*width, scale*height, SDL_WINDOW_SHOWN);
         sdl_renderer        = SDL_CreateRenderer(sdl_window, -1, SDL_RENDERER_PRESENTVSYNC);
         screen_buffer       = (Uint32*) malloc(width * height * sizeof(Uint32));
-        sdl_screen_texture  = SDL_CreateTexture(sdl_renderer, SDL_PIXELFORMAT_BGRA32, SDL_TEXTUREACCESS_STREAMING, width, height);
+        sdl_screen_texture  = SDL_CreateTexture(sdl_renderer, SDL_PIXELFORMAT_BGRA32,
+                              SDL_TEXTUREACCESS_STREAMING, width, height);
         SDL_SetTextureBlendMode(sdl_screen_texture, SDL_BLENDMODE_NONE);
 
         // Заполнить видеоинформацией
@@ -93,11 +91,9 @@ public:
         }
     }
 
-    int main() {
-
+    int main()
+    {
         for (;;) {
-
-            Uint32 ticks = SDL_GetTicks();
 
             // Прием событий
             while (SDL_PollEvent(& evt)) {
@@ -105,40 +101,41 @@ public:
                 // Событие выхода
                 switch (evt.type) {
 
-                    case SDL_QUIT: return 0;
+                    case SDL_QUIT:
+                        return 0;
 
                     case SDL_KEYDOWN:
-
                         kbd_scancode(evt.key.keysym.scancode, 0);
                         break;
 
                     case SDL_KEYUP:
-
                         kbd_scancode(evt.key.keysym.scancode, 1);
                         break;
                 }
             }
 
-            // Обновление экрана
-            if (ticks - pticks >= frame_length) {
+            Uint32 tps = 0;
+            Uint32 ticks = SDL_GetTicks();
 
-                pticks = ticks;
-                update();
-                return 1;
-            }
+            // Отсчитать требуемое количество тактов
+            do { tps += frame(); } while (SDL_GetTicks() - ticks < frame_length);
+
+            refresh();
+            update();
 
             SDL_Delay(1);
+            return 1;
         }
     }
 
-    // Один такт 25 мгц
-    void frame() {
-
-        int t_start = SDL_GetTicks();
+    // Пачка инструкции
+    int frame()
+    {
+        int tps = 1000;
         for (int i = 0; i < tps; i++) {
 
             // Обработка клавиатуры
-            kbd_pop(ps_clock, ps_data);
+            int _kb = kbd_pop();
 
             // ----------------------
             if (mod_core->we) memory[ mod_core->address ] = mod_core->out;
@@ -148,11 +145,11 @@ public:
             // ----------------------
 
             // Есть прерывание от клавиатуры. Если размаскировано, то записать в порт
-            if (mod_ps2->done && (irq_mask & 2) && !irq_pend) {
+            if (_kb && (irq_mask & 2) && !irq_pend) {
 
-                kb_data = mod_ps2->data;
+                kb_data = _kb;
 
-                mod_core->irq = !mod_core->irq;
+                mod_core->irq    = !mod_core->irq;
                 mod_core->irq_in = 2;
 
                 irq_pend = 1;
@@ -174,40 +171,49 @@ public:
 
                 switch (mod_core->port_a) {
 
-                    case 0x20: irq_pend = 0; break; // EOI
-                    case 0xA0: irq_mask = mod_core->port_o; break; // IOMASK
-                    case 0xFE: sd_status = 0; /* Управление SD */ break;
-                    case 0xFF: sdspi(mod_core->port_o); break; // Отослать данные к SD
+                    case 0x20: irq_pend = 0; break;                 // EOI
+                    case 0xA0: irq_mask = mod_core->port_o; break;  // IOMASK
+                    case 0xFE: sd_status = 0; break;                // Управление SD
+                    case 0xFF: sdspi(mod_core->port_o); break;      // Отослать данные к SD
                 }
             }
 
-            // printf("%x\n", mod_c8088->address);
-
+            // Такт на ядро
             mod_core->clock = 0; mod_core->eval();
             mod_core->clock = 1; mod_core->eval();
-
-            // PS/2 клавиатура
-            mod_ps2->ps_clock = ps_clock;
-            mod_ps2->ps_data  = ps_data;
-            mod_ps2->clock = 0; mod_ps2->eval();
-            mod_ps2->clock = 1; mod_ps2->eval();
-
-            // Видеопамять
-            mod_vga->data  = memory[0xB8000 + mod_vga->address];
-            mod_vga->clock = 0; mod_vga->eval();
-            mod_vga->clock = 1; mod_vga->eval();
-
-            vga(mod_vga->hs, mod_vga->vs, (mod_vga->r*16)*65536 + (mod_vga->g*16)*256 + (mod_vga->b*16));
         }
-        int t_interval = SDL_GetTicks() - t_start;
 
-        // Автоматическая подстройка tps
-        tps = (tps * frame_length) / t_interval;
+        return tps;
+    }
+
+    // Обновить кадр
+    void refresh()
+    {
+        for (int y = 0; y < 25; y++)
+        for (int x = 0; x < 80; x++)
+        {
+            uint32_t a = 0xB8000 + 2*x + y*160;
+            uint8_t ch = memory[a+0];
+            uint8_t at = memory[a+1];
+
+            for (int i = 0; i < 16; i++)
+            for (int j = 0; j < 8; j++)
+            {
+                int bk = (cursor == 80*y + x && i >= 14) && (cursor_blink < 15);
+
+                int ft = font16[16*ch + i];
+                int cl = (ft & (0x80 >> j)) || bk ? (at & 15) : (at >> 4) & 3;
+
+                pset(x*8 + j, y*16 + i, colors[cl]);
+            }
+        }
+
+        cursor_blink = (cursor_blink + 1) % 30;
     }
 
     // Обновить окно
-    void update() {
-
+    void update()
+    {
         SDL_Rect dstRect;
 
         dstRect.x = 0;
@@ -223,8 +229,8 @@ public:
     }
 
     // Убрать окно из памяти
-    int destroy() {
-
+    int destroy()
+    {
         free(screen_buffer);
         free(memory);
 
@@ -238,34 +244,18 @@ public:
     }
 
     // Установка точки
-    void pset(int x, int y, Uint32 cl) {
-
+    void pset(int x, int y, Uint32 cl)
+    {
         if (x < 0 || y < 0 || x >= width || y >= height)
             return;
 
         screen_buffer[width*y + x] = cl;
     }
 
-    // Отслеживание сигнала RGB по HS/VS
-    void vga(int hs, int vs, int cl) {
-
-        // Отслеживание на фронтах HS/VS
-        if (hs) vga_x++;
-
-        if (vga_hs == 1 && hs == 0) { vga_x = 0; vga_y++; }
-        if (vga_vs == 0 && vs == 1) { vga_y = 0; }
-
-        vga_hs = hs;
-        vga_vs = vs;
-
-        // Вывод на экран
-        pset(vga_x-(96-48+2), vga_y-(35-2+4), cl);
-    }
-
     // Сканирование нажатой клавиши
     // https://ru.wikipedia.org/wiki/Скан-код
-    void kbd_scancode(int scancode, int release) {
-
+    void kbd_scancode(int scancode, int release)
+    {
         switch (scancode) {
 
             // Коды клавиш A-Z
@@ -413,78 +403,37 @@ public:
     }
 
     // Нажатие на клавишу
-    void kbd_push(int data) {
-
+    void kbd_push(int data)
+    {
         if (kbd_top >= 255) return;
         kbd[kbd_top] = data;
         kbd_top++;
     }
 
     // Извлечение PS/2
-    void kbd_pop(int& ps_clock, int& ps_data) {
+    int kbd_pop()
+    {
+        int sym = 0;
 
         // В очереди нет клавиш для нажатия
-        if (kbd_top == 0) return;
+        if (kbd_top == 0) return 0;
 
         // 25000000/2000 = 12.5 kHz Очередной полутакт для PS/2
-        if (++kbd_ticker >= 2000) {
+        if (++kbd_ticker >= 10*2000) {
 
-            ps_clock = kbd_phase & 1;
-
-            switch (kbd_phase) {
-
-                // Старт-бит [=0]
-                case 0: case 1: ps_data = 0; break;
-
-                // Бит четности
-                case 18: case 19:
-
-                    ps_data = 1;
-                    for (int i = 0; i < 8; i++)
-                        ps_data ^= !!(kbd[0] & (1 << i));
-
-                    break;
-
-                // Стоп-бит [=1]
-                case 20: case 21: ps_data = 1; break;
-
-                // Небольшая задержка между нажатиями клавиш
-                case 22: case 23:
-                case 24: case 25:
-
-                    ps_clock = 1;
-                    ps_data  = 1;
-                    break;
-
-                // Завершение
-                case 26:
-
-                    // Удалить символ из буфера
-                    for (int i = 0; i < kbd_top - 1; i++)
-                        kbd[i] = kbd[i+1];
-
-                    kbd_top--;
-                    kbd_phase = -1;
-                    ps_clock  = 1;
-                    break;
-
-                // Отсчет битов от 0 до 7
-                // 0=2,3   | 1=4,5   | 2=6,7   | 3=8,9
-                // 4=10,11 | 5=12,13 | 6=14,15 | 7=16,17
-                default:
-
-                    ps_data = !!(kbd[0] & (1 << ((kbd_phase >> 1) - 1)));
-                    break;
-            }
-
+            int sym = kbd[0];
+            kbd_top--;
             kbd_ticker = 0;
-            kbd_phase++;
+
+            for (int i = 0; i < kbd_top; i++) kbd[i] = kbd[i+1];
         }
+
+        return sym;
     }
 
     // Эмуляция протокола SDCard
-    void sdspi(int data) {
-
+    void sdspi(int data)
+    {
         switch (spi_status) {
 
             // IDLE
