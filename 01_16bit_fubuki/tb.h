@@ -22,7 +22,7 @@ protected:
 
     // PS2-KEYBOARD
     int     ps_clock = 0, ps_data = 0, kbd_phase = 0, kbd_ticker = 0;
-    uint8_t kbd[256], kbd_top = 0, kb_hit_cnt = 0, kb_latch = 0, kb_data = 0;
+    uint8_t kbd[256], kbd_top = 0, kb_hit_cnt = 0, kb_latch = 0, kb_data = 0, kb_hit = 0;
 
     // SDCARD: sd_status бит 7-timeout, 0-busy
     uint8_t     spi_data, spi_st = 2, spi_status, spi_command, spi_crc, spi_resp, sd_status = 0x80;
@@ -148,6 +148,7 @@ public:
             if (_kb && (irq_mask & 2) && (irq_pend == 0)) {
 
                 kb_data = _kb;
+                kb_hit  = 1;
 
                 mod_core->irq    = !mod_core->irq;
                 mod_core->irq_in = 2;
@@ -161,6 +162,7 @@ public:
                 switch (mod_core->port_a) {
 
                     case 0x60: mod_core->port_i = kb_data; break;
+                    case 0x61: mod_core->port_i = kb_hit; kb_hit = 0; break;
                     case 0xFE: mod_core->port_i = sd_status; break;
                     case 0xFF: mod_core->port_i = spi_data; break;
                 }
@@ -419,9 +421,9 @@ public:
         if (kbd_top == 0) return 0;
 
         // 25000000/2000 = 12.5 kHz Очередной полутакт для PS/2
-        if (++kbd_ticker >= 10*2000) {
+        if (++kbd_ticker >= 8*2000) {
 
-            int sym = kbd[0];
+            sym = kbd[0];
             kbd_top--;
             kbd_ticker = 0;
 
