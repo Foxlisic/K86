@@ -1,0 +1,101 @@
+#! /usr/bin/vvp
+:ivl_version "12.0 (stable)";
+:ivl_delay_selection "TYPICAL";
+:vpi_time_precision - 9;
+:vpi_module "/usr/lib/x86_64-linux-gnu/ivl/system.vpi";
+:vpi_module "/usr/lib/x86_64-linux-gnu/ivl/vhdl_sys.vpi";
+:vpi_module "/usr/lib/x86_64-linux-gnu/ivl/vhdl_textio.vpi";
+:vpi_module "/usr/lib/x86_64-linux-gnu/ivl/v2005_math.vpi";
+:vpi_module "/usr/lib/x86_64-linux-gnu/ivl/va_math.vpi";
+:vpi_module "/usr/lib/x86_64-linux-gnu/ivl/v2009.vpi";
+S_0x61308babce70 .scope package, "$unit" "$unit" 2 1;
+ .timescale 0 0;
+S_0x61308babd000 .scope module, "tb" "tb" 3 3;
+ .timescale -8 -9;
+o0x76c16eab7018 .functor BUFZ 20, C4<zzzzzzzzzzzzzzzzzzzz>; HiZ drive
+v0x61308bacf920_0 .net "address", 19 0, o0x76c16eab7018;  0 drivers
+v0x61308bacfa00_0 .var "clock", 0 0;
+v0x61308bacfaa0_0 .var "clock_25", 0 0;
+v0x61308bacfba0_0 .var "in", 7 0;
+v0x61308bacfc70_0 .net "out", 7 0, v0x61308bacf590_0;  1 drivers
+v0x61308bacfd60 .array "ram", 47103 0, 7 0;
+v0x61308bacfe00_0 .var "reset_n", 0 0;
+v0x61308bacfed0_0 .net "we", 0 0, v0x61308bacf780_0;  1 drivers
+E_0x61308babe8b0 .event posedge, v0x61308bacfa00_0;
+S_0x61308ba804c0 .scope module, "FOXPAW" "fox86" 3 39, 4 1 0, S_0x61308babd000;
+ .timescale -8 -9;
+    .port_info 0 /INPUT 1 "clock";
+    .port_info 1 /INPUT 1 "reset_n";
+    .port_info 2 /INPUT 1 "ce";
+    .port_info 3 /OUTPUT 20 "address";
+    .port_info 4 /INPUT 8 "in";
+    .port_info 5 /OUTPUT 8 "out";
+    .port_info 6 /OUTPUT 1 "we";
+v0x61308ba80750_0 .net "address", 19 0, o0x76c16eab7018;  alias, 0 drivers
+L_0x76c16ea6e018 .functor BUFT 1, C4<1>, C4<0>, C4<0>, C4<0>;
+v0x61308bacf350_0 .net "ce", 0 0, L_0x76c16ea6e018;  1 drivers
+v0x61308bacf410_0 .net "clock", 0 0, v0x61308bacfaa0_0;  1 drivers
+v0x61308bacf4b0_0 .net "in", 7 0, v0x61308bacfba0_0;  1 drivers
+v0x61308bacf590_0 .var "out", 7 0;
+v0x61308bacf6c0_0 .net "reset_n", 0 0, v0x61308bacfe00_0;  1 drivers
+v0x61308bacf780_0 .var "we", 0 0;
+    .scope S_0x61308babd000;
+T_0 ;
+    %delay 5, 0;
+    %load/vec4 v0x61308bacfa00_0;
+    %inv;
+    %store/vec4 v0x61308bacfa00_0, 0, 1;
+    %jmp T_0;
+    .thread T_0;
+    .scope S_0x61308babd000;
+T_1 ;
+    %delay 20, 0;
+    %load/vec4 v0x61308bacfaa0_0;
+    %inv;
+    %store/vec4 v0x61308bacfaa0_0, 0, 1;
+    %jmp T_1;
+    .thread T_1;
+    .scope S_0x61308babd000;
+T_2 ;
+    %pushi/vec4 0, 0, 1;
+    %store/vec4 v0x61308bacfe00_0, 0, 1;
+    %pushi/vec4 0, 0, 1;
+    %store/vec4 v0x61308bacfa00_0, 0, 1;
+    %pushi/vec4 0, 0, 1;
+    %store/vec4 v0x61308bacfaa0_0, 0, 1;
+    %delay 30, 0;
+    %pushi/vec4 1, 0, 1;
+    %store/vec4 v0x61308bacfe00_0, 0, 1;
+    %delay 25000, 0;
+    %vpi_call/w 3 13 "$finish" {0 0 0};
+    %end;
+    .thread T_2;
+    .scope S_0x61308babd000;
+T_3 ;
+    %vpi_call/w 3 14 "$dumpfile", "tb.vcd" {0 0 0};
+    %vpi_call/w 3 14 "$dumpvars", 32'sb00000000000000000000000000000000, S_0x61308babd000 {0 0 0};
+    %end;
+    .thread T_3;
+    .scope S_0x61308babd000;
+T_4 ;
+    %wait E_0x61308babe8b0;
+    %ix/getv 4, v0x61308bacf920_0;
+    %load/vec4a v0x61308bacfd60, 4;
+    %assign/vec4 v0x61308bacfba0_0, 0;
+    %load/vec4 v0x61308bacfed0_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_4.0, 8;
+    %load/vec4 v0x61308bacfc70_0;
+    %ix/getv 3, v0x61308bacf920_0;
+    %ix/load 4, 0, 0; Constant delay
+    %assign/vec4/a/d v0x61308bacfd60, 0, 4;
+T_4.0 ;
+    %jmp T_4;
+    .thread T_4;
+# The file index is used to find the file name in the following table.
+:file_names 5;
+    "N/A";
+    "<interactive>";
+    "-";
+    "tb.v";
+    "fox86.v";
