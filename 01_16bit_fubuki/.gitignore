@@ -1,6 +1,8 @@
 tb.hex
 tb.vcd
 tb.bin
+tb.log
+tb.com
 vvp.log
 /av/tb
 /av/obj_dir

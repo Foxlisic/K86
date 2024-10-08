@@ -77,6 +77,8 @@ public:
         }
 
         // Сброс процессора
+        // Старт в 0000:0000
+        mod_core->cfg_ip0 = 1;
         mod_core->reset_n = 0;
         mod_core->clock = 0; mod_core->eval();
         mod_core->clock = 1; mod_core->eval();
@@ -87,7 +89,7 @@ public:
         if (argc > 1) {
 
             FILE* fp = fopen(argv[1], "rb");
-            if (fp) { fread(memory + 0xF0000, 1, 65536, fp); fclose(fp); }
+            if (fp) { fread(memory + 0x100, 1, 65536, fp); fclose(fp); }
         }
     }
 

@@ -1,5 +1,5 @@
 
-        org     0
+        org     100h
 
         cli                         ; Стандартный сброс
         xor     ax, ax              ; SS=0, SP=1000h

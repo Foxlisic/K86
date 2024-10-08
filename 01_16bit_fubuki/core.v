@@ -13,6 +13,7 @@ module core
     input               clock,
     input               ce,
     input               reset_n,
+    input               cfg_ip0,        // =1 Запускает процессор в CS:IP=0:100h
     output       [19:0] address,
     input        [ 7:0] in,             // in = ram[address]
     output  reg  [ 7:0] out,
@@ -25,6 +26,22 @@ module core
     output  reg         port_r,
     input        [ 7:0] port_i,
     output  reg  [ 7:0] port_o,
+
+    // Вывести регистры наверх в отладочных целях
+    output  reg  [15:0] ax,
+    output  reg  [15:0] bx,
+    output  reg  [15:0] cx,
+    output  reg  [15:0] dx,
+    output  reg  [15:0] sp,
+    output  reg  [15:0] bp,
+    output  reg  [15:0] si,
+    output  reg  [15:0] di,
+    output  reg  [15:0] es,
+    output  reg  [15:0] cs,
+    output  reg  [15:0] ss,
+    output  reg  [15:0] ds,
+    output  reg  [15:0] ip,
+    output  reg  [11:0] flags,
 
     // PIC: Программируемый контроллер прерываний
     input               irq,            // Срабатывает на изменении
@@ -78,19 +95,16 @@ wire [7:0] branches =
      flags[OF]
 };
 
-// Управляющие регистры и регистры общего назначения
+// Управляющие регистры
 // -----------------------------------------------------------------------------
 reg         cp, size, dir, cpen, over, rep_ft, iack, trace_ff;
-reg [15:0]  ax, bx, cx, dx, sp, bp, si, di;
-reg [15:0]  es, cs, ss, ds;
 reg [ 1:0]  rep;
 reg [ 3:0]  fn, fnext, s1, s2;
 reg [ 7:0]  opcode, modrm;
-reg [15:0]  segment, ea, wb, ip, ip_start;
+reg [15:0]  segment, ea, wb, ip_start;
 reg [ 7:0]  intr;
 reg [ 2:0]  alu;
 reg [15:0]  op1, op2;
-reg [11:0]  flags;
 
 // Исполнительный блок
 // -----------------------------------------------------------------------------
@@ -98,12 +112,12 @@ always @(posedge clock)
 if (reset_n == 1'b0) begin
 
     fn      <= START;
-    cs      <= 16'hF000;
+    ip      <= cfg_ip0 ? 16'h0100 : 16'hFFF0;
+    cs      <= cfg_ip0 ? 16'h0000 : 16'hF000;
     es      <= 16'h0000;
     ds      <= 16'h0000;
     ss      <= 16'h0000;
     sp      <= 16'h0000;
-    ip      <= 16'hFFF0;
     iack    <= 1'b0;
     //             ODIT SZ A  P C
     flags   <= 12'b0010_0000_0010;
@@ -419,10 +433,9 @@ else if (ce) begin
 
             8'b00xxx0xx: begin              // <alu> rm
 
-                wb    <= alu_r;
-                flags <= alu_f;
-
-                fn <= (alu != ALU_CMP) ? WBACK : START;
+                wb      <= alu_r;
+                flags   <= alu_f;
+                fn      <= (alu != ALU_CMP) ? WBACK : START;
 
             end
             8'b00xxx10x: case (s2)          // <alu> a, imm
