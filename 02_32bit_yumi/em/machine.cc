@@ -62,10 +62,8 @@ int main(int argc, char* argv[]) {
         }
 
         // Остановка на перерисовку и ожидание
-        ftime(&ms_clock);
-
         // Вычисление разности времени
-        int time_curr = ms_clock.millitm;
+        int time_curr = SDL_GetTicks();;
         int time_diff = time_curr - ms_prevtime;
         if (time_diff < 0) time_diff += 1000;
 

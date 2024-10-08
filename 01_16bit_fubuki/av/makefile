@@ -10,12 +10,18 @@ ica:
 	vvp tb.qqq -o tb.vcd > vvp.log
 	rm tb.qqq
 tbc:
-	verilator -cc ../core.v
-	verilator -cc ../ga.v
-	verilator -cc ../ps2.v
+	verilator --threads 1 -cc ../core.v
+	verilator --threads 1 -cc ../ga.v
+	verilator --threads 1 -cc ../ps2.v
 	cd obj_dir && make -f Vcore.mk
 	cd obj_dir && make -f Vga.mk
 	cd obj_dir && make -f Vps2.mk
-	g++ -o tb -I$(VINC) tb.cc $(VINC)/verilated.cpp $(VINC)/verilated_threads.cpp obj_dir/Vcore__ALL.a obj_dir/Vga__ALL.a obj_dir/Vps2__ALL.a -lSDL2
+	g++ -o tb -I$(VINC) tb.cc \
+		$(VINC)/verilated.cpp \
+		$(VINC)/verilated_threads.cpp \
+		obj_dir/Vcore__ALL.a \
+		obj_dir/Vga__ALL.a \
+		obj_dir/Vps2__ALL.a \
+		-lSDL2
 wav:
 	gtkwave tb.gtkw

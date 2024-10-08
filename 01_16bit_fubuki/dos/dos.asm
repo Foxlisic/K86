@@ -14,9 +14,9 @@
         xor     di, di
         mov     ah, $07
         mov     cx, 667
-@@:     mov     al, '-'
+@@:     mov     al, 'o'
         stosw
-        mov     al, '_'
+        mov     al, 'O'
         stosw
         stosw
         loop    @b
