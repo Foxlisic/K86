@@ -1,5 +1,4 @@
 #include "obj_dir/Vcore.h"
-#include "obj_dir/Vps2.h"
 #include "font.h"
 #include "tb.h"
 
