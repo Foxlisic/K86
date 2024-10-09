@@ -1,32 +1,21 @@
 
         org     100h
+include "../macro.asm"
 
         cli                         ; Стандартный сброс
-        mov     ax, 03h
-        int     10h
+        screen13
 
-        xor     ax, ax
-        mov     ss, ax
-        mov     ds, ax              ; DS=CS
-        mov     ax, $B800           ; A000 или B800
-        mov     es, ax
+.a:     xor     di, di
+        mov     ax, bx
+        mov     cx, $C800
+@@:     stosb
+        inc     al
+        dec     cl
+        jnz     @b
+        inc     al
+        add     di, (320-256)
+        dec     ch
+        jnz     @b
+        inc     bx
+        jmp     .a
 
-        ;xor     di, di
-        ;mov     cx, 64000
-@@:     ;stosb
-        ;inc     al
-        ;loop    @b
-        ;hlt
-
-        ; Кошатина
-        xor     di, di
-        mov     ah, $07
-        mov     cx, 667
-@@:     mov     al, 'o'
-        stosw
-        mov     al, 'O'
-        stosw
-        stosw
-        loop    @b
-
-        hlt

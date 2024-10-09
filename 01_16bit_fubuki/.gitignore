@@ -3,6 +3,7 @@ tb.vcd
 tb.bin
 tb.log
 tb.com
+record.ppm
 vvp.log
 /av/tb
 /av/obj_dir

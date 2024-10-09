@@ -5,7 +5,8 @@ class TB {
 protected:
 
     int width, height, scale, frame_length, pticks;
-    int debuglog;
+    int debuglog  = 0;
+    int savevideo = 0;
 
     SDL_Surface*        screen_surface;
     SDL_Window*         sdl_window;
@@ -24,7 +25,7 @@ protected:
     // PS2-KEYBOARD
     int     ps_clock = 0, ps_data = 0, kbd_phase = 0, kbd_ticker = 0;
     uint8_t kbd[256], kbd_top = 0, kb_hit_cnt = 0, kb_latch = 0, kb_data = 0, kb_hit = 0;
-    int     dac[256];
+    int     dac[256], dac_cnt = 0, dac_id = 0;
 
     // SDCARD: sd_status бит 7-timeout, 0-busy
     uint8_t     spi_data, spi_st = 2, spi_status, spi_command, spi_crc, spi_resp, sd_status = 0x80;
@@ -51,6 +52,7 @@ public:
         // 1MB alloc
         memory      = (uint8_t*) malloc(1024*1024 + 65536);
         debuglog    = 0;
+        savevideo   = 0;
 
         pticks      = 0;
         mod_core    = new Vcore();
@@ -115,6 +117,7 @@ public:
 
                     // Выводка дебаггинга в логконсоль
                     case 'd': debuglog = 1; break;
+                    case 'v': savevideo = 1; break;
                 }
             }
 
@@ -240,7 +243,29 @@ public:
                     case 0x00A0: irq_mask = mod_core->port_o; break;    // IOMASK
                     case 0x00FE: sd_status = 0; break;                  // Управление SD
                     case 0x00FF: sdspi(mod_core->port_o); break;        // Отослать данные к SD
-                    case 0x03D8: vmode = mod_core->port_o; break;       // Переключение видеорежима
+
+                    // Программирование палитры
+                    case 0x03C8: dac_id = mod_core->port_o; dac_cnt = 0; break;
+                    case 0x03C9:
+
+                        switch (dac_cnt)
+                        {
+                            case 0: dac[dac_id] = (dac[dac_id] & 0x00FFFF) | (mod_core->port_o * 65536 * 4); break;
+                            case 1: dac[dac_id] = (dac[dac_id] & 0xFF00FF) | (mod_core->port_o * 256 * 4); break;
+                            case 2: dac[dac_id] = (dac[dac_id] & 0xFFFF00) | (mod_core->port_o * 4); break;
+                        }
+
+                        // Перещелкнуть на другой регистр
+                        if (dac_cnt == 2) {
+                            dac_id = (dac_id + 1) & 0xFF;
+                        }
+
+                        dac_cnt = (dac_cnt + 1) % 3;
+
+                        break;
+
+                    // Переключение видеорежима
+                    case 0x03D8: vmode = mod_core->port_o; break;
                 }
             }
 
@@ -249,6 +274,9 @@ public:
             mod_core->clock = 1; mod_core->eval();
 
             tsc++;
+
+            // 60 FPS
+            if ((tsc % 416666) == 0) saveframe();
         }
 
         return tps;
@@ -283,7 +311,7 @@ public:
                     int ft = font16[16*ch + i];
                     int cl = (ft & (0x80 >> j)) || bk ? (at & 15) : (at >> 4) & 3;
 
-                    pset(x*8 + j, y*16 + i, colors[cl]);
+                    pset(x*8 + j, y*16 + i, dac[cl]);
                 }
             }
 
@@ -510,6 +538,29 @@ public:
         }
 
         return sym;
+    }
+
+    // Сохранение фрейма
+    void saveframe()
+    {
+        if (savevideo == 0) {
+            return;
+        }
+
+        FILE* fp = fopen("record.ppm", "ab");
+        if (fp) {
+
+            fprintf(fp, "P6\n# APPLICATION\n%d %d\n255\n", width, height);
+            for (int y = 0; y < height; y++)
+            for (int x = 0; x < width; x++) {
+
+                int cl = screen_buffer[y*width + x];
+                int vl = ((cl >> 16) & 255) + (cl & 0xFF00) + ((cl&255)<<16);
+                fwrite(&vl, 1, 3, fp);
+            }
+
+            fclose(fp);
+        }
     }
 
     // Эмуляция протокола SDCard

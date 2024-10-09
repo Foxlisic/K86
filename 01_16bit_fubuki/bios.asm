@@ -4,8 +4,7 @@
 ;
         org     0
         times   16  dd 0
-        dw      int10h_address
-        dw      0
+        dw      int10h_address, 0           ; INT 10h
 
 ; https://stanislavs.org/helppc/6845.html
 ; |7|6|5|4|3|2|1|0|  3D8 Mode Select Register
