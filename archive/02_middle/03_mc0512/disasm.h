@@ -1,3 +1,4 @@
+#include <string.h>
 
 // Список мнемоник, используютcя в ops
 const char* mnemonics[] = {

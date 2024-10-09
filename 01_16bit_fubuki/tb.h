@@ -5,7 +5,7 @@ class TB {
 protected:
 
     int width, height, scale, frame_length, pticks;
-    int x, y, _hs, _vs;
+    int debuglog;
 
     SDL_Surface*        screen_surface;
     SDL_Window*         sdl_window;
@@ -32,20 +32,22 @@ protected:
     FILE*       spi_file;
 
     // Память
-    uint8_t* memory;
+    uint8_t*    memory;
 
     // Модули
-    Vcore*  mod_core;
+    Vcore*      mod_core;
+    Disassemble* dasm;
 
 public:
 
     TB(int argc, char** argv)
     {
-        x   = 0; y   = 0;
-        _hs = 1; _vs = 1;
+        int     cid = 1;
+        FILE*   fp;
 
         // 1MB alloc
-        memory  = (uint8_t*) malloc(1024*1024 + 65536);
+        memory      = (uint8_t*) malloc(1024*1024 + 65536);
+        debuglog    = 0;
 
         pticks      = 0;
         mod_core    = new Vcore();
@@ -55,6 +57,8 @@ public:
         width        = 640;
         height       = 400;
         frame_length = (1000/30);  // 30 FPS
+
+        dasm = new Disassemble(memory);
 
         if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) {
             exit(1);
@@ -77,20 +81,43 @@ public:
         }
 
         // Сброс процессора
-        // Старт в 0000:0000
-        mod_core->cfg_ip0 = 1;
+        // Старт в F000:FFF0 по умолчанию
+        mod_core->cfg_ip0 = 0;
         mod_core->reset_n = 0;
+
+        while (cid < argc)
+        {
+            if (argv[cid][0] == '-') {
+
+                int ch = argv[cid][1];
+                switch (ch) {
+
+                    // Загрузка b=BIOS, c=COM файла
+                    case 'b':
+                    case 'c':
+
+                        fp = fopen(argv[++cid], "rb");
+                        if (fp) { fread(memory + (ch == 'b' ? 0 : 0x100), 1, 65536, fp); fclose(fp); }
+
+                        printf("LOAD %c: %s\n", ch, argv[cid]);
+
+                        // Старт в 0000h:0100h
+                        if (ch == 'c') mod_core->cfg_ip0 = 1;
+                        break;
+
+                    // Выводка дебаггинга в логконсоль
+                    case 'd': debuglog = 1; break;
+                }
+            }
+
+            cid++;
+        }
+
+        // Запуск процессора
         mod_core->clock = 0; mod_core->eval();
         mod_core->clock = 1; mod_core->eval();
         mod_core->reset_n = 1;
         mod_core->ce = 1;
-
-        // Загрузка BIOS
-        if (argc > 1) {
-
-            FILE* fp = fopen(argv[1], "rb");
-            if (fp) { fread(memory + 0x100, 1, 65536, fp); fclose(fp); }
-        }
     }
 
     int main()
@@ -138,6 +165,13 @@ public:
 
             // Обработка клавиатуры
             int _kb = kbd_pop();
+
+            // Логирование
+            if (mod_core->m0 && debuglog) {
+
+                dasm->disassemble(mod_core->cs*16 + mod_core->ip); // Чуваааак!
+                printf("%04X:%04X %s\n", mod_core->cs, mod_core->ip, dasm->dis_row);
+            }
 
             // ----------------------
             if (mod_core->we) memory[ mod_core->address ] = mod_core->out;

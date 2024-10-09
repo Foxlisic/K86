@@ -286,7 +286,7 @@ public:
         char dis_pf[8];
         char dis_cmd [32];
         char dis_cmd2[64];
-        char dis_ops[128];
+        char dis_ops[256];
         char dis_dmp[128];
         char dis_sfx[8];
 

@@ -1,8 +1,9 @@
 VINC=/usr/share/verilator/include
 
 all: ica tbc
-	./tb tb.bin > tb.log
+	./tb -b bios.bin > tb.log
 ica:
+	fasm bios100h.asm bios.bin
 	iverilog -g2005-sv -o tb.qqq tb.v core.v
 	vvp tb.qqq -o tb.vcd > /dev/null
 	rm tb.qqq
