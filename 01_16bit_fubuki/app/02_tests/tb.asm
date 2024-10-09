@@ -6,7 +6,6 @@ start:  cli
         mov     es, ax
         mov     ss, ax
         xor     sp, sp
-
         mov     ax, $B800
         mov     es, ax
         mov     [es:0], word $0235

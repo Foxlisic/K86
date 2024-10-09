@@ -3,5 +3,5 @@ DIRC=../..
 
 all:
 	fasm tb.asm tb.com
-	php $(DIRC)/../tools/mifer.php 16k tb.bin $(DIRC)/de0/mbios.mif
-	$(DIRC)/tb -c tb.com
+	php $(DIRC)/../tools/mifer.php 16k tb.com $(DIRC)/de0/mbios.mif
+	$(DIRC)/tb -c tb.com -b $(DIRC)/bios.bin -d > tb.log

@@ -3,6 +3,9 @@
 
         cli                         ; Стандартный сброс
         xor     ax, ax              ; SS=0, SP=1000h
+        mov     ax, 3
+        int     10h
+
         mov     ss, ax
         mov     sp, $1000
         mov     ax, $B800
