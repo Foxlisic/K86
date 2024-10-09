@@ -2,16 +2,21 @@
         org     100h
 
         cli                         ; Стандартный сброс
-        xor     ax, ax              ; SS=0, SP=1000h
-        mov     ax, 3
+        mov     ax, 03h
         int     10h
 
+        xor     ax, ax
         mov     ss, ax
-        mov     sp, $1000
-        mov     ax, $B800
-        mov     es, ax              ; ES=B800
-        mov     ax, cs
         mov     ds, ax              ; DS=CS
+        mov     ax, $B800           ; A000 или B800
+        mov     es, ax
+
+        ;xor     di, di
+        ;mov     cx, 64000
+@@:     ;stosb
+        ;inc     al
+        ;loop    @b
+        ;hlt
 
         ; Кошатина
         xor     di, di
@@ -23,4 +28,5 @@
         stosw
         stosw
         loop    @b
-        jmp     $
+
+        hlt

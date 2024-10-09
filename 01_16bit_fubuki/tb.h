@@ -15,14 +15,16 @@ protected:
     SDL_Event           evt;
     Uint32*             screen_buffer;
 
-    int cursor_blink = 0;
-    int cursor       = 0;
-    int irq_mask     = 0;
-    int irq_pend     = 0;
+    int cursor_blink    = 0;
+    int cursor          = 0;
+    int irq_mask        = 0;
+    int irq_pend        = 0;
+    int vmode           = 0;
 
     // PS2-KEYBOARD
     int     ps_clock = 0, ps_data = 0, kbd_phase = 0, kbd_ticker = 0;
     uint8_t kbd[256], kbd_top = 0, kb_hit_cnt = 0, kb_latch = 0, kb_data = 0, kb_hit = 0;
+    int     dac[256];
 
     // SDCARD: sd_status бит 7-timeout, 0-busy
     uint8_t     spi_data, spi_st = 2, spi_status, spi_command, spi_crc, spi_resp, sd_status = 0x80;
@@ -36,6 +38,7 @@ protected:
 
     // Модули
     Vcore*      mod_core;
+    Uint32      tsc = 0;
     Disassemble* dasm;
 
 public:
@@ -78,6 +81,11 @@ public:
         for (int i = 0; i < 4096; i += 2) {
             memory[0xB8000 + i    ] = 0x00;
             memory[0xB8000 + i + 1] = 0x07;
+        }
+
+        // Цвета по умолчанию
+        for (int i = 0; i < 256; i++) {
+            dac[i] = dacdef[i];
         }
 
         // Сброс процессора
@@ -169,8 +177,27 @@ public:
             // Логирование
             if (mod_core->m0 && debuglog) {
 
-                dasm->disassemble(mod_core->cs*16 + mod_core->ip); // Чуваааак!
-                printf("%04X:%04X %s\n", mod_core->cs, mod_core->ip, dasm->dis_row);
+                uint32_t address = mod_core->cs*16 + mod_core->ip;
+
+                // Чуваааак! Код инструкции HLT
+                if (memory[address] != 0xF4) {
+
+                    dasm->disassemble(address);
+                    printf("[%08X|%c%c%c%c%c%c%c%c%c] %04X:%04X %s\n",
+                        tsc,
+                        (mod_core->flags & 0x800 ? 'O' : '.'),
+                        (mod_core->flags & 0x400 ? 'D' : '.'),
+                        (mod_core->flags & 0x200 ? 'I' : '.'),
+                        (mod_core->flags & 0x100 ? 'T' : '.'),
+                        (mod_core->flags & 0x080 ? 'S' : '.'),
+                        (mod_core->flags & 0x040 ? 'Z' : '.'),
+                        (mod_core->flags & 0x010 ? 'A' : '.'),
+                        (mod_core->flags & 0x004 ? 'P' : '.'),
+                        (mod_core->flags & 0x001 ? 'C' : '.'),
+                        mod_core->cs, mod_core->ip,
+                        dasm->dis_row
+                    );
+                }
             }
 
             // ----------------------
@@ -209,16 +236,19 @@ public:
 
                 switch (mod_core->port_a) {
 
-                    case 0x20: irq_pend = 0; break;                 // EOI
-                    case 0xA0: irq_mask = mod_core->port_o; break;  // IOMASK
-                    case 0xFE: sd_status = 0; break;                // Управление SD
-                    case 0xFF: sdspi(mod_core->port_o); break;      // Отослать данные к SD
+                    case 0x0020: irq_pend = 0; break;                   // EOI
+                    case 0x00A0: irq_mask = mod_core->port_o; break;    // IOMASK
+                    case 0x00FE: sd_status = 0; break;                  // Управление SD
+                    case 0x00FF: sdspi(mod_core->port_o); break;        // Отослать данные к SD
+                    case 0x03D8: vmode = mod_core->port_o; break;       // Переключение видеорежима
                 }
             }
 
             // Такт на ядро
             mod_core->clock = 0; mod_core->eval();
             mod_core->clock = 1; mod_core->eval();
+
+            tsc++;
         }
 
         return tps;
@@ -227,26 +257,39 @@ public:
     // Обновить кадр
     void refresh()
     {
-        for (int y = 0; y < 25; y++)
-        for (int x = 0; x < 80; x++)
-        {
-            uint32_t a = 0xB8000 + 2*x + y*160;
-            uint8_t ch = memory[a+0];
-            uint8_t at = memory[a+1];
+        // Видеорежим 320 x 200
+        if (vmode & 2) {
 
-            for (int i = 0; i < 16; i++)
-            for (int j = 0; j < 8; j++)
-            {
-                int bk = (cursor == 80*y + x && i >= 14) && (cursor_blink < 15);
-
-                int ft = font16[16*ch + i];
-                int cl = (ft & (0x80 >> j)) || bk ? (at & 15) : (at >> 4) & 3;
-
-                pset(x*8 + j, y*16 + i, colors[cl]);
+            for (int y = 0; y < 400; y++)
+            for (int x = 0; x < 640; x++) {
+                pset(x, y, dac[memory[0xA0000 + (x>>1) + (y>>1)*320]]);
             }
         }
+        // Текстовый видеорежим
+        else {
 
-        cursor_blink = (cursor_blink + 1) % 30;
+            for (int y = 0; y < 25; y++)
+            for (int x = 0; x < 80; x++)
+            {
+                uint32_t a = 0xB8000 + 2*x + y*160;
+                uint8_t ch = memory[a+0];
+                uint8_t at = memory[a+1];
+
+                for (int i = 0; i < 16; i++)
+                for (int j = 0; j < 8; j++)
+                {
+                    int bk = (cursor == 80*y + x && i >= 14) && (cursor_blink < 15);
+
+                    int ft = font16[16*ch + i];
+                    int cl = (ft & (0x80 >> j)) || bk ? (at & 15) : (at >> 4) & 3;
+
+                    pset(x*8 + j, y*16 + i, colors[cl]);
+                }
+            }
+
+            cursor_blink = (cursor_blink + 1) % 30;
+        }
+
     }
 
     // Обновить окно
