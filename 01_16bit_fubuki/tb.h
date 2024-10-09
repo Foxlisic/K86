@@ -117,7 +117,7 @@ public:
 
                     // Выводка дебаггинга в логконсоль
                     case 'd': debuglog = 1; break;
-                    case 'v': savevideo = 1; break;
+                    case 'v': savevideo = 1; fp = fopen("record.ppm", "w"); if (fp) fclose(fp); break;
                 }
             }
 

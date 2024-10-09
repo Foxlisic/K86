@@ -1,21 +1,32 @@
-
-        org     100h
 include "../macro.asm"
 
-        cli                         ; Стандартный сброс
+        org     100h
         screen13
 
-.a:     xor     di, di
-        mov     ax, bx
-        mov     cx, $C800
-@@:     stosb
-        inc     al
-        dec     cl
-        jnz     @b
-        inc     al
-        add     di, (320-256)
-        dec     ch
-        jnz     @b
+        mov     ax, es
+        mov     ds, ax      ; Мяу
+        mov     bx, 256
+.x:     mov     ax, 0
+        mov     di, 318
+        mov     cx, 200
+@@:     mov     al, ah
+        stosw
+        add     di, 317
+        add     ax, bx
+        inc     di
+        loop    @b
         inc     bx
-        jmp     .a
+        call    move
+        jmp     .x
 
+        ; Скроллер
+move:   xor     di, di
+        mov     si, 2
+        mov     dx, 200
+@@:     mov     cx, (318/2)
+        rep     movsw
+        add     di, 2
+        add     si, 2
+        dec     dx
+        jne     @b
+        ret
