@@ -9,8 +9,7 @@ reg clock_25; always #2.0 clock_25 = ~clock_25;
 
 initial begin
 
-    $readmemh("tb.hex", memory, 0);
-    $readmemh("bt.hex", memory, 20'hFFFF0);
+    $readmemh("tb.hex", memory, 9'h100);
     $dumpfile("tb.vcd");
     $dumpvars(0, tb);
 
@@ -18,10 +17,15 @@ initial begin
     clock_25 = 0;
     reset_n  = 0;
 
+    memory[20'h00000] = 8'h12;
+    memory[20'h00001] = 8'h55;
+    memory[20'h00002] = 8'h23;
+    memory[20'h00003] = 8'h44;
+
     // JMP FAR 0000:0000
     memory[20'hFFFF0] = 8'hEA;
     memory[20'hFFFF1] = 8'h00;
-    memory[20'hFFFF2] = 8'h00;
+    memory[20'hFFFF2] = 8'h01;
     memory[20'hFFFF3] = 8'h00;
     memory[20'hFFFF4] = 8'h00;
 
@@ -48,6 +52,7 @@ core CPU
 (
     .clock      (clock_25),
     .ce         (1'b1),
+    .cfg_ip0    (1'b1),
     .reset_n    (reset_n),
     .address    (address),
     .in         (in),

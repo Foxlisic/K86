@@ -1,7 +1,7 @@
 VINC=/usr/share/verilator/include
 
 all: ica tbc
-	./tb -b bios.bin > tb.log
+
 ica:
 	fasm bios.asm bios.bin
 	iverilog -g2005-sv -o tb.qqq tb.v core.v
@@ -15,6 +15,7 @@ tbc:
 		$(VINC)/verilated_threads.cpp \
 		obj_dir/Vcore__ALL.a \
 		-lSDL2
+	./tb -b bios.bin > tb.log
 wav:
 	gtkwave tb.gtkw
 clean:

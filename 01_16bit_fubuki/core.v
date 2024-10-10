@@ -82,6 +82,13 @@ wire [15:0] rin =
     in[2:0] == REG_SP ? sp : in[2:0] == REG_BP ? bp :
     in[2:0] == REG_SI ? si : di;
 
+// Для строковых инструкции
+wire [15:0] sinc = flags[DF] ? si - (size ? 2 : 1) : si + (size ? 2 : 1);
+wire [15:0] dinc = flags[DF] ? di - (size ? 2 : 1) : di + (size ? 2 : 1);
+
+// Разрешение выполнения инструкции с REP: или без
+wire        repa = (rep[1] && cx || rep[1] == 0);
+
 // Вычисление условий
 wire [7:0] branches =
 {
@@ -118,6 +125,12 @@ if (reset_n == 1'b0) begin
     ds      <= 16'h0000;
     ss      <= 16'h0000;
     sp      <= 16'h0000;
+    si      <= 16'h0000;
+    di      <= 16'h0010;
+    sp      <= 16'h3800;
+    ss      <= 16'h0000;
+    ds      <= 16'h0000;
+    es      <= 16'h0000;
     iack    <= 1'b0;
     //             ODIT SZ A  P C
     flags   <= 12'b0010_0000_0010;
@@ -296,6 +309,15 @@ else if (ce) begin
                     else begin fn <= START; ip <= ip + 2; end
 
                     cx <= cx - 1;
+
+                end
+                // MOVSx
+                8'b1010010x: begin
+
+                    cp  <= 1;
+                    fn  <= repa ? INSTR : START;
+                    op1 <= segment;
+                    ea  <= si;
 
                 end
                 // Определить наличие байта ModRM для опкода
@@ -846,7 +868,7 @@ else if (ce) begin
                     port_w  <= 1;
 
                     if (!opcode[3]) ip <= ip + 1;
-                    if (!size) fn <= START;
+                    if (!size)      fn <= START;
 
                 end
                 1: begin
@@ -931,6 +953,7 @@ else if (ce) begin
                 7: begin fn <= UNDEF; end
 
             endcase
+            // -----------------------------------------------------
             8'b1010101x: case (s2)          // STOSx
 
                 0: begin // STOSB
@@ -979,41 +1002,42 @@ else if (ce) begin
             endcase
             8'b1010010x: case (s2)          // MOVSx
 
-                // Загрузка 8 или 16 бит DS:SI
-                0: begin s2 <= 1; ea <= si; cp <= 1; end
-                1: begin s2 <= size ? 2 : 3; wb <= in; ea <= ea + 1; end
-                2: begin s2 <= 3; wb[15:8] <= in; end
+                // Прочитать младший байт
+                0: begin s2 <= 1; ea <= ea + 1; wb <= in; end
 
-                // Запись 8 или 16 бит ES:DI
-                3: begin
+                // Чтение и запись 8/16-битного числа
+                1: begin
 
-                    s2      <= size ? 4 : 5;
+                    s2      <= size ? 2 : 3;
+                    wb      <= in;
                     we      <= 1;
-                    ea      <= di;
+                    out     <= wb[7:0];
                     segment <= es;
+                    ea      <= di;
+
+                end
+
+                // Запись 16-битного числа
+                2: begin
+
+                    s2      <= 3;
+                    ea      <= ea + 1;
+                    we      <= 1;
                     out     <= wb[7:0];
 
                 end
-                4: begin s2 <= 5; we <= 1; ea <= ea + 1; out <= wb[15:8]; end
 
-                // Инкремент или декремент SI
-                5: begin
+                // Инкремент или декремент SI/DI
+                3: begin
 
-                    s2  <= 6;
-                    we  <= 0;
-                    cp  <= 0;
-                    si  <= flags[DF] ? si - (opcode[0] + 1) : si + (opcode[0] + 1);
-                    size <= 1;
-
-                end
-
-                // Инкремент или декремент DI
-                6: begin s2 <= 6;
-
-                    di <= flags[DF] ? di - (opcode[0] + 1) : di + (opcode[0] + 1);
-
-                    // Использование REP:
-                    fn  <= rep[1] ? REPF : START;
+                    s2      <= 0;
+                    we      <= 0;
+                    segment <= op1;
+                    ea      <= sinc;
+                    si      <= sinc;
+                    di      <= dinc;
+                    fn      <= rep[1] && cx != 1 ? INSTR : START;
+                    cx      <= cx - rep[1];
 
                 end
 
@@ -1043,10 +1067,7 @@ else if (ce) begin
 
                     rep_ft  <= 1;
 
-                    // Проверять на REPNZ или REPZ
                     di  <= flags[DF] ? di - (opcode[0] + 1) : di + (opcode[0] + 1);
-
-                    // Использование REP:
                     fn  <= rep[1] ? REPF : START;
 
                 end
