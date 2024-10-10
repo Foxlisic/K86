@@ -87,8 +87,9 @@ wire [15:0] sinc = flags[DF] ? si - (size ? 2 : 1) : si + (size ? 2 : 1);
 wire [15:0] dinc = flags[DF] ? di - (size ? 2 : 1) : di + (size ? 2 : 1);
 
 // Разрешение выполнения инструкции с REP: или без
-wire        repa = (rep[1] && cx || rep[1] == 0);   // Начало исполнения
-wire        repb = (rep[1] && cx != 1);             // Продолжение исполения
+wire        repa = (rep[1] && cx || rep[1] == 0);           // Начало исполнения
+wire        repb = (rep[1] && cx != 1);                     // Продолжение исполения
+wire [15:0] repc = (in[0] ? 2:1)*(rep[1] ? cx-1 : 0);     // Количество отступов для LODSx
 
 // Вычисление условий
 wire [7:0] branches =
@@ -324,6 +325,14 @@ else if (ce) begin
                 end
                 // STOSx
                 8'b1010101x: begin fn <= repa ? INSTR : START; cp <= 1; end
+                // LODSx
+                8'b1010110x: begin
+
+                    cp <= 1;
+                    ea <= flags[DF] ? si - repc : si + repc;
+                    fn <= repa ? INSTR : START;
+
+                end
                 // Определить наличие байта ModRM для опкода
                 default: casex (in)
 
@@ -992,22 +1001,22 @@ else if (ce) begin
                 end
 
             endcase
-            8'b1010110x: case (s2)          // LODSx
+            8'b1010110x: case (s2)          // LODSx :: T=3/4[+1=REP]
 
-                0: begin s2 <= 1; cp <= 1;   ea <= si; end
-                1: begin s2 <= size ? 2 : 3; ea <= ea + 1; ax[7:0] <= in; end
-                2: begin s2 <= 3; ax[15:8] <= in; end
-                3: begin
+                0: begin
 
-                    fn      <= rep[1] ? REPF : START;
-                    cp      <= 0;
-                    si      <= flags[DF] ? si - (opcode[0] + 1) : si + (opcode[0] + 1);
-                    size    <= 1;
+                    fn      <= size ? INSTR : START;
+                    s2      <= 1;
+                    ea      <= ea + 1;
+                    si      <= flags[DF] ? ea-1-size : ea+1+size;
+                    ax[7:0] <= in;
 
                 end
 
+                1: begin ax[15:8] <= in; fn <= START; end
+
             endcase
-            8'b1010010x: case (s2)          // MOVSx :: T=[3 + 4/3*CX]
+            8'b1010010x: case (s2)          // MOVSx :: T=[3+4/3*CX]
 
                 // Прочитать младший байт
                 0: begin s2 <= 1; ea <= ea + 1; wb <= in; end

@@ -1,15 +1,15 @@
 [*]
 [*] GTKWave Analyzer v3.3.116 (w)1999-2023 BSI
-[*] Thu Oct 10 03:54:29 2024
+[*] Thu Oct 10 08:35:01 2024
 [*]
-[dumpfile] "tb.vcd"
-[dumpfile_mtime] "Thu Oct 10 03:53:51 2024"
-[dumpfile_size] 55347
-[savefile] "tb.gtkw"
+[dumpfile] "/home/fox/dev/03_x86/01_16bit_fubuki/tb.vcd"
+[dumpfile_mtime] "Thu Oct 10 08:34:59 2024"
+[dumpfile_size] 54182
+[savefile] "/home/fox/dev/03_x86/01_16bit_fubuki/tb.gtkw"
 [timestart] 0
 [size] 1920 1008
 [pos] -1 -1
-*-7.200000 804 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-7.200000 379 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] tb.
 [sst_width] 319
 [signals_width] 203
