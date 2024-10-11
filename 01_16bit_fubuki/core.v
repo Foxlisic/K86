@@ -110,7 +110,7 @@ reg         cp, size, dir, cpen, over, rep_ft, iack, trace_ff;
 reg [ 1:0]  rep;
 reg [ 3:0]  fn, fnext, s1, s2;
 reg [ 7:0]  opcode, modrm;
-reg [15:0]  segment, ea, wb, ip_start;
+reg [15:0]  segment, ea, wb;
 reg [ 7:0]  intr;
 reg [ 2:0]  alu;
 reg [15:0]  op1, op2, tmp16;
@@ -165,7 +165,6 @@ else if (ce) begin
             we          <= 0;           // Разрешение записи
             rep_ft      <= 0;           // =0 REP, =1 REPZ|NZ
             wb          <= 0;           // Данные на запись (modrm | reg)
-            ip_start    <= ip;          // Для REP:
 
             // IRQ прерывание вызывается, если счетчик изменился (iack != irq_signal) и IF=1
             if ((iack ^ irq) && flags[IF]) begin
