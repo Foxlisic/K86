@@ -72,7 +72,7 @@ localparam
 
 localparam
     START = 0, LOAD = 1, MODRM = 2, INSTR = 3,  INTR = 4,
-    WBACK = 5, PUSH = 6, POP = 7,   REPF = 8,   UNDEF = 9;
+    WBACK = 5, PUSH = 6, POP = 7,   UNDEF = 8;
 
 // -----------------------------------------------------------------------------
 wire [15:0] signex = {{8{in[7]}}, in};
@@ -89,7 +89,7 @@ wire [15:0] dinc = flags[DF] ? di - (size ? 2 : 1) : di + (size ? 2 : 1);
 // Разрешение выполнения инструкции с REP: или без
 wire        repa = (rep[1] && cx || rep[1] == 0);           // Начало исполнения
 wire        repb = (rep[1] && cx != 1);                     // Продолжение исполения
-wire [15:0] repc = (in[0] ? 2:1)*(rep[1] ? cx-1 : 0);     // Количество отступов для LODSx
+wire [15:0] repc = (in[0] ? 2:1)*(rep[1] ? cx-1 : 0);       // Количество отступов для LODSx
 
 // Вычисление условий
 wire [7:0] branches =
@@ -113,7 +113,7 @@ reg [ 7:0]  opcode, modrm;
 reg [15:0]  segment, ea, wb, ip_start;
 reg [ 7:0]  intr;
 reg [ 2:0]  alu;
-reg [15:0]  op1, op2;
+reg [15:0]  op1, op2, tmp16;
 
 // Исполнительный блок
 // -----------------------------------------------------------------------------
@@ -122,6 +122,7 @@ if (reset_n == 1'b0) begin
 
     fn      <= START;
     ax      <= 16'h0201;
+    cx      <= 16'h0008;
     ip      <= cfg_ip0 ? 16'h0100 : 16'hFFF0;
     cs      <= cfg_ip0 ? 16'h0000 : 16'hF000;
     es      <= 16'h0000;
@@ -136,7 +137,7 @@ if (reset_n == 1'b0) begin
     es      <= 16'h0000;
     iack    <= 1'b0;
     //             ODIT SZ A  P C
-    flags   <= 12'b0010_0000_0010;
+    flags   <= 12'b0000_0000_0010;
 
 end
 else if (ce) begin
@@ -317,22 +318,26 @@ else if (ce) begin
                 // MOVSx
                 8'b1010010x: begin
 
-                    cp  <= 1;
+                    cp  <= repa;
                     fn  <= repa ? INSTR : START;
                     op1 <= segment;
                     ea  <= si;
 
                 end
                 // STOSx
-                8'b1010101x: begin fn <= repa ? INSTR : START; cp <= 1; end
+                8'b1010101x: begin fn <= repa ? INSTR : START; cp <= repa; end
                 // LODSx
                 8'b1010110x: begin
 
-                    cp <= 1;
+                    cp <= repa;
                     ea <= flags[DF] ? si - repc : si + repc;
                     fn <= repa ? INSTR : START;
 
                 end
+                // CMPSx
+                8'b1010011x: begin fn <= repa ? INSTR : START; cp <= repa; ea <= si; alu <= ALU_SUB; end
+                // SCASx
+                8'b1010111x: begin fn <= repa ? INSTR : START; cp <= repa; ea <= di; alu <= ALU_SUB; segment <= es; end
                 // Определить наличие байта ModRM для опкода
                 default: casex (in)
 
@@ -967,7 +972,7 @@ else if (ce) begin
 
             endcase
             // -----------------------------------------------------
-            8'b1010101x: case (s2)          // STOSx :: T=[3+2/1*CX]
+            8'b1010101x: case (s2)          // STOSx :: 2*+(2/1)*CX
 
                 0: begin // STOSB
 
@@ -1001,7 +1006,7 @@ else if (ce) begin
                 end
 
             endcase
-            8'b1010110x: case (s2)          // LODSx :: T=3/4[+1=REP]
+            8'b1010110x: case (s2)          // LODSx :: 3* или 4*
 
                 0: begin
 
@@ -1016,34 +1021,36 @@ else if (ce) begin
                 1: begin ax[15:8] <= in; fn <= START; end
 
             endcase
-            8'b1010010x: case (s2)          // MOVSx :: T=[3+4/3*CX]
+            8'b1010010x: case (s2)          // MOVSx :: 2*+4/2*CX
 
-                // Прочитать младший байт
-                0: begin s2 <= 1; ea <= ea + 1; wb <= in; end
+                // Запись младшего байта [size=0]
+                0: begin
 
-                // Чтение и запись 8/16-битного числа
+                    s2  <= size ? 1 : 3;
+                    wb  <= in;
+                    out <= in;
+
+                    if (size)  ea <= ea + 1;
+                    else begin ea <= di; segment <= es; we <= 1; end
+
+                end
+
+                // Чтение старшего байта, запись младшего байта [size=1]
                 1: begin
 
-                    s2      <= size ? 2 : 3;
-                    wb      <= in;
-                    we      <= 1;
-                    out     <= wb[7:0];
+                    s2  <= 2;
+                    wb  <= in;
+                    we  <= 1;
+                    ea  <= di;
+                    out <= wb[7:0];
                     segment <= es;
-                    ea      <= di;
 
                 end
 
-                // Запись 16-битного числа
-                2: begin
+                // Запись старшего байта
+                2: begin s2 <= 3; ea <= ea + 1; we <= 1; out <= wb[7:0]; end
 
-                    s2      <= 3;
-                    ea      <= ea + 1;
-                    we      <= 1;
-                    out     <= wb[7:0];
-
-                end
-
-                // Инкремент или декремент SI/DI
+                // Инкремент или декремент SI/DI, выключение записи
                 3: begin
 
                     s2      <= 0;
@@ -1058,60 +1065,65 @@ else if (ce) begin
                 end
 
             endcase
-            8'b1010011x: case (s2)          // CMPSx
+            8'b1010011x: case (s2)          // CMPSx :: (3|5)*CX+2*
 
-                0: begin s2 <= 1;            cp        <= 1;  ea <= si; alu <= ALU_SUB; end
-                1: begin s2 <= size ? 2 : 3; op1       <= in; ea <= ea + 1; end
-                2: begin s2 <= 3;            op1[15:8] <= in; end
-                3: begin s2 <= 4;            segment   <= es; ea <= di; end
-                4: begin s2 <= size ? 5 : 6; op2       <= in; ea <= ea + 1; end
-                5: begin s2 <= 6;            op2[15:8] <= in; end
+                // Чтение DS:SI
+                0: begin
 
-                // Инкремент или декремент SI
-                6: begin
-
-                    s2      <= 7;
-                    flags   <= alu_f;
-                    cp      <= 0;
-                    si      <= flags[DF] ? si - (opcode[0] + 1) : si + (opcode[0] + 1);
-                    size    <= 1;
+                    s2      <= size ? 1 : 2;
+                    ea      <= size ? ea + 1 : di;
+                    tmp16   <= segment;
+                    segment <= size ? segment : es;
+                    op1     <= in;
 
                 end
 
-                // Инкремент или декремент DI
-                7: begin
+                // Старший байт из SI+1
+                1: begin s2 <= 2; op1[15:8] <= in; segment <= es; ea <= di; end
 
-                    rep_ft  <= 1;
+                // Чтение из ES:DI
+                2: begin s2 <= size ? 3 : 4; op2 <= in; ea <= ea + 1; end
+                3: begin s2 <= 4; op2[15:8] <= in; end
 
-                    di  <= flags[DF] ? di - (opcode[0] + 1) : di + (opcode[0] + 1);
-                    fn  <= rep[1] ? REPF : START;
+                // Сравнение и повтор цикла (если необходимо)
+                4: begin
+
+                    s2      <= 0;
+                    ea      <= sinc;
+                    si      <= sinc;
+                    di      <= dinc;
+                    flags   <= alu_f;
+                    segment <= tmp16;
+                    fn      <= repb && (rep[0] == alu_f[ZF]) ? INSTR : START;
+                    cx      <= cx - rep[1];
 
                 end
 
             endcase
-            8'b1010111x: case (s2)          // SCASx
+            8'b1010111x: case (s2)          // SCASx :: 2*+(2|3)*CX
 
+                // Прочитать младший байт
                 0: begin
 
-                    s2      <= 1;
-                    cp      <= 1;
-                    alu     <= ALU_SUB;
-                    op1     <= ax;
-                    ea      <= di;
-                    segment <= es;
+                    s2  <= size ? 1 : 2;
+                    op1 <= size ? ax : ax[7:0];
+                    op2 <= in;
+                    ea  <= ea + 1;
 
                 end
-                1: begin s2 <= size ? 2 : 3; op2       <= in; ea <= ea + 1; end
-                2: begin s2 <= 3;            op2[15:8] <= in; end
 
-                // Инкремент или декремент DI
-                3: begin
+                // Прочитать старший байт
+                1: begin s2 <= 2; op2[15:8] <= in; di <= dinc; end
 
+                // Сравнить A со значением из памяти
+                2: begin
+
+                    s2      <= 0;
                     flags   <= alu_f;
-                    cp      <= 0;
-                    rep_ft  <= 1; // Проверять на REPNZ или REPZ
-                    di      <= flags[DF] ? di - (opcode[0] + 1) : di + (opcode[0] + 1);
-                    fn      <= rep[1] ? REPF : START;   // Использование REP:
+                    di      <= dinc;
+                    ea      <= dinc;
+                    fn      <= repb && (rep[0] == alu_f[ZF]) ? INSTR : START;
+                    cx      <= cx - rep[1];
 
                 end
 
@@ -1188,30 +1200,6 @@ else if (ce) begin
             0: begin s1 <= 1; segment  <= ss; ea <= sp; cp <= 1; end
             1: begin s1 <= 2; wb[ 7:0] <= in; ea <= ea + 1; end
             2: begin s1 <= 0; wb[15:8] <= in; cp <= 0; sp <= sp + 2; fn <= fnext; end
-
-        endcase
-
-        // Выполнение инструкции REP
-        REPF: case (s1)
-
-            // Уменьшить CX - 1
-            0: begin s1 <= 1; cx <= cx - 1; end
-            1: begin
-
-                s1 <= 0;
-                fn <= START;
-
-                // CX=0, повтор закончен
-                if (cx) begin
-
-                    // REPNZ|REPZ
-                    if (rep_ft) begin if (rep[0] == flags[ZF]) ip <= ip_start; end
-                    // REP:
-                    else ip <= ip_start;
-
-                end
-
-            end
 
         endcase
 

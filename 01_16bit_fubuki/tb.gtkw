@@ -1,15 +1,15 @@
 [*]
 [*] GTKWave Analyzer v3.3.116 (w)1999-2023 BSI
-[*] Thu Oct 10 08:35:01 2024
+[*] Fri Oct 11 05:35:35 2024
 [*]
 [dumpfile] "/home/fox/dev/03_x86/01_16bit_fubuki/tb.vcd"
-[dumpfile_mtime] "Thu Oct 10 08:34:59 2024"
-[dumpfile_size] 54182
+[dumpfile_mtime] "Fri Oct 11 05:35:29 2024"
+[dumpfile_size] 53768
 [savefile] "/home/fox/dev/03_x86/01_16bit_fubuki/tb.gtkw"
 [timestart] 0
 [size] 1920 1008
 [pos] -1 -1
-*-7.200000 379 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-7.200000 382 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] tb.
 [sst_width] 319
 [signals_width] 203
@@ -22,6 +22,9 @@ tb.CPU.clock
 tb.reset_n
 [color] 2
 tb.CPU.m0
+@22
+[color] 6
+tb.CPU.fn[3:0]
 @800200
 -IFACE
 @28
@@ -34,6 +37,12 @@ tb.CPU.out[7:0]
 tb.CPU.we
 @1000200
 -IFACE
+@800200
+-CTRL
+@28
+tb.CPU.rep[1:0]
+@1000200
+-CTRL
 @800200
 -REGS
 @22
@@ -53,17 +62,34 @@ tb.CPU.ss[15:0]
 -REGS
 @800200
 -ALU
+@28
+tb.CPU.alu[2:0]
 @22
 tb.CPU.wb[15:0]
 tb.CPU.op1[15:0]
 tb.CPU.op2[15:0]
-@29
+@28
 tb.CPU.size
+@23
+tb.CPU.alu_r[16:0]
+@c00022
+tb.CPU.flags[11:0]
+@28
+(0)tb.CPU.flags[11:0]
+(1)tb.CPU.flags[11:0]
+(2)tb.CPU.flags[11:0]
+(3)tb.CPU.flags[11:0]
+(4)tb.CPU.flags[11:0]
+(5)tb.CPU.flags[11:0]
+(6)tb.CPU.flags[11:0]
+(7)tb.CPU.flags[11:0]
+(8)tb.CPU.flags[11:0]
+(9)tb.CPU.flags[11:0]
+(10)tb.CPU.flags[11:0]
+(11)tb.CPU.flags[11:0]
+@1401200
+-group_end
 @1000200
 -ALU
-@28
-tb.CPU.rep[1:0]
-@22
-tb.CPU.flags[11:0]
 [pattern_trace] 1
 [pattern_trace] 0

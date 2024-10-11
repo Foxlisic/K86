@@ -17,10 +17,10 @@ initial begin
     clock_25 = 0;
     reset_n  = 0;
 
-    memory[20'h00000] = 8'h12;
-    memory[20'h00001] = 8'h55;
-    memory[20'h00002] = 8'h23;
-    memory[20'h00003] = 8'h44;
+    memory[20'h00000] = 8'hA4; memory[20'h00010] = 8'h03;
+    memory[20'h00001] = 8'hDD; memory[20'h00011] = 8'hDE;
+    memory[20'h00002] = 8'hEF; memory[20'h00012] = 8'h01;
+    memory[20'h00003] = 8'hBA; memory[20'h00013] = 8'hBE;
 
     // JMP FAR 0000:0000
     memory[20'hFFFF0] = 8'hEA;
