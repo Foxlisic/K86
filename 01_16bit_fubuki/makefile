@@ -4,6 +4,7 @@ all: ica
 
 ica:
 	fasm bios.asm bios.bin
+	php ../tools/hexer.php bios.bin tb.hex
 	iverilog -g2005-sv -o tb.qqq tb.v core.v
 	vvp tb.qqq -o tb.vcd > /dev/null
 	rm tb.qqq

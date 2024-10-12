@@ -172,16 +172,16 @@ else if (locked) case (mode)
 
                         eax[15:0] <= mult[15:0];
                         edx[15:0] <= mult[31:16];
-                        flags[ZF] <= mult[31:0] == 0;
-                        flags[CF] <= edx[15:0]  != 0;
-                        flags[OF] <= edx[15:0]  != 0;
+                        flags[ZF] <= mult[31:0]  == 0;
+                        flags[CF] <= mult[31:16] != 0;
+                        flags[OF] <= mult[31:16] != 0;
 
                     end else begin // 8 bit
 
                         eax[15:0] <= mult[15:0];
                         flags[ZF] <= mult[15:0] == 0;
-                        flags[CF] <= eax[15:8]  != 0;
-                        flags[OF] <= eax[15:8]  != 0;
+                        flags[CF] <= mult[15:8] != 0;
+                        flags[OF] <= mult[15:8] != 0;
 
                     end
 

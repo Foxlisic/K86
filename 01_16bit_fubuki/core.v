@@ -72,7 +72,7 @@ localparam
 
 localparam
     START = 0, LOAD = 1, MODRM = 2, INSTR = 3,  INTR = 4,
-    WBACK = 5, PUSH = 6, POP = 7,   UNDEF = 8;
+    WBACK = 5, PUSH = 6, POP = 7,   DIV   = 8,  UNDEF = 9;
 
 // -----------------------------------------------------------------------------
 wire [15:0] signex = {{8{in[7]}}, in};
@@ -81,6 +81,11 @@ wire [15:0] rin =
     in[2:0] == REG_DX ? dx : in[2:0] == REG_BX ? bx :
     in[2:0] == REG_SP ? sp : in[2:0] == REG_BP ? bp :
     in[2:0] == REG_SI ? si : di;
+
+// Умножение. Если выбран imulw, то знакорасширяются 16-битные значения
+wire [31:0] mult   = {imulw ? {16{op1[15]}} : 16'h0000, op1} * {imulw ? {16{op2[15]}} : 16'h0000, op2};
+wire        multzf = (size ? mult[31:0]  : mult[15:0]) == 0;
+wire        multcf = (size ? mult[31:16] : mult[15:8]) != 0;
 
 // Для строковых инструкции
 wire [15:0] sinc = flags[DF] ? si - (size ? 2 : 1) : si + (size ? 2 : 1);
@@ -114,6 +119,7 @@ reg [15:0]  segment, ea, wb;
 reg [ 7:0]  intr;
 reg [ 2:0]  alu;
 reg [15:0]  op1, op2, tmp16;
+reg         imulw;
 
 // Исполнительный блок
 // -----------------------------------------------------------------------------
@@ -121,20 +127,19 @@ always @(posedge clock)
 if (reset_n == 1'b0) begin
 
     fn      <= START;
-    ax      <= 16'h0201;
+    ax      <= 16'h0023;
+    bx      <= 16'h0002;
     cx      <= 16'h0008;
+    dx      <= 16'h0000;
+    sp      <= 16'h0000;
+    bp      <= 16'h0000;
+    si      <= 16'h0000;
+    di      <= 16'h0000;
     ip      <= cfg_ip0 ? 16'h0100 : 16'hFFF0;
     cs      <= cfg_ip0 ? 16'h0000 : 16'hF000;
     es      <= 16'h0000;
-    ds      <= 16'h0000;
-    ss      <= 16'h0000;
-    sp      <= 16'h0000;
-    si      <= 16'h0000;
-    di      <= 16'h0010;
-    sp      <= 16'h3800;
     ss      <= 16'h0000;
     ds      <= 16'h0000;
-    es      <= 16'h0000;
     iack    <= 1'b0;
     //             ODIT SZ A  P C
     flags   <= 12'b0000_0000_0010;
@@ -203,28 +208,28 @@ else if (ce) begin
             casex (in)
 
                  // Сегментные префиксы
-                8'b00100110: begin segment <= es; over <= 1; end
-                8'b00101110: begin segment <= cs; over <= 1; end
-                8'b00110110: begin segment <= ss; over <= 1; end
-                8'b00111110: begin segment <= ds; over <= 1; end
+                8'b0010_0110: begin segment <= es; over <= 1; end
+                8'b0010_1110: begin segment <= cs; over <= 1; end
+                8'b0011_0110: begin segment <= ss; over <= 1; end
+                8'b0011_1110: begin segment <= ds; over <= 1; end
                 // REPNZ, REPZ
-                8'b1111001x: begin rep <= in[1:0]; end
+                8'b1111_001x: begin rep <= in[1:0]; end
                 // FS, GS, OpSize, AdSize, Ext
-                8'b00001111,
-                8'b0110010x,
-                8'b0110011x,
+                8'b0000_1111,
+                8'b0110_010x,
+                8'b0110_011x,
                 // NOP, LOCK: FWAIT
-                8'b10010000,
-                8'b10011011,
-                8'b11110000: begin /* LOAD */ end
+                8'b1001_0000,
+                8'b1001_1011,
+                8'b1111_0000: begin /* LOAD */ end
                 // ALU rm | ALU a,imm
-                8'b00xxx0xx: begin fn <= MODRM; end
-                8'b00xxx10x: begin fn <= INSTR; end
+                8'b00xx_x0xx: begin fn <= MODRM; end
+                8'b00xx_x10x: begin fn <= INSTR; end
                 // MOV rm, i | LEA r, m
-                8'b1100011x,
-                8'b10001101: begin fn <= MODRM; cpen <= 0; end
+                8'b1100_011x,
+                8'b1000_1101: begin fn <= MODRM; cpen <= 0; end
                 // INC | DEC r
-                8'b0100xxxx: begin
+                8'b0100_xxxx: begin
 
                     fn      <= INSTR;
                     alu     <= in[3] ? ALU_SUB : ALU_ADD;
@@ -234,7 +239,7 @@ else if (ce) begin
 
                 end
                 // XCHG r, a
-                8'b10010xxx: begin
+                8'b1001_0xxx: begin
 
                     fn          <= WBACK;
                     ax          <= rin;
@@ -245,58 +250,58 @@ else if (ce) begin
 
                 end
                 // PUSH r
-                8'b01010xxx: begin fn <= PUSH; wb <= rin; end
+                8'b0101_0xxx: begin fn <= PUSH; wb <= rin; end
                 // POP r,s,etc.
-                8'b01011xxx, // POP r
-                8'b000xx111, // POP s
-                8'b10011101, // POPF
-                8'b1100101x, // RETF [i]
-                8'b1x001111, // POP rm; IRET; RET [i]
-                8'b1100001x: begin fn <= POP; fnext <= INSTR; end
+                8'b0101_1xxx, // POP r
+                8'b000x_x111, // POP s
+                8'b1001_1101, // POPF
+                8'b1100_101x, // RETF [i]
+                8'b1x00_1111, // POP rm; IRET; RET [i]
+                8'b1100_001x: begin fn <= POP; fnext <= INSTR; end
                 // PUSH s
-                8'b00000110: begin fn <= PUSH; wb <= es; end
-                8'b00001110: begin fn <= PUSH; wb <= cs; end
-                8'b00010110: begin fn <= PUSH; wb <= ss; end
-                8'b00011110: begin fn <= PUSH; wb <= ds; end
+                8'b0000_0110: begin fn <= PUSH; wb <= es; end
+                8'b0000_1110: begin fn <= PUSH; wb <= cs; end
+                8'b0001_0110: begin fn <= PUSH; wb <= ss; end
+                8'b0001_1110: begin fn <= PUSH; wb <= ds; end
                 // PUSHF
-                8'b10011100: begin fn <= PUSH; wb <= flags; end
+                8'b1001_1100: begin fn <= PUSH; wb <= flags; end
                 // CLx/STx, CMC
-                8'b1111100x: begin fn <= START; flags[CF] <= in[0]; end
-                8'b1111101x: begin fn <= START; flags[IF] <= in[0]; end
-                8'b1111110x: begin fn <= START; flags[DF] <= in[0]; end
-                8'b11110101: begin fn <= START; flags[CF] <= ~flags[CF]; end
+                8'b1111_100x: begin fn <= START; flags[CF] <= in[0]; end
+                8'b1111_101x: begin fn <= START; flags[IF] <= in[0]; end
+                8'b1111_110x: begin fn <= START; flags[DF] <= in[0]; end
+                8'b1111_0101: begin fn <= START; flags[CF] <= ~flags[CF]; end
                 // SAHF, LAHF
-                8'b10011110: begin fn <= START; flags     <= ax[15:8]; end
-                8'b10011111: begin fn <= START; ax[15:8]  <= flags[7:0] | 2; end
+                8'b1001_1110: begin fn <= START; flags     <= ax[15:8]; end
+                8'b1001_1111: begin fn <= START; ax[15:8]  <= flags[7:0] | 2; end
                 // SALC
-                8'b11010110: begin fn <= START; ax[ 7:0]  <= {8{flags[CF]}}; end
+                8'b1101_0110: begin fn <= START; ax[ 7:0]  <= {8{flags[CF]}}; end
                 // HALT
-                8'b11110100: begin fn <= START; ip <= ip; end
+                8'b1111_0100: begin fn <= START; ip <= ip; end
                 // Grp#1 ALU; XCHG rm, r
-                8'b100000xx,
-                8'b1000011x: begin fn <= MODRM; dir <= 0; end
+                8'b1000_00xx,
+                8'b1000_011x: begin fn <= MODRM; dir <= 0; end
                 // TEST rm | TEST a,i
-                8'b1000010x: begin fn <= MODRM; alu <= ALU_AND; end
+                8'b1000_010x: begin fn <= MODRM; alu <= ALU_AND; end
                 // CBW, CWD
-                8'b10011000: begin fn <= START; ax[15:8] <= {8{ax[7]}}; end
-                8'b10011001: begin fn <= START; dx       <= {16{ax[15]}}; end
+                8'b1001_1000: begin fn <= START; ax[15:8] <= {8{ax[7]}}; end
+                8'b1001_1001: begin fn <= START; dx       <= {16{ax[15]}}; end
                 // MOV s,rm
-                8'b10001110: begin fn <= MODRM; size <= 1; end
+                8'b1000_1110: begin fn <= MODRM; size <= 1; end
                 // XLATB
-                8'b11010111: begin fn <= INSTR; ea <= bx + ax[7:0]; cp <= 1; end
+                8'b1101_0111: begin fn <= INSTR; ea <= bx + ax[7:0]; cp <= 1; end
                 // LES|LDS r,m
-                8'b1100010x: begin fn <= MODRM; size <= 1; dir <= 1; end
+                8'b1100_010x: begin fn <= MODRM; size <= 1; dir <= 1; end
                 // INT 1,3; INTO
-                8'b11110001: begin intr <= 1; fn <= INTR; end
-                8'b11001100: begin intr <= 3; fn <= INTR; end
-                8'b11001110: begin intr <= 4; fn <= flags[OF] ? INTR : START; end
+                8'b1111_0001: begin intr <= 1; fn <= INTR; end
+                8'b1100_1100: begin intr <= 3; fn <= INTR; end
+                8'b1100_1110: begin intr <= 4; fn <= flags[OF] ? INTR : START; end
                 // Grp#4|5; Сдвиги
-                8'b1111x11x,
-                8'b1100000x,
-                8'b110100xx: begin fn <= MODRM; dir <= 0; end
+                8'b1111_x11x,
+                8'b1100_000x,
+                8'b1101_00xx: begin fn <= MODRM; dir <= 0; end
                 // Jccc; JCXZ
-                8'b0111xxxx,
-                8'b11100011: begin
+                8'b0111_xxxx,
+                8'b1110_0011: begin
 
                     if ((branches[ in[3:1] ] == in[0] && !in[7]) || (in[7] && cx))
                          begin fn <= START; ip <= ip + 2; end
@@ -304,7 +309,7 @@ else if (ce) begin
 
                 end
                 // LOOP[NZ|Z]
-                8'b111000xx: begin
+                8'b1110_00xx: begin
 
                     // Если бит 1 равен 1, то ZF=bit[0] не имеет значения
                     if ((cx != 1) && (in[1] || flags[ZF] == in[0]))
@@ -315,7 +320,7 @@ else if (ce) begin
 
                 end
                 // MOVSx
-                8'b1010010x: begin
+                8'b1010_010x: begin
 
                     cp  <= repa;
                     fn  <= repa ? INSTR : START;
@@ -324,9 +329,9 @@ else if (ce) begin
 
                 end
                 // STOSx
-                8'b1010101x: begin fn <= repa ? INSTR : START; cp <= repa; end
+                8'b1010_101x: begin fn <= repa ? INSTR : START; cp <= repa; end
                 // LODSx
-                8'b1010110x: begin
+                8'b1010_110x: begin
 
                     cp <= repa;
                     ea <= flags[DF] ? si - repc : si + repc;
@@ -334,7 +339,7 @@ else if (ce) begin
 
                 end
                 // CMPSx
-                8'b1010011x: begin
+                8'b1010_011x: begin
 
                     fn  <= repa ? INSTR : START;
                     cp  <= repa;
@@ -343,7 +348,7 @@ else if (ce) begin
 
                 end
                 // SCASx
-                8'b1010111x: begin
+                8'b1010_111x: begin
 
                     fn  <= repa ? INSTR : START;
                     cp  <= repa;
@@ -485,14 +490,14 @@ else if (ce) begin
         // -------------------------------------------------------------
         INSTR: casex (opcode)
 
-            8'b00xxx0xx: begin              // <alu> rm
+            8'b00xx_x0xx: begin              // <alu> rm
 
                 wb      <= alu_r;
                 flags   <= alu_f;
                 fn      <= (alu != ALU_CMP) ? WBACK : START;
 
             end
-            8'b00xxx10x: case (s2)          // <alu> a, imm
+            8'b00xx_x10x: case (s2)          // <alu> a, imm
 
                 // Инициализация
                 0: begin
@@ -523,7 +528,7 @@ else if (ce) begin
                 end
 
             endcase
-            8'b1011xxxx: case (s2)          // MOV r, i
+            8'b1011_xxxx: case (s2)          // MOV r, i
 
                 // 8 bit
                 0: begin
@@ -550,13 +555,13 @@ else if (ce) begin
                 end
 
             endcase
-            8'b100010xx: begin              // MOV rm
+            8'b1000_10xx: begin              // MOV rm
 
                 wb <= op2;
                 fn <= WBACK;
 
             end
-            8'b1100011x: case (s2)          // MOV rm, i
+            8'b1100_011x: case (s2)          // MOV rm, i
 
                 // 8 bit
                 0: begin
@@ -570,7 +575,7 @@ else if (ce) begin
                 1: begin fn <= WBACK; cp <= 1; ip <= ip + 1; wb[15:8] <= in; end
 
             endcase
-            8'b10001101: begin              // LEA r16, m
+            8'b1000_1101: begin              // LEA r16, m
 
                 wb   <= ea;
                 size <= 1;
@@ -578,7 +583,7 @@ else if (ce) begin
                 fn   <= WBACK;
 
             end
-            8'b0100xxxx: begin              // INC | DEC r16
+            8'b0100_xxxx: begin              // INC | DEC r16
 
                 fn          <= WBACK;
                 modrm[5:3]  <= opcode[2:0];
@@ -587,7 +592,7 @@ else if (ce) begin
                 flags       <= {alu_f[11:1], flags[CF]};
 
             end
-            8'b01011xxx: begin              // POP r
+            8'b0101_1xxx: begin              // POP r
 
                 fn   <= WBACK;
                 size <= 1;
@@ -595,7 +600,7 @@ else if (ce) begin
                 modrm[5:3] <= opcode[2:0];
 
             end
-            8'b000xx111: begin              // POP s
+            8'b000x_x111: begin              // POP s
 
                 fn <= START;
 
@@ -607,7 +612,7 @@ else if (ce) begin
                 endcase
 
             end
-            8'b100000xx: case (s2)          // <alu> imm
+            8'b1000_00xx: case (s2)          // <alu> imm
 
                 // Считывание imm и номера кода операции
                 0: begin s2 <= 1; alu <= modrm[5:3]; cpen <= cp; cp <= 0; end
@@ -631,7 +636,7 @@ else if (ce) begin
                 end
 
             endcase
-            8'b101000xx: case (s2)          // MOV a,[m] | [m],a
+            8'b1010_00xx: case (s2)          // MOV a,[m] | [m],a
 
                 // Прочесть адрес
                 0: begin ea[ 7:0] <= in; ip <= ip + 1; s2 <= 1; end
@@ -647,13 +652,13 @@ else if (ce) begin
                 6: begin fn <= START; ax[15:8] <= in; end
 
             endcase
-            8'b1000010x: begin              // TEST rm,r
+            8'b1000_010x: begin              // TEST rm,r
 
                 flags <= alu_f;
                 fn    <= START;
 
             end
-            8'b100001xx: case (s2)          // XCHG rm,r
+            8'b1000_01xx: case (s2)          // XCHG rm,r
 
                 0: begin
 
@@ -674,13 +679,13 @@ else if (ce) begin
                 end
 
             endcase
-            8'b10011101: begin              // POPF
+            8'b1001_1101: begin              // POPF
 
                 fn      <= START;
                 flags   <= wb | 2;
 
             end
-            8'b1010100x: case (s2)          // TEST a,i
+            8'b1010_100x: case (s2)          // TEST a,i
 
                 // Считывание младшего байта
                 0: begin s2 <= size ? 1 : 2; alu <= ALU_AND; op1 <= ax; op2 <= in; ip <= ip + 1; end
@@ -692,21 +697,21 @@ else if (ce) begin
                 2: begin flags <= alu_f; fn <= START; end
 
             endcase
-            8'b0111xxxx,                    // Jccc
-            8'b111000xx,                    // LOOPNZ, JCXZ
-            8'b11101011: begin              // JMP b8
+            8'b0111_xxxx,                    // Jccc
+            8'b1110_00xx,                    // LOOPNZ, JCXZ
+            8'b1110_1011: begin              // JMP b8
 
                 fn <= START;
                 ip <= ip + 1 + signex;
 
             end
-            8'b11101001: case (s2)          // JMP b16
+            8'b1110_1001: case (s2)          // JMP b16
 
                 0: begin s2 <= 1;     ip <= ip + 1; ea[7:0] <= in; end
                 1: begin fn <= START; ip <= ip + 1 + {in, ea[7:0]}; end
 
             endcase
-            8'b11101010: case (s2)          // JMP far
+            8'b1110_1010: case (s2)          // JMP far
 
                 // Прочитаьть 4 байта для нового CS:IP
                 0: begin ip <= ip + 1; s2 <= 1; ea       <= in; end
@@ -715,38 +720,38 @@ else if (ce) begin
                 3: begin ip <= ea;     cs <= {in, op1[7:0]}; fn <= START; end
 
             endcase
-            8'b11101000: case (s2)          // CALL b16
+            8'b1110_1000: case (s2)          // CALL b16
 
                 0: begin s2 <= 1; ea <= in; ip <= ip + 1; end
                 1: begin fn <= PUSH; wb <= ip + 1; ip <= ip + 1 + {in, ea[7:0]}; end
 
             endcase
-            8'b11000011: begin              // RET
+            8'b1100_0011: begin              // RET
 
                 fn <= START;
                 ip <= wb;
 
             end
-            8'b11000010: case (s2)          // RET i16
+            8'b1100_0010: case (s2)          // RET i16
 
                 0: begin s2 <= 1; ea <= in; ip <= ip + 1; end
                 1: begin fn <= START; ip <= wb; sp <= sp + {in, ea[7:0]}; end
 
             endcase
-            8'b1100101x: case (s2)          // RETF; RETF i16
+            8'b1100_101x: case (s2)          // RETF; RETF i16
 
                 0: begin fn <= POP;   s2 <= 1;  op1 <= wb;  op2 <= in; ip <= ip + 1; end
                 1: begin fn <= START; cs <= wb; ip  <= op1; if (!opcode[0]) sp <= sp + {in, op2[7:0]}; end
 
             endcase
-            8'b11001111: case (s2)          // IRET
+            8'b1100_1111: case (s2)          // IRET
 
                 0: begin s2 <= 1; fn <= POP; ip <= wb; end
                 1: begin s2 <= 2; fn <= POP; cs <= wb; end
                 2: begin fn <= START; flags <= wb[11:0] | 2; end
 
             endcase
-            8'b10001100: begin              // MOV rm,s
+            8'b1000_1100: begin              // MOV rm,s
 
                 fn   <= WBACK;
                 size <= 1;
@@ -759,7 +764,7 @@ else if (ce) begin
                 endcase
 
             end
-            8'b10001110: begin              // MOV s,rm
+            8'b1000_1110: begin              // MOV s,rm
 
                 fn <= START;
                 case (modrm[4:3])
@@ -770,7 +775,7 @@ else if (ce) begin
                 endcase
 
             end
-            8'b10011010: case (s2)          // CALLF b16
+            8'b1001_1010: case (s2)          // CALLF b16
 
                 0: begin s2 <= 1;   ip <= ip + 1; op1[ 7:0] <= in; end
                 1: begin s2 <= 2;   ip <= ip + 1; op1[15:8] <= in; end
@@ -780,7 +785,7 @@ else if (ce) begin
                 5: begin ip <= op1; fn <= START; cs <= op2;  end
 
             endcase
-            8'b1100010x: case (s2)          // LES|LDS r,m
+            8'b1100_010x: case (s2)          // LES|LDS r,m
 
                 0: begin
 
@@ -801,37 +806,37 @@ else if (ce) begin
                 end
 
             endcase
-            8'b10001111: case (s2)          // POP rm
+            8'b1000_1111: case (s2)          // POP rm
 
-                0: begin s2 <= 1; cpen <= 0; fn <= MODRM; dir <= 0; end
+                0: begin s2 <= 1; fn <= MODRM; cpen  <= 0; dir <= 0; end
                 1: begin cp <= 1; fn <= WBACK; fnext <= START; end
 
             endcase
-            8'b011010x0: case (s2)          // PUSH i
+            8'b0110_10x0: case (s2)          // PUSH i
 
-                0: begin s2 <= opcode[1] ? 2 : 1; wb <= signex; ip <= ip + 1; end
-                1: begin s2 <= 2; wb[15:8] <= in; ip <= ip + 1; end
+                0: begin s2 <= opcode[1] ? 2 : 1; wb       <= signex; ip <= ip + 1; end
+                1: begin s2 <= 2;                 wb[15:8] <= in;     ip <= ip + 1; end
                 2: begin fn <= PUSH; fnext <= START; end
 
             endcase
-            8'b11010111: begin              // XLATB
+            8'b1101_0111: begin              // XLATB
 
                 fn      <= START;
                 ax[7:0] <= in;
 
             end
-            8'b11001101: begin              // INT i
+            8'b1100_1101: begin              // INT i
 
                 fn      <= INTR;
                 intr    <= in;
                 ip      <= ip + 1;
 
             end
-            8'b1100000x,
-            8'b110100xx: case (s2)          // Grp#2 Сдвиги
+            8'b1100_000x,
+            8'b1101_00xx: case (s2)          // Grp#2 Сдвиги
 
                 // Выбор второго операнда
-                // Если тут был указатель на памятьЮ, то сбросить его
+                // Если тут был указатель на память, то сбросить его
                 0: if (cp) cp <= 0; else
                 begin
 
@@ -857,7 +862,7 @@ else if (ce) begin
                 end
 
             endcase
-            8'b1110x10x: case (s2)          // IN a,p
+            8'b1110_x10x: case (s2)          // IN a,p
 
                 // Чтение номера порта
                 0: begin
@@ -889,7 +894,7 @@ else if (ce) begin
                 end
 
             endcase
-            8'b1110x11x: case (s2)          // OUT p,a
+            8'b1110_x11x: case (s2)          // OUT p,a
 
                 0: begin
 
@@ -913,7 +918,7 @@ else if (ce) begin
                 end
 
             endcase
-            8'b1111011x: case (modrm[5:3])  // Grp#3
+            8'b1111_011x: case (modrm[5:3])  // Grp#3
 
                 // TEST imm8/16
                 0, 1: case (s2)
@@ -936,8 +941,59 @@ else if (ce) begin
 
                 endcase
 
+                // MUL, IMUL rm [IMUL знакорасширяется op1/op2]
+                4, 5: case (s2)
+
+                    0: begin
+
+                        s2      <= 1;
+                        op1     <= size ? op1 : {modrm[3] ? {8{op1[7]}} : 8'h00, op1[7:0]};
+                        op2     <= size ? ax  : {modrm[3] ? {8{ ax[7]}} : 8'h00,  ax[7:0]};
+                        imulw   <= modrm[3];
+
+                    end
+                    1: begin
+
+                        fn <= START;
+
+                        if (size) {dx, ax} <= mult[31:0]; else ax <= mult[15:0];
+                        flags[ZF] <= multzf;
+                        flags[CF] <= multcf;
+                        flags[OF] <= multcf;
+
+                    end
+
+                endcase
+
+                // DIV [op1, op2] Беззнаковое деление
+                6: case (s2)
+
+                    0: begin
+
+                        s2   <= 1;
+                        fn   <= DIV;
+                        divr <= 0;
+                        op1  <= size ? 16 : 8;
+                        diva <= size ? {dx, ax} : {ax, 16'h0000};
+                        divb <= op1;
+
+                    end
+
+                    1: begin
+
+                        // #0 Overflow если в старшем слове или байте есть ненулевое значение
+                        fn   <= (size ? diva[31:16] : diva[15:8]) ? INTR : START;
+                        intr <= 0;
+
+                        if (size) {dx, ax} <= {divr[15:0], diva[15:0]};
+                        else      ax       <= {divr[ 7:0], diva[ 7:0]};
+
+                    end
+
+                endcase
+
             endcase
-            8'b1111111x: case (modrm[5:3])  // Grp#4|5
+            8'b1111_111x: case (modrm[5:3])  // Grp#4|5
 
                 // INC|DEC rm
                 0,
@@ -981,12 +1037,12 @@ else if (ce) begin
                 endcase
 
                 // PUSH rm
-                6: begin wb <= op1; fn <= PUSH; end
+                6: begin fn <= PUSH; wb <= op1; end
                 7: begin fn <= UNDEF; end
 
             endcase
             // -----------------------------------------------------
-            8'b1010101x: case (s2)          // STOSx :: 2*+(2/1)*CX
+            8'b1010_101x: case (s2)          // STOSx :: 2*+(2/1)*CX
 
                 0: begin // STOSB
 
@@ -1020,7 +1076,7 @@ else if (ce) begin
                 end
 
             endcase
-            8'b1010110x: case (s2)          // LODSx :: 3* или 4*
+            8'b1010_110x: case (s2)          // LODSx :: 3* или 4*
 
                 0: begin
 
@@ -1035,7 +1091,7 @@ else if (ce) begin
                 1: begin ax[15:8] <= in; fn <= START; end
 
             endcase
-            8'b1010010x: case (s2)          // MOVSx :: 2*+4/2*CX
+            8'b1010_010x: case (s2)          // MOVSx :: 2*+4/2*CX
 
                 // Запись младшего байта [size=0]
                 0: begin
@@ -1079,7 +1135,7 @@ else if (ce) begin
                 end
 
             endcase
-            8'b1010011x: case (s2)          // CMPSx :: (3|5)*CX+2*
+            8'b1010_011x: case (s2)          // CMPSx :: (3|5)*CX+2*
 
                 // Чтение DS:SI
                 0: begin
@@ -1114,7 +1170,7 @@ else if (ce) begin
                 end
 
             endcase
-            8'b1010111x: case (s2)          // SCASx :: 2*+(2|3)*CX
+            8'b1010_111x: case (s2)          // SCASx :: 2*+(2|3)*CX
 
                 // Прочитать младший байт
                 0: begin
@@ -1217,13 +1273,33 @@ else if (ce) begin
 
         endcase
 
-        // Деление op1 на op2, size -> wb
-        // DIV: case (s5)
-        // endcase
+        // Деление diva на divb; повторять op1 раз (количество сдвигов)
+        // divr = 0 на старте и является остатком; diva это результат
+        DIV: begin
+
+            {divr, diva} <= {div2r, div2a};
+
+            fn  <= op1 != 1 ? DIV : INSTR;
+            op1 <= op1 - 1;
+
+        end
 
     endcase
 
 end
+
+// ---------------------------------------------------------------------
+reg  [31:0] diva, divb, divr;
+
+// ШАГ 1,2
+wire [31:0] div1  = {divr [30:0], diva [31]};       // Сдвиг
+wire [31:0] div2  = {div1r[30:0], div1a[31]};
+wire [32:0] div1c = div1 - divb;                    // Сравнение после сдвига
+wire [32:0] div2c = div2 - divb;
+wire [31:0] div1r = div1c[32] ? div1 : div1c[31:0]; // Вычисление нового остатка
+wire [31:0] div2r = div2c[32] ? div2 : div2c[31:0];
+wire [31:0] div1a = {diva [30:0], ~div1c[32]};      // Заполнение результата
+wire [31:0] div2a = {div1a[30:0], ~div2c[32]};
 
 // Арифметико-логическое устройство
 // ---------------------------------------------------------------------
@@ -1263,6 +1339,7 @@ wire [11:0] alu_f = {
     /* CF  */ alu_cf & ~is_lgc
 };
 
+// ---------------------------------------------------------------------
 // Сдвиговый регистр
 // ---------------------------------------------------------------------
 

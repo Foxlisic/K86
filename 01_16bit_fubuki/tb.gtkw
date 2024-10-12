@@ -1,15 +1,15 @@
 [*]
 [*] GTKWave Analyzer v3.3.116 (w)1999-2023 BSI
-[*] Fri Oct 11 05:35:35 2024
+[*] Sat Oct 12 16:44:23 2024
 [*]
 [dumpfile] "/home/fox/dev/03_x86/01_16bit_fubuki/tb.vcd"
-[dumpfile_mtime] "Fri Oct 11 05:35:29 2024"
-[dumpfile_size] 53768
+[dumpfile_mtime] "Sat Oct 12 16:42:27 2024"
+[dumpfile_size] 74044
 [savefile] "/home/fox/dev/03_x86/01_16bit_fubuki/tb.gtkw"
 [timestart] 0
 [size] 1920 1008
 [pos] -1 -1
-*-7.200000 382 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-7.500000 528 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] tb.
 [sst_width] 319
 [signals_width] 203
@@ -25,6 +25,7 @@ tb.CPU.m0
 @22
 [color] 6
 tb.CPU.fn[3:0]
+tb.CPU.s2[3:0]
 @800200
 -IFACE
 @28
@@ -70,7 +71,7 @@ tb.CPU.op1[15:0]
 tb.CPU.op2[15:0]
 @28
 tb.CPU.size
-@23
+@22
 tb.CPU.alu_r[16:0]
 @c00022
 tb.CPU.flags[11:0]
@@ -89,7 +90,17 @@ tb.CPU.flags[11:0]
 (11)tb.CPU.flags[11:0]
 @1401200
 -group_end
+@22
+tb.CPU.mult[31:0]
 @1000200
 -ALU
+@800200
+-DIV
+@23
+tb.CPU.diva[31:0]
+tb.CPU.divb[31:0]
+tb.CPU.divr[31:0]
+@1000200
+-DIV
 [pattern_trace] 1
 [pattern_trace] 0
