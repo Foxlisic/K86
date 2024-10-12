@@ -334,9 +334,24 @@ else if (ce) begin
 
                 end
                 // CMPSx
-                8'b1010011x: begin fn <= repa ? INSTR : START; cp <= repa; ea <= si; alu <= ALU_SUB; end
+                8'b1010011x: begin
+
+                    fn  <= repa ? INSTR : START;
+                    cp  <= repa;
+                    ea  <= si;
+                    alu <= ALU_SUB;
+
+                end
                 // SCASx
-                8'b1010111x: begin fn <= repa ? INSTR : START; cp <= repa; ea <= di; alu <= ALU_SUB; segment <= es; end
+                8'b1010111x: begin
+
+                    fn  <= repa ? INSTR : START;
+                    cp  <= repa;
+                    ea  <= di;
+                    alu <= ALU_SUB;
+                    segment <= es;
+
+                end
                 // Определить наличие байта ModRM для опкода
                 default: casex (in)
 
