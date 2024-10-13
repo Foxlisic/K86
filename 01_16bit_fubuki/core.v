@@ -966,16 +966,24 @@ else if (ce) begin
                 endcase
 
                 // DIV [op1, op2] Беззнаковое деление
-                6: case (s2)
+                // IDIV Деление со знаком
+                6, 7: case (s2)
 
                     0: begin
 
                         s2   <= 1;
                         fn   <= DIV;
                         divr <= 0;
-                        op1  <= size ? 16 : 8;
-                        diva <= size ? {dx, ax} : {ax, 16'h0000};
-                        divb <= op1;
+                        op1  <= size ? 8 : 4;
+
+                        if (modrm[3]) begin
+                            diva <= divi[31] ? -divi : divi;
+                            divb <= size ? (op1[15] ? -op1 : op1) : (op1[7] ? -op1[7:0] : op1[7:0]);
+                            sign <= diva ^ divb;
+                        end else begin
+                            diva <= divi;
+                            divb <= op1;
+                        end
 
                     end
 
@@ -1277,7 +1285,7 @@ else if (ce) begin
         // divr = 0 на старте и является остатком; diva это результат
         DIV: begin
 
-            {divr, diva} <= {div2r, div2a};
+            {divr, diva} <= {div4r, div4a};
 
             fn  <= op1 != 1 ? DIV : INSTR;
             op1 <= op1 - 1;
@@ -1289,17 +1297,27 @@ else if (ce) begin
 end
 
 // ---------------------------------------------------------------------
+reg         sign;
 reg  [31:0] diva, divb, divr;
+wire [31:0] divi  = size ? {dx, ax} : {ax, 16'h0000};
 
-// ШАГ 1,2
+// ШАГ 1,2,3,4
 wire [31:0] div1  = {divr [30:0], diva [31]};       // Сдвиг
 wire [31:0] div2  = {div1r[30:0], div1a[31]};
+wire [31:0] div3  = {div2r[30:0], div2a[31]};
+wire [31:0] div4  = {div3r[30:0], div3a[31]};
 wire [32:0] div1c = div1 - divb;                    // Сравнение после сдвига
 wire [32:0] div2c = div2 - divb;
+wire [32:0] div3c = div3 - divb;
+wire [32:0] div4c = div4 - divb;
 wire [31:0] div1r = div1c[32] ? div1 : div1c[31:0]; // Вычисление нового остатка
 wire [31:0] div2r = div2c[32] ? div2 : div2c[31:0];
+wire [31:0] div3r = div3c[32] ? div3 : div3c[31:0];
+wire [31:0] div4r = div4c[32] ? div4 : div4c[31:0];
 wire [31:0] div1a = {diva [30:0], ~div1c[32]};      // Заполнение результата
 wire [31:0] div2a = {div1a[30:0], ~div2c[32]};
+wire [31:0] div3a = {div2a[30:0], ~div3c[32]};
+wire [31:0] div4a = {div3a[30:0], ~div4c[32]};
 
 // Арифметико-логическое устройство
 // ---------------------------------------------------------------------
