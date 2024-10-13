@@ -1,6 +1,6 @@
 VINC=/usr/share/verilator/include
 
-all: ica
+all: ica tbc
 
 ica:
 	fasm bios.asm bios.bin

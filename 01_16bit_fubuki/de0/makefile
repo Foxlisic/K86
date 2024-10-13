@@ -1,4 +1,4 @@
-all: cdb pgm
+all: syn
 pgm:
 	quartus_pgm -m jtag -o "p;output_files/de0.sof"
 syn:
@@ -8,6 +8,7 @@ syn:
 cdb:
 	quartus_cdb de0 -c de0 --update_mif
 	quartus_asm --read_settings_files=on --write_settings_files=off de0 -c de0
+	make pgm
 sta:
 	quartus_sta de0 -c de0
 clean:

@@ -75,11 +75,36 @@ assign HEX3 = 7'b1111111;
 assign HEX4 = 7'b1111111;
 assign HEX5 = 7'b1111111;
 
-// Генератор частот
-// -----------------------------------------------------------------------------
+// Объявление проводов
+// ---------------------------------------------------------------------
+wire        clock_25, clock_100, clock_50, locked;
+wire [19:0] address;
+wire [ 7:0] port_i, port_o, irq_in, out;
+wire        port_w, port_r, irq_sig, we;
+wire [15:0] port_a;
+wire [11:0] cursor;
+wire        videomode; // 0=TEXT; 1=320x200
 
-wire locked;
-wire clock_25;
+// проводка к памяти
+wire [15:0] main_a;
+wire [15:0] video_a;
+wire [11:0] font_a;
+wire [ 7:0] font_q, video_q;
+wire [ 7:0] in_main, in_font, in_video;
+
+// Совмещенная видеопамять. При записи в B8000h записывает в 8000h
+wire we_main  = (address <  20'h10000);
+wire we_video = (address >= 20'hA0000 && address < 20'hB92C0); // 80x30 символов
+wire we_font  = (address >= 20'hBC000 && address < 20'hBD000);
+
+// Выбор источника памяти
+wire [ 7:0] in =
+    we_main  ? in_main  :
+    we_video ? in_video :
+    we_font  ? in_font  : 8'hFF;
+
+// Генератор частот
+// ---------------------------------------------------------------------
 
 pll PLL0
 (
@@ -91,91 +116,35 @@ pll PLL0
 );
 
 // Интерфейс процессора
-// -----------------------------------------------------------------------------
-
-wire [19:0] address;
-wire [ 7:0] out, port_i, port_o, irq_in;
-wire        we, port_w, port_r, irq;
-wire [15:0] port_a;
+// ---------------------------------------------------------------------
 
 core C86
 (
-    // Основной контур для процессора
-    .clock          (clock_25),
-    .ce             (1'b1),
-    .reset_n        (locked),
-    .address        (address),
-    .in             (in),
-    .out            (out),
-    .we             (we),
+    // Основное
+    .clock      (clock_25),
+    .ce         (1'b0),             // 1'b1
+    .reset_n    (locked),
+    .address    (address),
+    .in         (in),
+    .out        (out),
+    .we         (we),
 
     // Порты ввода-вывода
-    .port_a         (port_a),
-    .port_w         (port_w),
-    .port_r         (port_r),
-    .port_i         (port_i),
-    .port_o         (port_o),
+    .port_a     (port_a),
+    .port_w     (port_w),
+    .port_r     (port_r),
+    .port_i     (port_i),
+    .port_o     (port_o),
 
-    // PIC: Программируемый контроллер прерываний
-    .irq            (irq),
-    .irq_in         (irq_in)
+    // PIC
+    .irq        (irq_sig),
+    .irq_in     (irq_in)
 );
-
-// Внутрисхемная память
-// -----------------------------------------------------------------------------
-
-wire [12:0] m1_a_video;
-wire [7:0]  m1_i_video, m1_i, m2_i, m3_i;
-
-// Области памяти
-wire        is_m_common = address < 20'h20000; // 128K
-wire        is_m_bios   = address > 20'hF0000; // 64K
-wire        is_m_video  = address >= 20'hB8000 && address < 20'hBA000;
-
-// Память видеоадаптера
-mga M1_GA
-(
-    .clock  (clock_100),
-    .a0     (address[12:0]),
-    .d0     (out),
-    .w0     (we && is_m_video),
-    .q0     (m1_i),
-    .a1     (m1_a_video),
-    .q1     (m1_i_video)
-);
-
-// Обшая память 128К
-mcom M2_COMM
-(
-    .clock  (clock_100),
-    .a0     (address[16:0]),
-    .d0     (out),
-    .w0     (we && is_m_common),
-    .q0     (m2_i)
-);
-
-// БИОС 16К :: Пока что так
-mbios M2_BIOS
-(
-    .clock  (clock_100),
-    .a0     (address[11:0]),
-    .q0     (m3_i)
-);
-
-// Роутер памяти
-wire [7:0]  in =
-
-    is_m_bios   ? m3_i :    // BIOS 64К (MIRROR 32k)
-    is_m_common ? m2_i :    // COMMON
-    is_m_video  ? m1_i :    // VIDEO 4K
-    8'h00;                  // OTHER
 
 // Видеопроцессор
-// -----------------------------------------------------------------------------
+// ---------------------------------------------------------------------
 
-wire [10:0] cursor;
-
-ga VIDEO
+video VIDEO
 (
     .clock      (clock_25),
     .r          (VGA_R),
@@ -183,16 +152,57 @@ ga VIDEO
     .b          (VGA_B),
     .hs         (VGA_HS),
     .vs         (VGA_VS),
-    .address    (m1_a_video),
-    .data       (m1_i_video),
-    .cursor     (cursor)
+    // ---
+    .videomode  (videomode),
+    .cursor     (cursor),
+    .font_a     (font_a),
+    .font_q     (font_q),
+    .video_a    (video_a),
+    .video_q    (video_q)
 );
 
 // Клавиатура
-// -----------------------------------------------------------------------------
+// ---------------------------------------------------------------------
+
+// Память
+// ---------------------------------------------------------------------
+
+// 64K основной памяти
+mem_main M0
+(
+    .clock      (clock_100),
+    .a          (address[15:0]),
+    .q          (in_main),
+    .d          (out),
+    .w          (we && we_main),
+);
+
+// 64K видеопамяти
+mem_video M1
+(
+    .clock      (clock_100),
+    .a          (address[15:0]),
+    .q          (in_video),
+    .d          (out),
+    .w          (we && we_video),
+    .ax         (video_a),
+    .qx         (video_q)
+);
+
+// 4K шрифты
+mem_font M2
+(
+    .clock      (clock_100),
+    .a          (address[11:0]),
+    .q          (in_font),
+    .d          (out),
+    .w          (we && we_font),
+    .ax         (font_a),
+    .qx         (font_q)
+);
 
 endmodule
 
 `include "../core.v"
-`include "../ga.v"
+`include "../video.v"
 `include "../ps2.v"

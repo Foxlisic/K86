@@ -27,3 +27,5 @@ obj_dir
 *.o
 *.elf
 *.lst
+*.qdf
+mif_main.mif
