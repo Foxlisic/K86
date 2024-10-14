@@ -95,6 +95,12 @@ public:
         mod_core->cfg_ip0 = 0;
         mod_core->reset_n = 0;
 
+        /* Генерация MIF-файла
+        for (int i = 0; i < 256; i++) {
+            printf("  %02X: %04X;\n", i, ((dacdef[i] & 0xF00000) >> 12) + ((dacdef[i] & 0xF000) >> 8) + ((dacdef[i] & 0xF0) >> 4));
+        }
+        */
+
         while (cid < argc)
         {
             if (argv[cid][0] == '-') {

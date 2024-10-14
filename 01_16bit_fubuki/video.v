@@ -61,14 +61,9 @@ always @(posedge clock) begin
     Y <= xmax ? (ymax ? 0 : Y + 1) : Y;
 
     // Вывод окна видеоадаптера
-    if (disp)
-    begin
-         // {r, g, b} <= maskbit ? (attr[7] & flash ? bgcolor : frcolor) : bgcolor;
-         {r, g, b} <= clrt;
-    end
-    else {r, g, b} <= 12'h000;
+    {r, g, b} <= disp ? clrt : 12'h000;
 
-    // ----
+    // Процессинг
     if (videomode == 0) begin
 
         case (x[2:0])

@@ -5,11 +5,15 @@
  * Аргумент 1: Размер памяти (256k = 262144)
  * Аргумент 2: bin-файл
  * Аргумент 3: Куда выгрузить
+ * Аргумент 4: BIOS 256 байт
  */
 
 $size = (int) $argv[1];
 $data = file_get_contents($argv[2]);
+$bios = empty($argv[4]) ? "" : str_pad(file_get_contents($argv[4]), 256, chr(0));
+$data = $bios . $data;
 $len  = strlen($data);
+
 if ($size < 1024) $size *= 1024;
 
 if (empty($size)) { echo "size required\n"; exit(1); }
