@@ -15,7 +15,9 @@ module video
     output  reg [15:0]  video_a,
     input       [ 7:0]  video_q,
     output  reg [11:0]  font_a,
-    input       [ 7:0]  font_q
+    input       [ 7:0]  font_q,
+    output  reg [ 7:0]  dac_a,
+    input       [11:0]  dac_q
 );
 // ---------------------------------------------------------------------
 parameter
@@ -44,6 +46,7 @@ reg  [ 7:0] attr, char;
 reg         flash;
 wire [11:0] at   = xc[9:3] + y[8:4]*80;
 wire        mask = char[~x[2:0]] || (y[3:0] >= 14 && at == cursor+1 && flash);
+reg  [11:0] clr13; // Для 320x200 видеорежима
 wire [ 3:0] clr  = mask ? attr[3:0] : attr[6:4];
 wire [11:0] clrt =
     clr == 0 ? 12'h111 :
@@ -59,10 +62,19 @@ always @(posedge clock) begin
     Y <= xmax ? (ymax ? 0 : Y + 1) : Y;
 
     // Вывод окна видеоадаптера
-    {r, g, b} <= disp ? clrt : 12'h000;
+    {r, g, b} <= disp ? (videomode ? clr13 : clrt) : 12'h000;
 
-    // Процессинг
-    if (videomode == 0) begin
+    // 320x200
+    if (videomode) begin
+
+        case (x[0])
+        0: begin dac_a <= video_q; end
+        1: begin clr13 <= dac_q; video_a <= 320*y[8:1] + ((X - hz_back + 4) >> 1); end
+        endcase
+
+    end
+    // 80x25
+    else begin
 
         case (x[2:0])
 

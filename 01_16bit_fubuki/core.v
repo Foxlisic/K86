@@ -109,7 +109,7 @@ wire [7:0] branches =
 
 // Управляющие регистры
 // -----------------------------------------------------------------------------
-reg         cp, size, dir, cpen, over, rep_ft, iack, trace_ff;
+reg         cp, size, dir, cpen, over, iack, trace_ff;
 reg [ 1:0]  rep;
 reg [ 3:0]  fn, fnext, s1, s2;
 reg [ 7:0]  opcode, modrm;
@@ -166,7 +166,6 @@ else if (ce) begin
             rep         <= 2'b0;        // Нет префикса REP:
             ea          <= 0;           // Эффективный адрес
             we          <= 0;           // Разрешение записи
-            rep_ft      <= 0;           // =0 REP, =1 REPZ|NZ
             wb          <= 0;           // Данные на запись (modrm | reg)
 
             // IRQ прерывание вызывается, если счетчик изменился (iack != irq_signal) и IF=1

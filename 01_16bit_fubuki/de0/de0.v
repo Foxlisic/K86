@@ -79,18 +79,19 @@ assign HEX5 = 7'b1111111;
 // ---------------------------------------------------------------------
 wire        clock_25, clock_100, clock_50, locked;
 wire [19:0] address;
-wire [ 7:0] port_i, port_o, irq_in, out;
-wire        port_w, port_r, irq_sig, we;
+wire [ 7:0] port_i, port_o, out;
+wire        port_w, port_r, we;
 wire [15:0] port_a;
 wire [11:0] cursor;
-wire        videomode; // 0=TEXT; 1=320x200
+reg         videomode;  // 0=TEXT; 1=320x200
 
 // DAC для 256 цветов
 reg  [ 7:0] dac_a;
 reg  [15:0] dac_d;
-wire [ 7:0] dac_av;
-wire [15:0] dac_q, dac_qv;
+wire [15:0] dac_q;
 reg         dac_w;
+wire [ 7:0] dac_av;
+wire [15:0] dac_qv;
 
 // проводка к памяти
 wire [15:0] main_a;
@@ -98,6 +99,10 @@ wire [15:0] video_a;
 wire [11:0] font_a;
 wire [ 7:0] font_q, video_q;
 wire [ 7:0] in_main, in_font, in_video;
+
+// Клавиатура
+wire [ 7:0] kb_data;
+wire        kb_done;
 
 // Совмещенная видеопамять. При записи в B8000h записывает в 8000h
 wire we_main  = (address <  20'h10000);
@@ -166,11 +171,22 @@ video VIDEO
     .font_a     (font_a),
     .font_q     (font_q),
     .video_a    (video_a),
-    .video_q    (video_q)
+    .video_q    (video_q),
+    .dac_a      (dac_av),
+    .dac_q      (dac_qv)
 );
 
 // Клавиатура
 // ---------------------------------------------------------------------
+
+ps2 KBD
+(
+    .clock      (clock_25),
+    .ps_clock   (PS2_CLK),
+    .ps_data    (PS2_DAT),
+    .done       (kb_done),
+    .data       (kb_data)
+);
 
 // Память
 // ---------------------------------------------------------------------
@@ -209,15 +225,90 @@ mem_font M2
     .qx         (font_q)
 );
 
-// Палитра
+// 1K Палитра
 mem_dac M3
 (
     .clock      (clock_100),
     .a          (dac_a),
-    .d          (dac_o),
+    .d          (dac_d),
     .w          (dac_w),
     .q          (dac_q),
+    .ax         (dac_av),
+    .qx         (dac_qv),
 );
+
+// Управление портами и IRQ
+// ---------------------------------------------------------------------
+
+reg [ 1:0]  dac_cnt;
+reg [ 2:0]  vect8;
+reg [ 4:0]  timer_sub;
+reg [15:0]  timer_cnt;
+reg [15:0]  timer_max;
+reg [ 7:0]  irq_in;
+reg         irq_pend;           // 0=Прерывание не выполняется =1 В процессе
+reg         irq_sig;            // FlipFlop для процессора
+
+always @(posedge clock_25)
+begin
+
+    dac_w <= 0;
+
+    // Срабатывание IRQ
+    // Пока прерывание не будет обработано (irq_pend), новое вызвано не будет
+    // -----------------------------------------------------------------
+
+    if (vect8 && irq_pend == 0) begin
+
+        irq_sig  <= ~irq_sig;
+        irq_pend <= 1;
+
+        if      (vect8[0]) begin vect8[0] <= 0; irq_in <= 8; end    // Таймер
+        else if (vect8[1]) begin vect8[1] <= 0; irq_in <= 9; end    // Клавиатура
+        else if (vect8[2]) begin vect8[2] <= 0; irq_in <= 10; end   // VRetrace
+
+    end
+
+    // Запись в порты
+    // -----------------------------------------------------------------
+
+    if (port_w)
+    case (port_a)
+
+    // Контроллер прерываний
+    16'h0020: begin irq_pend <= 0; end // EOI
+    16'h00A0: begin end // IRQMASK
+
+    // Запись палитры
+    16'h03C8: begin dac_a <= port_o; dac_cnt <= 0; end
+    16'h03C9: case (dac_cnt)
+        0: begin dac_cnt <= 1; dac_d[11:8] <= port_o[5:2]; end
+        1: begin dac_cnt <= 2; dac_d[ 7:4] <= port_o[5:2]; end
+        2: begin dac_cnt <= 0; dac_d[ 3:0] <= port_o[5:2]; dac_w <= 1; end
+    endcase
+
+    // Переключение видеорежима
+    16'h03D8: begin videomode <= port_o[1]; end
+    endcase
+
+    // Установка PEND для прерываний
+    // -----------------------------------------------------------------
+
+    // Клавиатура
+    if (kb_done) vect8[1] <= 1;
+
+    // Снижение скорости 25 Мгц до 1,25 мгц
+    if (timer_sub == 20) begin
+
+        timer_sub <= 0;
+        timer_cnt <= timer_cnt + 1;
+
+        // Срабатывание таймера, достигая timer_max (это ~18 Гц)
+        if (timer_cnt == timer_max) begin vect8[0] <= 1; timer_cnt <= 1; end
+
+    end else timer_sub <= timer_sub + 1;
+
+end
 
 endmodule
 

@@ -3,6 +3,7 @@ include "../macro.asm"
         org     100h
         screen13
 
+
         mov     ax, es
         mov     ds, ax      ; Мяу
         mov     bx, 256
