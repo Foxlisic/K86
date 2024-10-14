@@ -19,11 +19,11 @@ module video
 );
 // ---------------------------------------------------------------------
 parameter
-    hz_back    = 48,  vt_back    = 33,
-    hz_visible = 640, vt_visible = 480,
-    hz_front   = 16,  vt_front   = 10,
-    hz_sync    = 96,  vt_sync    = 2,
-    hz_whole   = 800, vt_whole   = 525;
+    hz_back    = 48,  vt_back    = 35,      // 33
+    hz_visible = 640, vt_visible = 400,     // 480
+    hz_front   = 16,  vt_front   = 12,      // 10
+    hz_sync    = 96,  vt_sync    = 2,       // 2
+    hz_whole   = 800, vt_whole   = 449;     // 525
 // ---------------------------------------------------------------------
 assign hs = X  < (hz_back + hz_visible + hz_front); // NEG.
 assign vs = Y >= (vt_back + vt_visible + vt_front); // POS.
@@ -45,11 +45,9 @@ reg         flash;
 wire [11:0] at   = xc[9:3] + y[8:4]*80;
 wire        mask = char[~x[2:0]] || (y[3:0] >= 14 && at == cursor+1 && flash);
 wire [ 3:0] clr  = mask ? attr[3:0] : attr[6:4];
-wire [11:0] clrt = clr == 7 ? 12'hCCC : {
-    clr[2], {3{clr[3]}},
-    clr[1], {3{clr[3]}},
-    clr[0], {3{clr[3]}},
-};
+wire [11:0] clrt =
+    clr == 0 ? 12'h111 :
+    clr == 7 ? 12'hCCC : {/*R*/ clr[2], {3{clr[3]}}, /*G*/ clr[1], {3{clr[3]}}, /*B*/ clr[0], {3{clr[3]}}};
 
 // ---------------------------------------------------------------------
 

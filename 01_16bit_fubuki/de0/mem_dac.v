@@ -2,7 +2,7 @@
 `timescale 1 ps / 1 ps
 // synopsys translate_on
 // -----------------------------------------------------------------------------
-module mem(clock, a, d, q, w, ax, dx, wx, qx);
+module mem_dac(clock, a, d, q, w, ax, dx, wx, qx);
 input           clock;
 input    [ 7:0] a, ax;
 input    [15:0] d, dx;

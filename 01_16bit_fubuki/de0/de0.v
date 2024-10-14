@@ -85,6 +85,13 @@ wire [15:0] port_a;
 wire [11:0] cursor;
 wire        videomode; // 0=TEXT; 1=320x200
 
+// DAC для 256 цветов
+reg  [ 7:0] dac_a;
+reg  [15:0] dac_d;
+wire [ 7:0] dac_av;
+wire [15:0] dac_q, dac_qv;
+reg         dac_w;
+
 // проводка к памяти
 wire [15:0] main_a;
 wire [15:0] video_a;
@@ -122,7 +129,8 @@ core C86
 (
     // Основное
     .clock      (clock_25),
-    .ce         (1'b0),             // 1'b1
+    .ce         (1'b1),
+    .cfg_ip0    (1'b1),         // Начинать с 0000:0100h
     .reset_n    (locked),
     .address    (address),
     .in         (in),
@@ -199,6 +207,16 @@ mem_font M2
     .w          (we && we_font),
     .ax         (font_a),
     .qx         (font_q)
+);
+
+// Палитра
+mem_dac M3
+(
+    .clock      (clock_100),
+    .a          (dac_a),
+    .d          (dac_o),
+    .w          (dac_w),
+    .q          (dac_q),
 );
 
 endmodule
