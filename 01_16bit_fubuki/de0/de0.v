@@ -83,7 +83,11 @@ wire [15:0] port_a;
 reg  [ 7:0] port_i;
 wire [ 7:0] port_o, out;
 wire        port_w, port_r, we;
-wire [11:0] cursor;
+reg  [11:0] cursor;
+reg  [ 3:0] cursor_start, cursor_end;
+reg  [ 7:0] vga_reg;
+reg         vga_retrace;
+wire        vretrace;
 reg         videomode;  // 0=TEXT; 1=320x200
 
 // DAC для 256 цветов
@@ -93,6 +97,7 @@ wire [15:0] dac_q;
 reg         dac_w;
 wire [ 7:0] dac_av;
 wire [15:0] dac_qv;
+reg [ 1:0]  dac_cnt;
 
 // проводка к памяти
 wire [15:0] main_a;
@@ -104,6 +109,19 @@ wire [ 7:0] in_main, in_font, in_video;
 // Клавиатура
 wire [ 7:0] kb_data;
 wire        kb_done;
+reg         kbd_hit;
+reg [ 7:0]  kbd_dat;
+
+// Контроллер прерываний
+reg [ 2:0]  vect8;
+reg [ 7:0]  irq_in;
+reg         irq_pend;           // 0=Прерывание не выполняется =1 В процессе
+reg         irq_sig;            // FlipFlop для процессора
+
+// Таймер https://wiki.osdev.org/Programmable_Interval_Timer
+reg [ 4:0]  timer_sub;
+reg [15:0]  timer_cnt;
+reg [15:0]  timer_max;
 
 // Совмещенная видеопамять. При записи в B8000h записывает в 8000h
 wire we_main  = (address <  20'h10000);
@@ -174,7 +192,8 @@ video VIDEO
     .video_a    (video_a),
     .video_q    (video_q),
     .dac_a      (dac_av),
-    .dac_q      (dac_qv)
+    .dac_q      (dac_qv),
+    .vretrace   (vretrace)
 );
 
 // Клавиатура
@@ -241,19 +260,14 @@ mem_dac M3
 // Управление портами и IRQ
 // ---------------------------------------------------------------------
 
-reg [ 1:0]  dac_cnt;
-reg [ 2:0]  vect8;
-reg [ 4:0]  timer_sub;
-reg [15:0]  timer_cnt;
-reg [15:0]  timer_max;
-reg         kbd_hit;
-reg [ 7:0]  kbd_dat;
-reg [ 7:0]  irq_in;
-reg         irq_pend;           // 0=Прерывание не выполняется =1 В процессе
-reg         irq_sig;            // FlipFlop для процессора
-
 always @(posedge clock_25)
-begin
+if (locked == 0) begin
+
+    cursor          <= 0;
+    cursor_start    <= 14;
+    cursor_end      <= 15;
+
+end else begin
 
     dac_w <= 0;
 
@@ -266,8 +280,8 @@ begin
         irq_sig  <= ~irq_sig;
         irq_pend <= 1;
 
-        if      (vect8[0]) begin vect8[0] <= 0; irq_in <= 8; end    // Таймер
-        else if (vect8[1]) begin vect8[1] <= 0; irq_in <= 9; end    // Клавиатура
+        if      (vect8[0]) begin vect8[0] <= 0; irq_in <= 8;  end   // Таймер
+        else if (vect8[1]) begin vect8[1] <= 0; irq_in <= 9;  end   // Клавиатура
         else if (vect8[2]) begin vect8[2] <= 0; irq_in <= 10; end   // VRetrace
 
     end
@@ -290,6 +304,16 @@ begin
                  dac_w   <= 1; dac_a       <= dac_ax;
                  dac_ax  <= dac_ax + 1; end
     endcase
+    // Управление VGA, курсором
+    16'h03D4: begin vga_reg <= port_o; end
+    16'h03D5: case (vga_reg)
+
+        8'h0A: cursor_start <= port_o[3:0]; // 5-й бит отключает курсор
+        8'h0B: cursor_end   <= port_o[3:0];
+        8'h0E: cursor[11:8] <= port_o[3:0];
+        8'h0F: cursor[ 7:0] <= port_o;
+
+    endcase
 
     // Переключение видеорежима
     16'h03D8: begin videomode <= port_o[1]; end
@@ -301,13 +325,15 @@ begin
     case (port_a)
     16'h0060: begin port_i <= kbd_dat; end
     16'h0061: begin port_i <= kbd_hit; kbd_hit <= 0; end
+    16'h03DA: begin port_i <= {vga_retrace, 2'b00}; vga_retrace <= 0; end
     endcase
 
     // Установка PEND для прерываний
     // -----------------------------------------------------------------
 
     // Клавиатура
-    if (kb_done) begin kbd_hit <= 1; kbd_dat <= kb_data; vect8[1] <= 1; end
+    if (kb_done)  begin vect8[1] <= 1; kbd_hit <= 1; kbd_dat <= kb_data; end
+    if (vretrace) begin vect8[2] <= 1; vga_retrace <= 1; end
 
     // Снижение скорости 25 Мгц до 1,25 мгц
     if (timer_sub == 20) begin

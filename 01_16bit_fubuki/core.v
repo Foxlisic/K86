@@ -599,9 +599,11 @@ else if (ce) begin
             end
             8'b0101_1xxx: begin             // POP r
 
-                fn   <= WBACK;
-                size <= 1;
-                dir  <= 1;
+                fn      <= WBACK;
+                fnext   <= START;
+                size    <= 1;
+                dir     <= 1;
+
                 modrm[5:3] <= opcode[2:0];
 
             end

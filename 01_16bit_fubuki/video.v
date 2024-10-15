@@ -17,7 +17,8 @@ module video
     output  reg [11:0]  font_a,
     input       [ 7:0]  font_q,
     output  reg [ 7:0]  dac_a,
-    input       [11:0]  dac_q
+    input       [11:0]  dac_q,
+    output              vretrace
 );
 // ---------------------------------------------------------------------
 parameter
@@ -29,6 +30,7 @@ parameter
 // ---------------------------------------------------------------------
 assign hs = X  < (hz_back + hz_visible + hz_front); // NEG.
 assign vs = Y >= (vt_back + vt_visible + vt_front); // POS.
+assign vretrace = (X == 0) && (Y == vt_back + vt_visible);
 // ---------------------------------------------------------------------
 wire xmax = (X == hz_whole - 1);
 wire ymax = (Y == vt_whole - 1);

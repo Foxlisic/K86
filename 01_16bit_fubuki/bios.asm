@@ -3,6 +3,7 @@
 ; INT 10h AH=00 SET VIDEO MODE 03h или 13h
 ;
         org     0
+
         dw      intstb, 0                   ; INT 0
         dw      intstb, 0                   ; INT 1
         dw      intstb, 0                   ; INT 2
