@@ -41,16 +41,12 @@ wire [ 9:0] x  = X - hz_back;    // X=[0..639]
 wire [ 8:0] y  = Y - vt_back;    // Y=[0..478] Одна линия не видна внизу
 wire [ 9:0] xc = x + 8;
 // ---------------------------------------------------------------------
-reg  [23:0] timer;
-reg  [ 7:0] attr, char;
 reg         flash;
+reg  [23:0] timer;
+reg  [ 7:0] char;
+reg  [11:0] fore, back;
 wire [11:0] at   = xc[9:3] + y[8:4]*80;
 wire        mask = char[~x[2:0]] || (y[3:0] >= 14 && at == cursor+1 && flash);
-reg  [11:0] clr13; // Для 320x200 видеорежима
-wire [ 3:0] clr  = mask ? attr[3:0] : attr[6:4];
-wire [11:0] clrt =
-    clr == 0 ? 12'h111 :
-    clr == 7 ? 12'hCCC : {/*R*/ clr[2], {3{clr[3]}}, /*G*/ clr[1], {3{clr[3]}}, /*B*/ clr[0], {3{clr[3]}}};
 
 // ---------------------------------------------------------------------
 
@@ -62,14 +58,14 @@ always @(posedge clock) begin
     Y <= xmax ? (ymax ? 0 : Y + 1) : Y;
 
     // Вывод окна видеоадаптера
-    {r, g, b} <= disp ? (videomode ? clr13 : clrt) : 12'h000;
+    {r, g, b} <= disp ? (videomode || mask ? fore : back) : 12'h000;
 
     // 320x200
     if (videomode) begin
 
         case (x[0])
         0: begin dac_a <= video_q; end
-        1: begin clr13 <= dac_q; video_a <= 320*y[8:1] + ((X - hz_back + 4) >> 1); end
+        1: begin fore  <= dac_q; video_a <= 320*y[8:1] + ((X - hz_back + 4) >> 1); end
         endcase
 
     end
@@ -78,11 +74,12 @@ always @(posedge clock) begin
 
         case (x[2:0])
 
-            5: begin video_a    <= 16'h8000 + {at, 1'b0}; end
-            6: begin video_a[0] <= 1'b1;
-                     font_a     <= {video_q, y[3:0]}; end
-            7: begin attr       <= video_q;
-                     char       <= font_q; end
+            2: begin video_a <= 16'h8000 + {at, 1'b0}; end
+            3: begin font_a  <= {video_q, y[3:0]}; video_a[0] <= 1'b1; end
+            4: begin dac_a   <= video_q[3:0]; end
+            5: begin dac_a   <= video_q[7:4]; fore <= dac_q; end
+            6: begin back    <= dac_q; end
+            7: begin char    <= font_q; end
 
         endcase
 

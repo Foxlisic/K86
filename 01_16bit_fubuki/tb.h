@@ -216,14 +216,16 @@ public:
             // Контроллер прерываний
             // ----------------------
 
-            // Есть прерывание от клавиатуры. Если размаскировано, то записать в порт
-            if (_kb && ((irq_mask & 2) == 0) && (irq_pend == 0)) {
+            // @TODO Timer
+
+            // Есть прерывание от клавиатуры
+            if (_kb && irq_pend == 0) {
 
                 kb_data = _kb;
                 kb_hit  = 1;
 
                 mod_core->irq    = !mod_core->irq;
-                mod_core->irq_in = 2;
+                mod_core->irq_in = 9;
 
                 irq_pend = 1;
             }

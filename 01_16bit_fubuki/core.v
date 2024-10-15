@@ -40,6 +40,8 @@ module core
     output  reg  [15:0] cs,
     output  reg  [15:0] ss,
     output  reg  [15:0] ds,
+    output  reg  [15:0] fs,
+    output  reg  [15:0] gs,
     output  reg  [15:0] ip,
     output  reg  [11:0] flags,
 
@@ -138,6 +140,8 @@ if (reset_n == 1'b0) begin
     es      <= 16'h0000;
     ss      <= 16'h0000;
     ds      <= 16'h0000;
+    fs      <= 16'h0000;
+    gs      <= 16'h0000;
     iack    <= 1'b0;
     //             ODIT SZ A  P C
     flags   <= 12'b0000_0000_0010;
@@ -209,12 +213,13 @@ else if (ce) begin
                 8'b0010_1110: begin segment <= cs; over <= 1; end
                 8'b0011_0110: begin segment <= ss; over <= 1; end
                 8'b0011_1110: begin segment <= ds; over <= 1; end
+                8'b0110_0100: begin segment <= fs; over <= 1; end
+                8'b0110_0101: begin segment <= gs; over <= 1; end
                 // REPNZ, REPZ
                 8'b1111_001x: begin rep <= in[1:0]; end
                 // EXTEND
                 8'b0000_1111: begin fn <= INSTR; end
-                // FS, GS, OpSize, AdSize
-                8'b0110_010x,
+                // OpSize, AdSize
                 8'b0110_011x,
                 // NOP, LOCK: FWAIT
                 8'b1001_0000,
@@ -604,11 +609,10 @@ else if (ce) begin
 
                 fn <= START;
 
-                case (opcode[4:3])
-                2'b00: es <= wb;
-                2'b01: cs <= wb;
-                2'b10: ss <= wb;
-                2'b11: ds <= wb;
+                case (opcode[5:3])
+                3'b000: es <= wb; 3'b001: cs <= wb;
+                3'b010: ss <= wb; 3'b011: ds <= wb;
+                3'b100: fs <= wb; 3'b101: gs <= wb;
                 endcase
 
             end
@@ -781,22 +785,20 @@ else if (ce) begin
                 fn   <= WBACK;
                 size <= 1;
 
-                case (modrm[4:3])
-                2'b00: wb <= es;
-                2'b01: wb <= cs;
-                2'b10: wb <= ss;
-                2'b11: wb <= ds;
+                case (modrm[5:3])
+                0: wb <= es; 1: wb <= cs;
+                2: wb <= ss; 3: wb <= ds;
+                4: wb <= fs; 5: wb <= gs;
                 endcase
 
             end
             8'b1000_1110: begin             // MOV s,rm
 
                 fn <= START;
-                case (modrm[4:3])
+                case (modrm[5:3])
                 0: es <= op2;
-                1: cs <= op2;
-                2: ss <= op2;
-                3: ds <= op2;
+                2: ss <= op2; 3: ds <= op2;
+                4: fs <= op2; 5: gs <= op2;
                 endcase
 
             end

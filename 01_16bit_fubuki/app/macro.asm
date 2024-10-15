@@ -1,13 +1,46 @@
-; Установка сегментов и запуск видеорежима 320x200
-macro screen13 {
+; Установка сегментов и запуск видеорежима
+; ----------------------------------------------------------------------
 
+macro screen mode
+{
         cli
         xor     ax, ax
-        mov     sp, ax              ; $3800 Для Марсохода2 это высота памяти (14K)
+        mov     sp, ax
         mov     ss, ax
-        mov     ds, ax              ; SS=DS=0000h
+        mov     ds, ax
+if mode = 13
         mov     ax, $A000
-        mov     es, ax              ; ES = A000h
+        mov     es, ax
         mov     ax, 13h
+end if
+if mode = 3
+        mov     ax, $B800
+        mov     es, ax
+        mov     ax, 03h
+end if
         int     10h
+}
+
+; Установка вектора прерываний
+; ----------------------------------------------------------------------
+macro vector n, addr
+{
+        mov     [4*n], word addr
+        mov     [4*n+2], cs
+}
+
+; Палитра
+; ----------------------------------------------------------------------
+macro palette i, r, g, b
+{
+        mov     al, i
+        mov     dx, 968
+        out     dx, al
+        inc     dx
+        mov     al, r
+        out     dx, al
+        mov     al, g
+        out     dx, al
+        mov     al, b
+        out     dx, al
 }

@@ -1,21 +1,18 @@
+include "../macro.asm"
+; ------------------------------------------------------------------------------
         org     100h
 ; ------------------------------------------------------------------------------
-start:  cli
-        xor     ax, ax
-        mov     ss, ax
-        xor     sp, sp
-        mov     ax, $B800
-        mov     es, ax
-        mov     ax, cs
-        mov     ds, ax
+start:  screen  3
+        vector  9, kbd
+        palette 0, 0, 8, 16
 
-        ; Забор
+        ; Проверка вывода на экран
         xor     di, di
         mov     ah, $07
         mov     cx, 1000
-@@:     mov     al, '/'
+@@:     mov     al, 0x2F ; '/'
         stosw
-        mov     al, '\'
+        mov     al, 0x5C ; '\'
         stosw
         loop    @b
 
@@ -26,8 +23,19 @@ start:  cli
 
 @@:     lodsb
         and     al, al
-        je      $
+        je      stop
         stosw
         jmp     @b
 
+; Проверка клавиатуры
+stop:   sti
+        xor     di, di
+        hlt
+; ----------------------------------------------------------------------
 s1:     db      " PRIVET DRIVE! ",0
+; ----------------------------------------------------------------------
+kbd:    mov     ah, 17h
+        in      al, $60
+        stosw
+        out     ($20), al
+        iret

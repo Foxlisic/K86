@@ -3,9 +3,25 @@
 ; INT 10h AH=00 SET VIDEO MODE 03h или 13h
 ;
         org     0
-        times   16  dd 0
+        dw      intstb, 0                   ; INT 0
+        dw      intstb, 0                   ; INT 1
+        dw      intstb, 0                   ; INT 2
+        dw      intstb, 0                   ; INT 3
+        dw      intstb, 0                   ; INT 4
+        dw      intstb, 0                   ; INT 5
+        dw      intstb, 0                   ; INT 6
+        dw      intstb, 0                   ; INT 7
+        dw      intstb, 0                   ; INT 8 :: IRQ0 Timer
+        dw      intstb, 0                   ; INT 9 :: IRQ1 Keyboard
+        dw      intstb, 0                   ; INT A :: IRQ2 VRetrace
+        dw      intstb, 0                   ; INT B
+        dw      intstb, 0                   ; INT C
+        dw      intstb, 0                   ; INT D
+        dw      intstb, 0                   ; INT E
+        dw      intstb, 0                   ; INT F
         dw      int10h_address, 0           ; INT 10h
 
+; ----------------------------------------------------------------------
 ; https://stanislavs.org/helppc/6845.html
 ; |7|6|5|4|3|2|1|0|  3D8 Mode Select Register
 ;  | | | | | | | `---- 1 = 80x25 text, 0 = 40x25 text
@@ -30,4 +46,8 @@ int10h_address:
 .mode:  mov     dx, 3D8h
         mov     al, ah
         out     dx, al
+        iret
+
+; Выход из обработанного прерывания: запись в $20 любого значения
+intstb: out     ($20), al
         iret

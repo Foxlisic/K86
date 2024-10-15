@@ -79,14 +79,15 @@ assign HEX5 = 7'b1111111;
 // ---------------------------------------------------------------------
 wire        clock_25, clock_100, clock_50, locked;
 wire [19:0] address;
-wire [ 7:0] port_i, port_o, out;
-wire        port_w, port_r, we;
 wire [15:0] port_a;
+reg  [ 7:0] port_i;
+wire [ 7:0] port_o, out;
+wire        port_w, port_r, we;
 wire [11:0] cursor;
 reg         videomode;  // 0=TEXT; 1=320x200
 
 // DAC для 256 цветов
-reg  [ 7:0] dac_a;
+reg  [ 7:0] dac_a, dac_ax;
 reg  [15:0] dac_d;
 wire [15:0] dac_q;
 reg         dac_w;
@@ -245,6 +246,8 @@ reg [ 2:0]  vect8;
 reg [ 4:0]  timer_sub;
 reg [15:0]  timer_cnt;
 reg [15:0]  timer_max;
+reg         kbd_hit;
+reg [ 7:0]  kbd_dat;
 reg [ 7:0]  irq_in;
 reg         irq_pend;           // 0=Прерывание не выполняется =1 В процессе
 reg         irq_sig;            // FlipFlop для процессора
@@ -271,7 +274,6 @@ begin
 
     // Запись в порты
     // -----------------------------------------------------------------
-
     if (port_w)
     case (port_a)
 
@@ -280,22 +282,32 @@ begin
     16'h00A0: begin end // IRQMASK
 
     // Запись палитры
-    16'h03C8: begin dac_a <= port_o; dac_cnt <= 0; end
+    16'h03C8: begin dac_ax <= port_o; dac_cnt <= 0; end
     16'h03C9: case (dac_cnt)
         0: begin dac_cnt <= 1; dac_d[11:8] <= port_o[5:2]; end
         1: begin dac_cnt <= 2; dac_d[ 7:4] <= port_o[5:2]; end
-        2: begin dac_cnt <= 0; dac_d[ 3:0] <= port_o[5:2]; dac_w <= 1; end
+        2: begin dac_cnt <= 0; dac_d[ 3:0] <= port_o[5:2];
+                 dac_w   <= 1; dac_a       <= dac_ax;
+                 dac_ax  <= dac_ax + 1; end
     endcase
 
     // Переключение видеорежима
     16'h03D8: begin videomode <= port_o[1]; end
     endcase
 
+    // Чтение из портов
+    // -----------------------------------------------------------------
+    if (port_r)
+    case (port_a)
+    16'h0060: begin port_i <= kbd_dat; end
+    16'h0061: begin port_i <= kbd_hit; kbd_hit <= 0; end
+    endcase
+
     // Установка PEND для прерываний
     // -----------------------------------------------------------------
 
     // Клавиатура
-    if (kb_done) vect8[1] <= 1;
+    if (kb_done) begin kbd_hit <= 1; kbd_dat <= kb_data; vect8[1] <= 1; end
 
     // Снижение скорости 25 Мгц до 1,25 мгц
     if (timer_sub == 20) begin
