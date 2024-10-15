@@ -205,6 +205,7 @@ public:
                         (mod_core->flags & 0x001 ? 'C' : '.'),
                         mod_core->cs, mod_core->ip,
                         dasm->dis_row
+                        // mod_core->cx, mod_core->di
                     );
                 }
             }

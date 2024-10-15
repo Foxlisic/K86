@@ -154,8 +154,8 @@ core C86
     // Основное
     .clock      (clock_25),
     .ce         (1'b1),
-    .cfg_ip0    (1'b1),         // Начинать с 0000:0100h
-    .reset_n    (locked),
+    .cfg_ip0    (1'b1),             // Начинать с 0000:0100h
+    .reset_n    (locked & RESET_N),
     .address    (address),
     .in         (in),
     .out        (out),
@@ -261,7 +261,7 @@ mem_dac M3
 // ---------------------------------------------------------------------
 
 always @(posedge clock_25)
-if (locked == 0) begin
+if (locked == 0 || RESET_N == 0) begin
 
     cursor          <= 0;
     cursor_start    <= 14;

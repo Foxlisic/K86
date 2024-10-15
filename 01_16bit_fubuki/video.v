@@ -46,7 +46,7 @@ wire [ 9:0] xc = x + 8;
 reg         flash;
 reg  [23:0] timer;
 reg  [ 7:0] char;
-reg  [11:0] fore, back;
+reg  [11:0] fore, back, _fore;
 wire [11:0] at   = xc[9:3] + y[8:4]*80;
 wire        mask = char[~x[2:0]] || (y[3:0] >= 14 && at == cursor+1 && flash);
 
@@ -76,12 +76,13 @@ always @(posedge clock) begin
 
         case (x[2:0])
 
-            2: begin video_a <= 16'h8000 + {at, 1'b0}; end
-            3: begin font_a  <= {video_q, y[3:0]}; video_a[0] <= 1'b1; end
-            4: begin dac_a   <= video_q[3:0]; end
-            5: begin dac_a   <= video_q[7:4]; fore <= dac_q; end
-            6: begin back    <= dac_q; end
-            7: begin char    <= font_q; end
+            3: begin video_a <= 16'h8000 + {at, 1'b0}; end
+            4: begin font_a  <= {video_q, y[3:0]}; video_a[0] <= 1'b1; end
+            5: begin dac_a   <= video_q[3:0]; end
+            6: begin dac_a   <= video_q[7:4]; _fore <= dac_q; end
+            7: begin back    <= dac_q;
+                     fore    <= _fore;
+                     char    <= font_q; end
 
         endcase
 

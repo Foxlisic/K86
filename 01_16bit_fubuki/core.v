@@ -103,7 +103,7 @@ wire [7:0] branches =
     (flags[SF] ^ flags[OF]),             // 6: SF!=OF
      flags[PF],
      flags[SF],
-     flags[CF] | flags[OF],              // 3: CF != OF
+     flags[CF] | flags[ZF],              // 3: CF != OF
      flags[ZF],
      flags[CF],
      flags[OF]
@@ -129,7 +129,7 @@ if (reset_n == 1'b0) begin
     fn      <= START;
     ax      <= 16'hFFFF;
     bx      <= 16'h0002;
-    cx      <= 16'h0008;
+    cx      <= 16'h0908;
     dx      <= 16'h0000;
     sp      <= 16'h0000;
     bp      <= 16'h0000;
@@ -137,7 +137,7 @@ if (reset_n == 1'b0) begin
     di      <= 16'h0000;
     ip      <= cfg_ip0 ? 16'h0100 : 16'hFFF0;
     cs      <= cfg_ip0 ? 16'h0000 : 16'hF000;
-    es      <= 16'h0000;
+    es      <= 16'hA000;
     ss      <= 16'h0000;
     ds      <= 16'h0000;
     fs      <= 16'h0000;
@@ -704,6 +704,7 @@ else if (ce) begin
 
                     fn      <= WBACK;
                     fnext   <= START;
+                    cp      <= 1;
                     dir     <= 0;
                     wb      <= op2;
 
