@@ -259,9 +259,9 @@ public:
 
                         switch (dac_cnt)
                         {
-                            case 0: dac[dac_id] = (dac[dac_id] & 0x00FFFF) | (mod_core->port_o * 65536 * 4); break;
-                            case 1: dac[dac_id] = (dac[dac_id] & 0xFF00FF) | (mod_core->port_o * 256 * 4); break;
-                            case 2: dac[dac_id] = (dac[dac_id] & 0xFFFF00) | (mod_core->port_o * 4); break;
+                            case 0: dac[dac_id] = (dac[dac_id] & 0x00FFFF) | ((mod_core->port_o & 0x3F) * 65536 * 4); break;
+                            case 1: dac[dac_id] = (dac[dac_id] & 0xFF00FF) | ((mod_core->port_o & 0x3F) * 256 * 4); break;
+                            case 2: dac[dac_id] = (dac[dac_id] & 0xFFFF00) | ((mod_core->port_o & 0x3F) * 4); break;
                         }
 
                         // Перещелкнуть на другой регистр

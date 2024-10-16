@@ -30,8 +30,8 @@ start:
         jmp     @b
 
 ; Проверка клавиатуры
-stop:   sti
-        xor     di, di
+stop:   xor     di, di
+        sti
         hlt
 ; ----------------------------------------------------------------------
 s1:     db      " PRIVET DRIVE! ",0
