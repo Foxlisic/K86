@@ -1,86 +1,53 @@
-include "../macro.asm"
-; ------------------------------------------------------------------------------
         org     100h
-; ------------------------------------------------------------------------------
-start:
-        screen  13
-
-        ; Сгенерировать случайный шум
-        mov     cx, 64000
+        include "../macro.asm"
+start:  screen  13
+        mov     cx, 64000       ; Сгенерировать случайный шум
         xor     di, di
 @@:     add     al, ah
         imul    ax, 3235
         inc     ax
         stosb
         loop    @b
-
-        ; Начать сортировку
-        mov     si, 0
+        mov     si, 0           ; Начать сортировку
         mov     di, 64000
         call    qsort
-
-        ;xor ax, ax
-        ;int 16h
-        ;int3
-
         hlt
-
-        ; L-si, R-di
-qsort:  push    si di
-
+qsort:  push    si di           ; L-si, R-di
         mov     ax, si
         mov     bx, di
         shr     ax, 1
         shr     bx, 1
-        add     bx, ax              ; BX=середина
-        mov     cl, [es:bx]         ; CL=PIVOT
-
-        ; WHILE (Arr[si] < pivot): si = si + 1
-.w1:    cmp     [es:si], cl
+        add     bx, ax          ; BX=середина
+        mov     cl, [es:bx]     ; CL=PIVOT
+.w1:    cmp     [es:si], cl     ; WHILE (Arr[si] < pivot): si = si + 1
         jnb     .w2
         inc     si
         jmp     .w1
-
-        ; WHILE (Arr[di] > pivot): di = di - 1
-.w2:    cmp     [es:di], cl
+.w2:    cmp     [es:di], cl     ; WHILE (Arr[di] > pivot): di = di - 1
         jbe     .w3
         dec     di
         jmp     .w2
-
-        ; IF a% <= b% THEN
-.w3:    cmp     si, di
+.w3:    cmp     si, di          ; IF a% <= b% THEN
         ja      .w4
-
-        ; SWAP Arr(a%), Arr(b%)
-        mov     al, [es:si]
+        mov     al, [es:si]     ; SWAP Arr(a%), Arr(b%)
         xchg    al, [es:di]
         xchg    al, [es:si]
         inc     si
         dec     di
-
-        ; LOOP WHILE a% <= b%
-.w4:    cmp     si, di
+        cmp     si, di          ; LOOP WHILE a% <= b%
         jbe     .w1
-
-        ; AX-было ранее L, BX-R
-        pop     bx ax
-
-        ; IF l% < b% THEN QSort l%, b%
-        cmp     ax, di          ; ax=l%, di=b%
+.w4:    pop     bx ax           ; AX-было ранее L, BX-R
+        cmp     ax, di          ; IF l% < b% THEN QSort l%, b%
         jnb     .s1
         push    ax bx si di
-        mov     si, ax          ; L..B
+        mov     si, ax          ; ax=l%, di=b%
         call    qsort
         pop     di si bx ax
-
-        ; IF a% < r% THEN QSort a%, r%
-.s1:    cmp     si, bx          ; si=r%, bx=r%
+.s1:    cmp     si, bx          ; IF a% < r% THEN QSort a%, r%
         jnb     .s2
         push    ax bx si di
-        mov     di, bx          ; A..R
+        mov     di, bx
         call    qsort
         pop     di si bx ax
-
-        ; END SUB
 .s2:    ret
 

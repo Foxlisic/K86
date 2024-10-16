@@ -5,6 +5,8 @@ include "../macro.asm"
 start:
         screen  13
 
+        ; ------------------------
+
         mov     ah, 0
         xor     bx, bx
         xor     cx, cx
@@ -41,6 +43,7 @@ start:
         dec     cl
         jne     @b
 
+        ; ------------------------
 
         mov     ax, es
         mov     ds, ax

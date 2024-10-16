@@ -7,7 +7,7 @@ com:
 	fasm $(DIRC)/bios.asm bios.bin
 	php $(DIRC)/../tools/mifer.php 64k tb.com $(DIRC)/de0/mif_main.mif bios.bin
 app:
-	$(DIRC)/tb -c tb.com -b bios.bin -v > tb.log
+	$(DIRC)/tb -c tb.com -b bios.bin > tb.log
 dos:
 	mv tb.com ~/dosbox/MAIN.COM
 	dosbox

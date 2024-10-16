@@ -5,16 +5,19 @@ all: ica tbc
 ica:
 	fasm bios.asm bios.bin
 	php ../tools/hexer.php bios.bin tb.hex
-	iverilog -g2005-sv -o tb.qqq tb.v core.v
+	iverilog -g2005-sv -o tb.qqq tb.v core.v vidac.v
 	vvp tb.qqq -o tb.vcd > /dev/null
 	rm tb.qqq
 tbc:
 	verilator --threads 1 -cc core.v
+	verilator --threads 1 -cc vidac.v
 	cd obj_dir && make -f Vcore.mk
+	cd obj_dir && make -f Vvidac.mk
 	g++ -Ofast -Wno-unused-result -o tb -I$(VINC) tb.cc \
 		$(VINC)/verilated.cpp \
 		$(VINC)/verilated_threads.cpp \
 		obj_dir/Vcore__ALL.a \
+		obj_dir/Vvidac__ALL.a \
 		-lSDL2
 	./tb -b bios.bin > tb.log
 wav:

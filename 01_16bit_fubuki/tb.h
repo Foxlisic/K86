@@ -39,6 +39,8 @@ protected:
 
     // Модули
     Vcore*      mod_core;
+    Vvidac*     mod_vidac;
+
     Uint32      tsc = 0;
     Disassemble* dasm;
 
@@ -56,6 +58,7 @@ public:
 
         pticks      = 0;
         mod_core    = new Vcore();
+        mod_vidac   = new Vvidac();
 
         // Удвоение пикселей
         scale        = 2;
@@ -89,6 +92,12 @@ public:
         for (int i = 0; i < 256; i++) {
             dac[i] = dacdef[i];
         }
+
+        // Сброс видака
+        mod_vidac->reset_n  = 0;
+        mod_vidac->clock    = 0; mod_vidac->eval();
+        mod_vidac->clock    = 1; mod_vidac->eval();
+        mod_vidac->reset_n  = 1;
 
         // Сброс процессора
         // Старт в F000:FFF0 по умолчанию

@@ -1,4 +1,5 @@
 #include "obj_dir/Vcore.h"
+#include "obj_dir/Vvidac.h"
 #include "disasm.cc"
 
 #include "font.h"
