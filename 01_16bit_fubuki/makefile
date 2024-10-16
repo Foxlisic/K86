@@ -4,6 +4,7 @@ all: ica tbc
 
 ica:
 	fasm bios.asm bios.bin
+	fasm test.asm test.bin
 	php ../tools/hexer.php bios.bin tb.hex
 	iverilog -g2005-sv -o tb.qqq tb.v core.v vidac.v
 	vvp tb.qqq -o tb.vcd > /dev/null
@@ -19,7 +20,7 @@ tbc:
 		obj_dir/Vcore__ALL.a \
 		obj_dir/Vvidac__ALL.a \
 		-lSDL2
-	./tb -b bios.bin > tb.log
+	./tb -b bios.bin -c test.bin > tb.log
 wav:
 	gtkwave tb.gtkw
 clean:
