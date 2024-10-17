@@ -73,7 +73,7 @@ public:
         }
 
         SDL_ClearError();
-        sdl_window          = SDL_CreateWindow("16BIT 8086 EMULATOR VERILATOR", SDL_WINDOWPOS_CENTERED,
+        sdl_window          = SDL_CreateWindow("FUBUKI 8088", SDL_WINDOWPOS_CENTERED,
                               SDL_WINDOWPOS_CENTERED, scale*width, scale*height, SDL_WINDOW_SHOWN);
         sdl_renderer        = SDL_CreateRenderer(sdl_window, -1, SDL_RENDERER_PRESENTVSYNC);
         screen_buffer       = (Uint32*) malloc(width * height * sizeof(Uint32));

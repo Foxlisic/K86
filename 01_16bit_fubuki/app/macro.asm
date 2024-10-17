@@ -44,3 +44,38 @@ macro palette i, r, g, b
         mov     al, b
         out     dx, al
 }
+
+; Объявления для VIDAC
+; ----------------------------------------------------------------------
+
+; Линия
+macro vidacline x1, y1, x2, y2, c
+{
+        db      1
+        dw      x1, y1, x2, y2
+        db      c
+}
+
+; Пустой прямоугольник
+macro vidacrect x1, y1, x2, y2, c
+{
+        db      2
+        dw      x1, y1, x2, y2
+        db      c
+}
+
+; Закрашенный прямоугольник
+macro vidacfill x1, y1, x2, y2, c
+{
+        db      3
+        dw      x1, y1, x2, y2
+        db      c
+}
+
+; Полигональная линия
+macro vidacpoly x2, y2, c
+{
+        db      4
+        dw      x2, y2
+        db      c
+}

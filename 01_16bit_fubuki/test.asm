@@ -6,24 +6,20 @@
 
         mov     ax, $C000
         mov     es, ax
+        mov     si, draw
         xor     di, di
-
-        ; LINE
-        mov     al, 2
-        stosb
-        mov     ax, 1       ; x1
-        stosw
-        mov     ax, 1       ; y1
-        stosw
-        mov     ax, 318     ; x2
-        stosw
-        mov     ax, 198     ; y2
-        stosw
-        mov     al, 14
-        stosb
-        mov     al, 0       ; EOF
-        stosb
+        mov     cx, size
+        rep     movsb
 
         mov     dx, $300
         out     dx, al
         hlt
+
+draw:   vidacline   160,10,300,150,2
+        vidacpoly   100,100,3
+        vidacpoly   160,10,4
+        vidacrect   20,20,30,25,5
+        vidacfill   40,40,70,50,6
+
+        db 0
+size    = $ - draw
