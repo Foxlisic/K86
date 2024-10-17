@@ -189,6 +189,8 @@ public:
         int tps = 1000;
         for (int i = 0; i < tps; i++) {
 
+            int vidac_cmd = 0;
+
             // Обработка клавиатуры
             int _kb = kbd_pop();
 
@@ -262,6 +264,9 @@ public:
                     case 0x00FE: sd_status = 0; break;                  // Управление SD
                     case 0x00FF: sdspi(mod_core->port_o); break;        // Отослать данные к SD
 
+                    // Запрос на рендер
+                    case 0x0300: vidac_cmd = 1;
+
                     // Программирование палитры
                     case 0x03C8: dac_id = mod_core->port_o; dac_cnt = 0; break;
                     case 0x03C9:
@@ -290,8 +295,25 @@ public:
             // Такт на ядро
             mod_core->clock = 0; mod_core->eval();
             mod_core->clock = 1; mod_core->eval();
-
             tsc++;
+
+            // Запрос к VIDAC
+            mod_vidac->cmd = vidac_cmd;
+
+            // Обработка только если VIDAC реально работает
+            if (mod_vidac->cmd || mod_vidac->bsy) {
+
+                int _a = 0xA0000 + mod_vidac->a;
+
+                mod_vidac->i = memory[_a];
+                if (mod_vidac->w) memory[_a] = mod_vidac->o;
+
+                // Отладка
+                // printf("VIDAC CMD=%d, BSY=%d, A=%05X, D=%02X, O=%02X, w=%d\n", mod_vidac->cmd, mod_vidac->bsy, _a, mod_vidac->i, mod_vidac->o, mod_vidac->w);
+
+                mod_vidac->clock = 0; mod_vidac->eval();
+                mod_vidac->clock = 1; mod_vidac->eval();
+            }
 
             // 60 FPS
             if ((tsc % 416666) == 0) saveframe();

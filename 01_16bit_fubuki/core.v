@@ -100,7 +100,7 @@ wire [15:0] repc = (in[0] ? 2:1)*(rep[1] ? cx-1 : 0);       // Количест�
 wire [7:0] branches =
 {
     (flags[SF] ^ flags[OF]) | flags[ZF], // 7: (ZF=1) OR (SF!=OF)
-    (flags[SF] ^ flags[OF]),             // 6: SF!=OF
+    (flags[SF] ^ flags[OF]),             // 6: SF != OF
      flags[PF],
      flags[SF],
      flags[CF] | flags[ZF],              // 3: CF != OF

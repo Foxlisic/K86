@@ -12,7 +12,7 @@ module video
     // --------------------------
     input               videomode,
     input       [11:0]  cursor,
-    output  reg [15:0]  video_a,
+    output  reg [16:0]  video_a,
     input       [ 7:0]  video_q,
     output  reg [11:0]  font_a,
     input       [ 7:0]  font_q,
@@ -76,7 +76,7 @@ always @(posedge clock) begin
 
         case (x[2:0])
 
-            3: begin video_a <= 16'h8000 + {at, 1'b0}; end
+            3: begin video_a <= 17'h18000 + {at, 1'b0}; end
             4: begin font_a  <= {video_q, y[3:0]}; video_a[0] <= 1'b1; end
             5: begin dac_a   <= video_q[3:0]; end
             6: begin dac_a   <= video_q[7:4]; _fore <= dac_q; end

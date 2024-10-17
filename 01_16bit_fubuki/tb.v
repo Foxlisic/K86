@@ -17,6 +17,7 @@ initial begin
     clock_25 = 0;
     reset_n  = 0;
 
+    // BASE
     memory[20'h00000] = 8'hA4; memory[20'h00010] = 8'h03;
     memory[20'h00001] = 8'hDD; memory[20'h00011] = 8'hDE;
     memory[20'h00002] = 8'hEF; memory[20'h00012] = 8'h01;
@@ -28,6 +29,18 @@ initial begin
     memory[20'hFFFF2] = 8'h01;
     memory[20'hFFFF3] = 8'h00;
     memory[20'hFFFF4] = 8'h00;
+
+    // VIDAC
+    memory[20'hB0000] = 8'h01;
+
+    memory[20'hB0001] = 8'h03; memory[20'hB0002] = 8'h00; // x1
+    memory[20'hB0003] = 8'h10; memory[20'hB0004] = 8'h00; // y1
+
+    memory[20'hB0005] = 8'h11; memory[20'hB0006] = 8'h00; // x2
+    memory[20'hB0007] = 8'h12; memory[20'hB0008] = 8'h00; // y2
+
+    memory[20'hB0009] = 8'hAA; // color
+    memory[20'hB000A] = 8'h00;
 
     #3.0  reset_n = 1;
     #2000 $finish;
@@ -42,11 +55,23 @@ reg  [ 7:0] in;
 wire [ 7:0] out;
 wire        we;
 wire [19:0] address;
+wire [16:0] vidac_a;
+reg  [ 7:0] vidac_i;
+wire [ 7:0] vidac_o;
+wire        vidac_w;
 
-always @(posedge clock_hi) begin in <= memory[address]; if (we) memory[address] <= out; end
+always @(posedge clock_hi) begin
+
+    in      <= memory[address];
+    vidac_i <= memory[vidac_a + 20'hA0000];
+
+    if (we) memory[address] <= out;
+    if (vidac_w) memory[address] <= vidac_o;
+
+end
 
 // Описание подключения CPU
-// =============================================================================
+// =====================================================================
 
 core CPU
 (
@@ -58,6 +83,20 @@ core CPU
     .in         (in),
     .out        (out),
     .we         (we)
+);
+
+// Подключить VIDAC
+// =====================================================================
+
+vidac VIDAC
+(
+    .clock      (clock_25),
+    .reset_n    (reset_n),
+    .cmd        (1'b1),
+    .a          (vidac_a),
+    .i          (vidac_i),
+    .o          (vidac_o),
+    .w          (vidac_w)
 );
 
 endmodule

@@ -101,7 +101,7 @@ reg [ 1:0]  dac_cnt;
 
 // проводка к памяти
 wire [15:0] main_a;
-wire [15:0] video_a;
+wire [16:0] video_a;
 wire [11:0] font_a;
 wire [ 7:0] font_q, video_q;
 wire [ 7:0] in_main, in_font, in_video;
@@ -221,11 +221,11 @@ mem_main M0
     .w          (we && we_main),
 );
 
-// 64K видеопамяти
+// 128K видеопамяти
 mem_video M1
 (
     .clock      (clock_100),
-    .a          (address[15:0]),
+    .a          (address[16:0]),
     .q          (in_video),
     .d          (out),
     .w          (we && we_video),

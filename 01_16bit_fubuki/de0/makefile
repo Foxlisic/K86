@@ -1,4 +1,4 @@
-all: syn
+all: syn pgm
 pgm:
 	quartus_pgm -m jtag -o "p;output_files/de0.sof"
 syn:
