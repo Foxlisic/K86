@@ -44,6 +44,7 @@ wire [15:0] e2   = {err, 1'b0} - dx;
 wire [15:0] ax   = (y << 8) + (y << 6) + x;
 wire        wx   = x < 320 && y < 200;
 wire        yof  = (y >= 200 && y[15] == 0);
+wire [15:0] cirx = dx + 4*x2 + 6;
 
 // ---------------------------------------------------------------------
 // Блок распределения команд и наблюдение за их исполнением
@@ -84,6 +85,8 @@ end else begin
                 3: begin t <= 2; tx <= 6; b <= 9; end
                 // LINE -[x2:word,y2:word],c:byte Дорисовать линию
                 4: begin t <= 8; b <= 5; end
+                // CIRCLE (x,y),r,c
+                5: begin t <= 9; b <= 7; end
                 // Любой не объявленный код команды сбрасывает в BSY=0
                 default: begin t <= 0; bsy <= 0; end
 
@@ -188,6 +191,57 @@ end else begin
             {x1,y1} <= {_x2,_y2};
 
         end
+
+        // -------------------------------------------------------------
+        // CIRCLE (x,y),r,c
+        // -------------------------------------------------------------
+
+        9: if (b) begin
+
+            a <= a + 1;
+            b <= b - 1;
+            {o,y2,y1,x1} <= {i,o,y2,y1,x1[15:8]};
+
+        end else begin
+
+            t  <= 10;
+            u  <= a;
+            tx <= 0;
+            dx <= 3 - 2*y2;
+            x2 <= 0;
+
+        end
+
+        // Рисование точек на круге
+        10: begin
+
+            t <= 11;
+
+            case (tx)
+            0: begin tx <= 1; x <= x1 - x2; y <= y1 + y2; end
+            1: begin tx <= 2; x <= x1 + x2; y <= y1 + y2; end
+            2: begin tx <= 3; x <= x1 - x2; y <= y1 - y2; end
+            3: begin tx <= 4; x <= x1 + x2; y <= y1 - y2; end
+            4: begin tx <= 5; x <= x1 - y2; y <= y1 + x2; end
+            5: begin tx <= 6; x <= x1 + y2; y <= y1 + x2; end
+            6: begin tx <= 7; x <= x1 - y2; y <= y1 - x2; end
+            7: begin tx <= 0; x <= x1 + y2; y <= y1 - x2; end
+            endcase
+
+        end
+
+        // Установка точки
+        11: begin a <= ax; w <= wx; t <= tx ? 10 : 12; end
+
+        // Следующая итерация
+        12: if (x2 <= y2) begin
+
+            t  <= 10;
+            dx <= cirx[15] ? cirx : (cirx + 4*(1 - y2));
+            x2 <= x2 + 1;
+            y2 <= y2 - !cirx[15];
+
+        end else t <= 0;
 
     endcase
 

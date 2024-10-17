@@ -15,7 +15,9 @@
         out     dx, al
         hlt
 
-draw:   vidacline   160,10,300,150,2
+draw:
+        vidaccirc   160,100,120,7
+        vidacline   160,10,300,150,2
         vidacpoly   100,100,3
         vidacpoly   160,10,4
         vidacrect   20,20,30,25,5

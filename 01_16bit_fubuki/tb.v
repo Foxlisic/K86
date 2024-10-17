@@ -31,12 +31,12 @@ initial begin
     memory[20'hFFFF4] = 8'h00;
 
     // VIDAC
-    memory[20'hC0000] = 8'h02;
+    memory[20'hC0000] = 8'h05;
 
-    memory[20'hC0001] = 8'h03; memory[20'hC0002] = 8'h00; // x1
-    memory[20'hC0003] = 8'h10; memory[20'hC0004] = 8'h00; // y1
+    memory[20'hC0001] = 8'hA0; memory[20'hC0002] = 8'h00; // x1
+    memory[20'hC0003] = 8'h64; memory[20'hC0004] = 8'h00; // y1
 
-    memory[20'hC0005] = 8'h11; memory[20'hC0006] = 8'h00; // x2
+    memory[20'hC0005] = 8'h50; memory[20'hC0006] = 8'h00; // x2
     memory[20'hC0007] = 8'h12; memory[20'hC0008] = 8'h00; // y2
 
     memory[20'hC0009] = 8'hAA; // color

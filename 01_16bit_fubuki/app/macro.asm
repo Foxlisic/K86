@@ -79,3 +79,10 @@ macro vidacpoly x2, y2, c
         dw      x2, y2
         db      c
 }
+
+macro vidaccirc x, y, r, c
+{
+        db      5
+        dw      x, y, r
+        dw      c
+}
