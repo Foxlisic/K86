@@ -31,16 +31,16 @@ initial begin
     memory[20'hFFFF4] = 8'h00;
 
     // VIDAC
-    memory[20'hB0000] = 8'h01;
+    memory[20'hC0000] = 8'h02;
 
-    memory[20'hB0001] = 8'h03; memory[20'hB0002] = 8'h00; // x1
-    memory[20'hB0003] = 8'h10; memory[20'hB0004] = 8'h00; // y1
+    memory[20'hC0001] = 8'h03; memory[20'hC0002] = 8'h00; // x1
+    memory[20'hC0003] = 8'h10; memory[20'hC0004] = 8'h00; // y1
 
-    memory[20'hB0005] = 8'h11; memory[20'hB0006] = 8'h00; // x2
-    memory[20'hB0007] = 8'h12; memory[20'hB0008] = 8'h00; // y2
+    memory[20'hC0005] = 8'h11; memory[20'hC0006] = 8'h00; // x2
+    memory[20'hC0007] = 8'h12; memory[20'hC0008] = 8'h00; // y2
 
-    memory[20'hB0009] = 8'hAA; // color
-    memory[20'hB000A] = 8'h00;
+    memory[20'hC0009] = 8'hAA; // color
+    memory[20'hC000A] = 8'h00;
 
     #3.0  reset_n = 1;
     #2000 $finish;
@@ -55,7 +55,7 @@ reg  [ 7:0] in;
 wire [ 7:0] out;
 wire        we;
 wire [19:0] address;
-wire [16:0] vidac_a;
+wire [17:0] vidac_a;
 reg  [ 7:0] vidac_i;
 wire [ 7:0] vidac_o;
 wire        vidac_w;

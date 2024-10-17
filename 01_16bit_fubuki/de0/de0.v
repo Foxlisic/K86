@@ -233,6 +233,8 @@ mem_video M1
     .qx         (video_q)
 );
 
+// 64K видеопамять VIDAC
+
 // 4K шрифты
 mem_font M2
 (

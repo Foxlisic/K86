@@ -4,22 +4,22 @@
 
         screen  13
 
-        mov     ax, $B000
+        mov     ax, $C000
         mov     es, ax
         xor     di, di
 
         ; LINE
-        mov     al, 1
+        mov     al, 2
         stosb
-        mov     ax, 16
+        mov     ax, 1       ; x1
         stosw
-        mov     ax, 2
+        mov     ax, 1       ; y1
         stosw
-        mov     ax, 318
+        mov     ax, 318     ; x2
         stosw
-        mov     ax, 198
+        mov     ax, 198     ; y2
         stosw
-        mov     al, 15
+        mov     al, 14
         stosb
         mov     al, 0       ; EOF
         stosb
