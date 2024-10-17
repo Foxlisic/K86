@@ -8,6 +8,7 @@ module vidac
 
     // Запрос на выполнение
     input               cmd,
+    input               page,       // Номер видеостраницы
 
     // Подключение к разделяемой видеопамяти различных модулей
     output  reg [17:0]  a,
@@ -41,7 +42,7 @@ wire [15:0] e1   = {err, 1'b0} + dy;
 wire [15:0] e2   = {err, 1'b0} - dx;
 
 // AX = 320*Y + X
-wire [15:0] ax   = (y << 8) + (y << 6) + x;
+wire [16:0] ax   = (y << 8) + (y << 6) + x + {page, 16'h0000};
 wire        wx   = x < 320 && y < 200;
 wire        yof  = (y >= 200 && y[15] == 0);
 wire [15:0] cirx = dx + 4*x2 + 6;

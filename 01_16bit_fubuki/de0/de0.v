@@ -89,6 +89,7 @@ reg  [ 7:0] vga_reg;
 reg         vga_retrace;
 wire        vretrace;
 reg         videomode;  // 0=TEXT; 1=320x200
+reg         videopage;
 
 // DAC для 256 цветов
 reg  [ 7:0] dac_a, dac_ax;
@@ -186,6 +187,7 @@ video VIDEO
     .vs         (VGA_VS),
     // ---
     .videomode  (videomode),
+    .page       (videopage),
     .cursor     (cursor),
     .font_a     (font_a),
     .font_q     (font_q),
@@ -296,6 +298,9 @@ end else begin
     // Контроллер прерываний
     16'h0020: begin irq_pend <= 0; end // EOI
     16'h00A0: begin end // IRQMASK
+
+    // Выбор видеостраницы, запрос на VIDAC
+    16'h03C0: begin videopage <= port_o[0]; end
 
     // Запись палитры
     16'h03C8: begin dac_ax <= port_o; dac_cnt <= 0; end

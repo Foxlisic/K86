@@ -11,6 +11,7 @@ module video
     output              vs,
     // --------------------------
     input               videomode,
+    input               page,               // Видеостраница графического режима
     input       [11:0]  cursor,
     output  reg [16:0]  video_a,
     input       [ 7:0]  video_q,
@@ -67,7 +68,7 @@ always @(posedge clock) begin
 
         case (x[0])
         0: begin dac_a <= video_q; end
-        1: begin fore  <= dac_q; video_a <= 320*y[8:1] + ((X - hz_back + 4) >> 1); end
+        1: begin fore  <= dac_q; video_a <= 320*y[8:1] + ((X - hz_back + 4) >> 1) + {page, 16'h0000}; end
         endcase
 
     end

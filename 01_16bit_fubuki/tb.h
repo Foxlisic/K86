@@ -26,6 +26,7 @@ protected:
     int     ps_clock = 0, ps_data = 0, kbd_phase = 0, kbd_ticker = 0;
     uint8_t kbd[256], kbd_top = 0, kb_hit_cnt = 0, kb_latch = 0, kb_data = 0, kb_hit = 0;
     int     dac[256], dac_cnt = 0, dac_id = 0;
+    int     video_page = 0;
 
     // SDCARD: sd_status бит 7-timeout, 0-busy
     uint8_t     spi_data, spi_st = 2, spi_status, spi_command, spi_crc, spi_resp, sd_status = 0x80;
@@ -98,6 +99,7 @@ public:
         mod_vidac->clock    = 0; mod_vidac->eval();
         mod_vidac->clock    = 1; mod_vidac->eval();
         mod_vidac->reset_n  = 1;
+        mod_vidac->page     = 0;
 
         // Сброс процессора
         // Старт в F000:FFF0 по умолчанию
@@ -265,7 +267,10 @@ public:
                     case 0x00FF: sdspi(mod_core->port_o); break;        // Отослать данные к SD
 
                     // Запрос на рендер
-                    case 0x0300: vidac_cmd = 1;
+                    case 0x0300: vidac_cmd = 1; mod_vidac->page = mod_core->port_o & 1; break;
+
+                    // Текущая видеостраница
+                    case 0x03C0: video_page = mod_core->port_o & 1; break;
 
                     // Программирование палитры
                     case 0x03C8: dac_id = mod_core->port_o; dac_cnt = 0; break;
@@ -330,7 +335,7 @@ public:
 
             for (int y = 0; y < 400; y++)
             for (int x = 0; x < 640; x++) {
-                pset(x, y, dac[memory[0xA0000 + (x>>1) + (y>>1)*320]]);
+                pset(x, y, dac[memory[(video_page ? 0xB0000 : 0xA0000) + (x>>1) + (y>>1)*320]]);
             }
         }
         // Текстовый видеорежим

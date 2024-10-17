@@ -1,5 +1,5 @@
 
-        include "app/macro.asm"
+        include "../macro.asm"
         org     100h
 
         screen  13
