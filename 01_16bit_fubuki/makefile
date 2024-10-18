@@ -24,4 +24,4 @@ tbc:
 wav:
 	gtkwave tb.gtkw
 clean:
-	rm -rf tb tb.vcd tb.hex tb.bin obj_dir
+	rm -rf tb tb.vcd tb.hex tb.bin obj_dir tb.log test.bin bios.bin

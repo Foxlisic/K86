@@ -84,5 +84,5 @@ macro vidaccirc x, y, r, c
 {
         db      5
         dw      x, y, r
-        dw      c
+        db      c
 }

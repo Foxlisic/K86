@@ -1,15 +1,15 @@
 [*]
 [*] GTKWave Analyzer v3.3.116 (w)1999-2023 BSI
-[*] Thu Oct 17 13:24:58 2024
+[*] Fri Oct 18 03:46:03 2024
 [*]
 [dumpfile] "/home/fox/dev/03_x86/01_16bit_fubuki/tb.vcd"
-[dumpfile_mtime] "Thu Oct 17 13:24:36 2024"
-[dumpfile_size] 112406
+[dumpfile_mtime] "Fri Oct 18 03:44:05 2024"
+[dumpfile_size] 90290
 [savefile] "/home/fox/dev/03_x86/01_16bit_fubuki/tb.gtkw"
-[timestart] 0
+[timestart] 2609
 [size] 1920 1008
 [pos] -1 -1
-*-8.100000 616 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-7.500000 3279 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] tb.
 [sst_width] 319
 [signals_width] 203
@@ -127,10 +127,10 @@ tb.CPU.divr[31:0]
 -VIDAC
 @22
 tb.VIDAC.t[7:0]
-@23
 tb.VIDAC.tx[7:0]
-@22
 tb.VIDAC.a[17:0]
+@23
+tb.VIDAC.u[17:0]
 @28
 [color] 2
 tb.VIDAC.bsy
@@ -167,5 +167,7 @@ tb.VIDAC.e2[15:0]
 -LINE
 @1000200
 -VIDAC
+@22
+tb.VIDAC.comm[7:0]
 [pattern_trace] 1
 [pattern_trace] 0

@@ -12,19 +12,19 @@
         rep     movsb
 
         mov     dx, $3C0        ; Выбрать страницу
-        mov     al, 1
+        mov     al, 0
         out     dx, al
 
-        mov     al, 1           ; Рендеринг
+        mov     al, 0           ; Рендеринг #0 страницы
         mov     dx, $300
         out     dx, al
 
         hlt
 
 draw:
-        vidaccirc   160,100,120,7
-        vidacline   160,10,300,150,2
-        vidacpoly   100,100,3
+        vidaccirc   160,100,90,7
+        vidacline   160,10,240,150,2
+        vidacpoly   100,120,3
         vidacpoly   160,10,4
         vidacrect   20,20,30,25,5
         vidacfill   40,40,70,50,6

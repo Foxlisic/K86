@@ -36,8 +36,8 @@ initial begin
     memory[20'hC0001] = 8'hA0; memory[20'hC0002] = 8'h00; // x1
     memory[20'hC0003] = 8'h64; memory[20'hC0004] = 8'h00; // y1
 
-    memory[20'hC0005] = 8'h50; memory[20'hC0006] = 8'h00; // x2
-    memory[20'hC0007] = 8'h12; memory[20'hC0008] = 8'h00; // y2
+    memory[20'hC0005] = 8'h04; memory[20'hC0006] = 8'h00; // x2
+    memory[20'hC0007] = 8'h03; memory[20'hC0008] = 8'h00; // y2
 
     memory[20'hC0009] = 8'hAA; // color
     memory[20'hC000A] = 8'h00;
