@@ -86,3 +86,10 @@ macro vidaccirc x, y, r, c
         dw      x, y, r
         db      c
 }
+
+macro vidaccill x, y, r, c
+{
+        db      6
+        dw      x, y, r
+        db      c
+}

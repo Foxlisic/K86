@@ -22,10 +22,12 @@
         hlt
 
 draw:
-        vidaccirc   160,100,90,7
+        vidaccill   160,100,40,14
+        vidaccirc   160,100,40,15
         vidacline   160,10,240,150,2
         vidacpoly   100,120,3
         vidacpoly   160,10,4
+
         vidacrect   20,20,30,25,5
         vidacfill   40,40,70,50,6
 

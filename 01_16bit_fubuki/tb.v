@@ -31,7 +31,7 @@ initial begin
     memory[20'hFFFF4] = 8'h00;
 
     // VIDAC
-    memory[20'hC0000] = 8'h05;
+    memory[20'hC0000] = 8'h06;
 
     memory[20'hC0001] = 8'hA0; memory[20'hC0002] = 8'h00; // x1
     memory[20'hC0003] = 8'h64; memory[20'hC0004] = 8'h00; // y1
@@ -93,6 +93,7 @@ vidac VIDAC
     .clock      (clock_25),
     .reset_n    (reset_n),
     .cmd        (1'b1),
+    .page       (1'b0),
     .a          (vidac_a),
     .i          (vidac_i),
     .o          (vidac_o),

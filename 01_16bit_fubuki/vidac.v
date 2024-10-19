@@ -15,15 +15,27 @@ module vidac
     input       [ 7:0]  i,
     output  reg [ 7:0]  o,
     output  reg         w,
-    output  reg         bsy
+    output  reg         bsy,
+    // Запрос текстуры
+    output  reg [ 7:0]  tx,
+    output  reg [ 7:0]  ty,
+    input       [ 7:0]  td          // Данные о текстуре
 );
 
 // Первые 128К буфер; старшие 128К данные
 `define ACMD 18'h20000
 
+localparam
+    LINE        = 1,
+    BLOCK       = 2,
+    BLOCK_FILL  = 3,
+    POLY        = 4,
+    CIRCLE      = 5,
+    CIRCLE_FILL = 6;
+
 // ---------------------------------------------------------------------
 
-reg [ 7:0]  t, tx, comm;
+reg [ 7:0]  t, tn, comm;
 reg [ 3:0]  b;
 reg [17:0]  u;
 reg [15:0]  dx, dy;
@@ -80,14 +92,19 @@ end else begin
             case (i)
 
                 // LINE [x1:word,y1:word]-[x2:word,y2:word],c:byte
-                1: begin t <= 2; tx <= 3; b <= 9; end
+                LINE:
+                begin t <= 2; tn <= 3; b <= 9; end
                 // BLOCK [x1,y1]-[x2,y2],c :: 2-не закрашенный, 3-закрашенный
-                2,
-                3: begin t <= 2; tx <= 6; b <= 9; end
+                BLOCK,
+                BLOCK_FILL:
+                begin t <= 2; tn <= 6; b <= 9; end
                 // LINE -[x2:word,y2:word],c:byte Дорисовать линию
-                4: begin t <= 8; b <= 5; end
-                // CIRCLE (x,y),r,c
-                5: begin t <= 9; b <= 7; end
+                POLY:
+                begin t <= 8; b <= 5; end
+                // 5=CIRCLE (x,y),r,c; 6=CIRCLEFILL
+                CIRCLE,
+                CIRCLE_FILL:
+                begin t <= 9; b <= 7; end
                 // Любой не объявленный код команды сбрасывает в BSY=0
                 default: begin t <= 0; bsy <= 0; end
 
@@ -109,7 +126,7 @@ end else begin
             b <= b - 1;
             {o,y2,x2,y1,x1} <= {i,o,y2,x2,y1,x1[15:8]};
 
-        end else t <= tx;
+        end else t <= tn;
         // Подготовка данных к рендерингу
         3: begin
 
@@ -207,8 +224,9 @@ end else begin
 
             t  <= 10;
             u  <= a;
-            tx <= 0;
+            tn <= 0;
             dx <= 3 - 2*y2;
+            dy <= 1;
             x2 <= 0;
 
         end
@@ -218,27 +236,49 @@ end else begin
 
             t <= 11;
 
-            case (tx)
-            0: begin tx <= 1; x <= x1 - x2; y <= y1 + y2; end
-            1: begin tx <= 2; x <= x1 + x2; y <= y1 + y2; end
-            2: begin tx <= 3; x <= x1 - x2; y <= y1 - y2; end
-            3: begin tx <= 4; x <= x1 + x2; y <= y1 - y2; end
-            4: begin tx <= 5; x <= x1 - y2; y <= y1 + x2; end
-            5: begin tx <= 6; x <= x1 + y2; y <= y1 + x2; end
-            6: begin tx <= 7; x <= x1 - y2; y <= y1 - x2; end
-            7: begin tx <= 0; x <= x1 + y2; y <= y1 - x2; end
-            endcase
+            if (comm == CIRCLE_FILL) begin
+
+                case (tn)
+                0: begin tn <= 1; x <= x1 - x2; _x2 <= x1 + x2; y <= y1 + y2; end
+                1: begin tn <= 2; x <= x1 - x2; _x2 <= x1 + x2; y <= y1 - y2; end
+                2: begin tn <= 3; x <= x1 - y2; _x2 <= x1 + y2; y <= y1 + x2; end
+                3: begin tn <= 0; x <= x1 - y2; _x2 <= x1 + y2; y <= y1 - x2; end
+                endcase
+
+            end else begin
+
+                case (tn)
+                0: begin tn <= 1; x <= x1 - x2; y <= y1 + y2; end
+                1: begin tn <= 2; x <= x1 + x2; y <= y1 + y2; end
+                2: begin tn <= 3; x <= x1 - x2; y <= y1 - y2; end
+                3: begin tn <= 4; x <= x1 + x2; y <= y1 - y2; end
+                4: begin tn <= 5; x <= x1 - y2; y <= y1 + x2; end
+                5: begin tn <= 6; x <= x1 + y2; y <= y1 + x2; end
+                6: begin tn <= 7; x <= x1 - y2; y <= y1 - x2; end
+                7: begin tn <= 0; x <= x1 + y2; y <= y1 - x2; end
+                endcase
+
+            end
 
         end
 
         // Установка точки
-        11: begin a <= ax; w <= wx; t <= tx ? 10 : 12; end
+        11: begin
+
+            a <= ax;
+            w <= wx;
+            t <= comm == CIRCLE ? (tn ? 10 : 12) : (x < _x2 ? 11 : (tn ? 10 : 12));
+            x <= x + 1;
+
+        end
 
         // Следующая итерация
         12: if (x2 <= y2) begin
 
             t  <= 10;
+            tn <= 0;
             dx <= cirx[15] ? cirx : (cirx + 4*(1 - y2));
+            dy <= (comm == CIRCLE) || (cirx[15] == 0);
             x2 <= x2 + 1;
             y2 <= y2 - !cirx[15];
 
