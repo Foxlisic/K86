@@ -226,7 +226,6 @@ end else begin
             u  <= a;
             tn <= 0;
             dx <= 3 - 2*y2;
-            dy <= 1;
             x2 <= 0;
 
         end
@@ -276,9 +275,8 @@ end else begin
         12: if (x2 <= y2) begin
 
             t  <= 10;
-            tn <= 0;
+            tn <= (comm == CIRCLE_FILL && cirx[15] ? 2 : 0);
             dx <= cirx[15] ? cirx : (cirx + 4*(1 - y2));
-            dy <= (comm == CIRCLE) || (cirx[15] == 0);
             x2 <= x2 + 1;
             y2 <= y2 - !cirx[15];
 
