@@ -31,7 +31,8 @@ localparam
     BLOCK_FILL  = 3,
     POLY        = 4,
     CIRCLE      = 5,
-    CIRCLE_FILL = 6;
+    CIRCLE_FILL = 6,
+    BLOCK_TEX   = 7;
 
 // ---------------------------------------------------------------------
 
@@ -58,6 +59,24 @@ wire [16:0] ax   = (y << 8) + (y << 6) + x + {page, 16'h0000};
 wire        wx   = x < 320 && y < 200;
 wire        yof  = (y >= 200 && y[15] == 0);
 wire [15:0] cirx = dx + 4*x2 + 6;
+
+// Текстурированный прямоугольник
+wire [ 9:0] dxnx = dx + _y2[ 7:0]; // texture.w
+wire [ 9:0] dynx = dy + _y2[15:8]; // texture.h
+wire [ 3:0] dxrs = ~{xd_0[3], xd_0[2], xd_0[1], xd_0[0]};
+wire [ 3:0] dyrs = ~{yd_0[3], yd_0[2], yd_0[1], yd_0[0]};
+
+// Деление dxnx на x2
+wire [ 8:0] xd_3 = dxnx - 8*x2; wire [ 7:0] dx_3 = (xd_3[8] ? dxnx : xd_3);
+wire [ 8:0] xd_2 = dx_3 - 4*x2; wire [ 7:0] dx_2 = (xd_2[8] ? dx_3 : xd_2);
+wire [ 8:0] xd_1 = dx_2 - 2*x2; wire [ 7:0] dx_1 = (xd_1[8] ? dx_2 : xd_1);
+wire [ 8:0] xd_0 = dx_1 -   x2; wire [ 7:0] dx_0 = (xd_0[8] ? dx_1 : xd_0);
+
+// Деление dynx на y2
+wire [ 8:0] yd_3 = dynx - 8*y2; wire [ 7:0] dy_3 = (yd_3[8] ? dynx : yd_3);
+wire [ 8:0] yd_2 = dy_3 - 4*y2; wire [ 7:0] dy_2 = (yd_2[8] ? dy_3 : yd_2);
+wire [ 8:0] yd_1 = dy_2 - 2*y2; wire [ 7:0] dy_1 = (yd_1[8] ? dy_2 : yd_1);
+wire [ 8:0] yd_0 = dy_1 -   y2; wire [ 7:0] dy_0 = (yd_0[8] ? dy_1 : yd_0);
 
 // ---------------------------------------------------------------------
 // Блок распределения команд и наблюдение за их исполнением
@@ -105,6 +124,8 @@ end else begin
                 CIRCLE,
                 CIRCLE_FILL:
                 begin t <= 9; b <= 7; end
+                // 7=BITBLT (x:byte,y:byte,w:byte,h:byte)-(x1:word,y1:word,w:word,h:word)
+                BLOCK_TEX: begin t <= 13; b <= 12; end
                 // Любой не объявленный код команды сбрасывает в BSY=0
                 default: begin t <= 0; bsy <= 0; end
 
@@ -281,6 +302,63 @@ end else begin
             y2 <= y2 - !cirx[15];
 
         end else t <= 0;
+
+        // -------------------------------------------------------------
+        // BITBLT (x,y,w,h)-(x1,y1,w,h)
+        // Рисование текстуры на видеостранице
+        // _x2[ 7:0] = x
+        // _x2[15:8] = y
+        // _y2[ 7:0] = w
+        // _y2[15:8] = h
+        // -------------------------------------------------------------
+
+        // Считывание данных из памяти
+        13: if (b) begin
+
+            a <= a + 1;
+            b <= b - 1;
+            {o,y2,x2,y1,x1,_y2,_x2} <= {i,o,y2,x2,y1,x1,_y2,_x2[15:8]};
+
+        end else begin
+
+            t  <= 14;
+            u  <= a;
+            dx <= 0;
+            dy <= 0;
+            x2 <= x2 - 1;           // Ширина блока
+            y2 <= y2 - 1;
+            tx <= _x2[ 7:0];        // Старт текстуры X
+            ty <= _x2[15:8];        // Старт текстуры Y
+
+        end
+
+        // Рисование пикселей в блоке
+        14: begin
+
+            a <= ax;
+            w <= wx;
+            o <= td;
+            x <= x + 1;
+
+            // Переход на новую линию
+            if (x == x1 + x2) begin
+
+                t  <= y == y1 + y2 ? 0 : 14;
+                dx <= 0;
+                x  <= x1;
+                tx <= _x2[ 7:0];
+                ty <= ty   + dyrs;
+                dy <= dynx - dyrs*y2;
+                y  <= y + 1;
+
+            end else begin
+
+                tx <= tx   + dxrs;
+                dx <= dxnx - dxrs*x2;
+
+            end
+
+        end
 
     endcase
 

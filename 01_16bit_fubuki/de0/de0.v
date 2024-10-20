@@ -105,7 +105,7 @@ wire [15:0] main_a;
 wire [16:0] video_a;
 wire [11:0] font_a;
 wire [ 7:0] font_q, video_q;
-wire [ 7:0] in_main, in_font, in_video;
+wire [ 7:0] in_main, in_font, in_video, in_vidac, in_texture;
 
 // Клавиатура
 wire [ 7:0] kb_data;
@@ -124,15 +124,26 @@ reg [ 4:0]  timer_sub;
 reg [15:0]  timer_cnt;
 reg [15:0]  timer_max;
 
-// Совмещенная видеопамять. При записи в B8000h записывает в 8000h
-wire we_main  = (address <  20'h10000);
-wire we_video = (address >= 20'hA0000 && address < 20'hB92C0); // 80x30 символов
-wire we_font  = (address >= 20'hBC000 && address < 20'hBD000);
+// Видеоускоритель
+reg         vidac_cmd;
+reg         vidac_page;
+wire [15:0] vidac_a;
+wire [ 7:0] vidac_i, vidac_o, vidac_tx, vidac_ty, vidac_td;
+wire        vidac_w;
+wire        vidac_bsy;
+
+// Распределение памяти
+wire we_main    = (address <  20'h10000);                        // 64К  Память программы
+wire we_video   = (address >= 20'hA0000 && address < 20'hC0000); // 128К Видеопамять
+wire we_vidac   = (address >= 20'hC0000 && address < 20'hD0000); // 64К  Программа видак
+wire we_texture = (address >= 20'hD0000 && address < 20'hD8000); // 32К  Текстуры 256x128
+wire we_font    = (address >= 20'hD8000 && address < 20'hB9000); // 4К   Шрифты 256 символов
 
 // Выбор источника памяти
 wire [ 7:0] in =
     we_main  ? in_main  :
     we_video ? in_video :
+    we_vidac ? in_vidac :
     we_font  ? in_font  : 8'hFF;
 
 // Генератор частот
@@ -198,6 +209,24 @@ video VIDEO
     .vretrace   (vretrace)
 );
 
+vidac VIDAC
+(
+    .clock      (clock_25),
+    .reset_n    (locked),
+    .cmd        (vidac_cmd),
+    .page       (vidac_page),
+    // Видеопамять
+    .a          (vidac_a),
+    .i          (vidac_i),
+    .o          (vidac_o),
+    .w          (vidac_w),
+    .bsy        (vidac_bsy),
+    // Текстура
+    .tx         (vidac_tx),
+    .ty         (vidac_ty),
+    .td         (vidac_td)
+);
+
 // Клавиатура
 // ---------------------------------------------------------------------
 
@@ -236,10 +265,33 @@ mem_video M1
 );
 
 // 64K видеопамять VIDAC
+mem_vidac M2
+(
+    .clock      (clock_100),
+    .a          (address[15:0]),
+    .q          (in_vidac),
+    .d          (out),
+    .w          (we && we_vidac),
+    .ax         (vidac_a),
+    .qx         (vidac_i),
+    .dx         (vidac_o),
+    .wx         (vidac_w),
+);
+
 // 32K текстурная память 256x128
+mem_texture M3
+(
+    .clock      (clock_100),
+    .a          (address[14:0]),
+    .q          (in_texture),
+    .d          (out),
+    .w          (we && we_texture),
+    .ax         ({vidac_ty[6:0], vidac_tx[7:0]}),
+    .qx         (vidac_td)
+);
 
 // 4K шрифты
-mem_font M2
+mem_font M4
 (
     .clock      (clock_100),
     .a          (address[11:0]),
@@ -251,7 +303,7 @@ mem_font M2
 );
 
 // 1K Палитра
-mem_dac M3
+mem_dac M5
 (
     .clock      (clock_100),
     .a          (dac_a),
@@ -274,7 +326,8 @@ if (locked == 0 || RESET_N == 0) begin
 
 end else begin
 
-    dac_w <= 0;
+    dac_w       <= 0;
+    vidac_cmd   <= 0;
 
     // Срабатывание IRQ
     // Пока прерывание не будет обработано (irq_pend), новое вызвано не будет
@@ -301,6 +354,7 @@ end else begin
     16'h00A0: begin end // IRQMASK
 
     // Выбор видеостраницы, запрос на VIDAC
+    16'h0300: begin vidac_cmd <= 1; vidac_page <= port_o[0]; end
     16'h03C0: begin videopage <= port_o[0]; end
 
     // Запись палитры
@@ -333,6 +387,7 @@ end else begin
     case (port_a)
     16'h0060: begin port_i <= kbd_dat; end
     16'h0061: begin port_i <= kbd_hit; kbd_hit <= 0; end
+    16'h0300: begin port_i <= {vidac_page, vidac_bsy}; end
     16'h03DA: begin port_i <= {vga_retrace, 2'b00}; vga_retrace <= 0; end
     endcase
 
@@ -360,4 +415,5 @@ endmodule
 
 `include "../core.v"
 `include "../video.v"
+`include "../vidac.v"
 `include "../ps2.v"
