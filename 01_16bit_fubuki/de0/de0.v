@@ -127,7 +127,7 @@ reg [15:0]  timer_max;
 // Видеоускоритель
 reg         vidac_cmd;
 reg         vidac_page;
-wire [15:0] vidac_a;
+wire [17:0] vidac_a;
 wire [ 7:0] vidac_i, vidac_o, vidac_tx, vidac_ty, vidac_td;
 wire        vidac_w;
 wire        vidac_bsy;
@@ -217,7 +217,7 @@ vidac VIDAC
     .page       (vidac_page),
     // Видеопамять
     .a          (vidac_a),
-    .i          (vidac_i),
+    .i          (vidac_a[17] ? vidac_i : in_video),
     .o          (vidac_o),
     .w          (vidac_w),
     .bsy        (vidac_bsy),
@@ -249,17 +249,18 @@ mem_main M0
     .a          (address[15:0]),
     .q          (in_main),
     .d          (out),
-    .w          (we && we_main),
+    .w          (we && we_main)
 );
 
 // 128K видеопамяти
+// Если работает VIDAC, то память недоступна для чтения и записи
 mem_video M1
 (
     .clock      (clock_100),
-    .a          (address[16:0]),
+    .a          (vidac_bsy ? vidac_a[16:0]  : address[16:0]),
+    .d          (vidac_bsy ? vidac_o        : out),
     .q          (in_video),
-    .d          (out),
-    .w          (we && we_video),
+    .w          (we && we_video || (vidac_w && !vidac_a[17])),
     .ax         (video_a),
     .qx         (video_q)
 );
@@ -272,10 +273,10 @@ mem_vidac M2
     .q          (in_vidac),
     .d          (out),
     .w          (we && we_vidac),
-    .ax         (vidac_a),
+    .ax         (vidac_a[15:0]),
     .qx         (vidac_i),
     .dx         (vidac_o),
-    .wx         (vidac_w),
+    .wx         (vidac_w && vidac_a[17])
 );
 
 // 32K текстурная память 256x128
