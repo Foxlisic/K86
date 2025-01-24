@@ -14,3 +14,5 @@ PLLJ_PLLSPE_INFO.txt
 bios.bin
 *.bak
 debug.txt
+.tmp
+/vendor/
