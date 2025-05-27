@@ -26,8 +26,6 @@ if (reset_n == 0) begin
 
     t    <= RUN;              // Исполнение инструкции начинается сразу
     m    <= 0;
-    m1   <= 0;
-    m2   <= 0;
     cp   <= 0;                // Установить на CS:IP
     cs   <= 0;
     ip   <= 0;
@@ -36,6 +34,7 @@ if (reset_n == 0) begin
     rep  <= 0;
     w    <= 0;
     term <= 1;
+    over <= 0;
 
 // Запуск выполнения команд процессора
 end else if (ce) begin
@@ -56,6 +55,9 @@ end else if (ce) begin
             if (term) begin sgn <= ds; rep <= 2'b00; over <= 0; end
 
             m       <= 1;
+            m1      <= 0;
+            m2      <= 0;
+            m3      <= 0;
             ip      <= ipn;
             next    <= RUN;
             term    <= 0;
@@ -66,21 +68,30 @@ end else if (ce) begin
         end
 
         casex (opcode)
-
-        // ### AL-операции с операндами Modrm [3T+]
-        8'b00xxx0xx: case (m)
+        8'b00xxx0xx: case (m) // ### AL-операции с операндами ModRM [3T+]
         0: begin t <= MODRM; alu <= opcode[5:3]; end
         1: begin t <= alu == CMP ? RUN : WB; wb <= ar; flags <= af; `TERM end
         endcase
-
-        // ### AL-операции AL/AX + imm [3/4T]
-        8'b00xxx10x: case (m)
-        0: begin alu <= opcode[5:3];        op1 <= opcode[0] ? ax : ax[7:0];end
+        8'b00xxx10x: case (m) // ### AL-операции AL/AX + imm [3/4T]
+        0: begin alu <= opcode[5:3];        op1 <= i[0] ? ax : ax[7:0]; end
         1: begin ip <= ipn; m <= size?2:3;  op2 <= i; end
         2: begin ip <= ipn; m <= 3;         op2[15:8] <= i; end
         3: begin flags <= af; if (alu != CMP) ax <= size ? ar : {ax[15:8], ar[7:0]}; `TERM end
         endcase
-
+        8'b000xx110: case (m) // ### PUSH es/cs/ss/ds [4T]
+        0: begin t <= PUSH; case (i[4:3]) 0:wb<=es; 1:wb<=cs; 2:wb<=ss; 3:wb<=ds; endcase `TERM; end
+        endcase
+        8'b00001111: case (m) // ### ::Extended::
+        0: begin end
+        endcase
+        8'b000xx111: case (m) // ### POP es/../ss/ds [5T]
+        0: begin t <= POP; end
+        1: begin case (opcode[4:3]) 0:es<=wb; 2:ss<=wb; 3:ds<=wb; endcase `TERM; end
+        endcase
+        8'b001xx110: case (m) // ### Префикс es/cs/ss/ds:
+        0: begin over <= 1; case (i[4:3]) 0:sgn<=es; 1:sgn<=cs; 2:sgn<=ss; 3:sgn<=ds; endcase m <= 0; end
+        endcase
+        default: ip <= ip;    // $$$ НЕИЗВЕСТНАЯ ИНСТРУКЦИЯ
         endcase
 
     end
@@ -152,7 +163,7 @@ end else if (ce) begin
     endcase
 
     // -------------------------------------------------------------
-    // ЗАПИСЬ РЕЗУЛЬТАТОВ WB,DIR,SIZE,MODRM В ПАМЯТЬ/РЕГИСТРЫ
+    // [1T,2-3T] ЗАПИСЬ РЕЗУЛЬТАТОВ WB,DIR,SIZE,MODRM В ПАМЯТЬ/РЕГИСТРЫ
     // -------------------------------------------------------------
     WB: case (m2)
 
@@ -196,6 +207,24 @@ end else if (ce) begin
 
         end
 
+    endcase
+
+    // -------------------------------------------------------------
+    // [3T] ВЫГРУЗКА WB -> В СТЕК
+    // -------------------------------------------------------------
+    PUSH: case (m3)
+    0: begin m3 <= 1; ea <= sp - 2; w <= 1; o <= wb[7:0]; cp <= 1; sgn <= ss; sp <= sp - 2; end
+    1: begin m3 <= 2; ea <= ea + 1; w <= 1; o <= wb[15:8]; end
+    2: begin m3 <= 0; cp <= 0; t <= next; end
+    endcase
+
+    // -------------------------------------------------------------
+    // [3T] ЗАГРУЗКА ИЗ СТЕКА -> WB
+    // -------------------------------------------------------------
+    POP: case (m3)
+    0: begin m3 <= 1; cp <= 1; ea <= sp; sp <= sp + 2; sgn <= ss; cp <= 1; end
+    1: begin m3 <= 2; wb <= i; ea <= ea + 1; end
+    2: begin m3 <= 0; wb[15:8] <= i;  cp <= 0; t <= next; end
     endcase
 
     endcase

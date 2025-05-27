@@ -20,8 +20,8 @@ protected:
     SDL_Event           evt;
     Uint32*             screen_buffer;
 
-    int scale       = 2;
-    int videomode   = 0;
+    int scale           = 2;
+    int config_debugger = 0;
 
 public:
 
@@ -29,7 +29,7 @@ public:
     {
         memory      = (uint8_t*) malloc(1024*1024);
         dis         = new disasm(memory);
-        videomode   = 0;
+        config_debugger = 0;
     }
 
     ~machine()
@@ -70,15 +70,21 @@ public:
 
     void load(int argc, char** argv)
     {
-        int i = 1;
+        int  i = 1;
+
         FILE* fp = NULL;
 
         // Скопировать шрифты по умолчанию
-        for (int i = 0; i < 4096; i++) memory[0xB9000 + i] = font[i];
+        for (int i = 0; i < 4096; i++) memory[0xC800 + i] = font[i];
 
         while (i < argc) {
 
             if (argv[i][0] == '-') {
+
+                switch (argv[i][1]) {
+
+                    case 'd': config_debugger = 1; break;
+                }
 
             } else {
 
@@ -137,7 +143,8 @@ public:
             Uint32 ticks = SDL_GetTicks();
 
             for (int i = 0; i < 3500000; i++) {
-                // x86deb();
+
+                if (config_debugger && inhlt == 0) x86deb();
                 x86run(1);
             }
 
@@ -174,44 +181,24 @@ public:
         }
     }
 
-    // Обновление экранной области
+    // Обновление экранной области [cyclone-3]
     void refresh()
     {
-        switch (videomode)
-        {
-            // 80x25
-            case 0:
+        for (int i = 0; i < 25; i++)
+        for (int j = 0; j < 80; j++) {
 
-                for (int i = 0; i < 25; i++)
-                for (int j = 0; j < 80; j++) {
+            int     a = 0xB800 + 2*j + 160*i;
+            uint8_t b = memory[a],
+                    c = memory[a + 1];
 
-                    int     a = 0xB8000 + 2*j + 160*i;
-                    uint8_t b = memory[a],
-                            c = memory[a + 1];
+            for (int y = 0; y < 16; y++) {
 
-                    for (int y = 0; y < 16; y++) {
-
-                        int d = memory[0xB9000 + 16*b + y];
-                        for (int x = 0; x < 8; x++) {
-                            pset(j*8 + x, i*16 + y, dac[d & (0x80 >> x) ? c & 15 : c >> 4]);
-                        }
-                    }
+                int d = memory[0xC800 + 16*b + y];
+                for (int x = 0; x < 8; x++) {
+                    pset(j*8 + x, i*16 + y, dac[d & (0x80 >> x) ? c & 15 : c >> 4]);
                 }
-
-                break;
-
-            // 320x200
-            case 1: // Страница 0
-
-                for (int y = 0; y < 400; y++)
-                for (int x = 0; x < 640; x++) {
-                    pset(x, y, dac[memory[0xA0000 + (x>>1) + 320*(y>>1)] & 15]);
-                }
-
-                break;
-
+            }
         }
-
     }
 
 

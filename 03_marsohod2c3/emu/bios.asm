@@ -5,22 +5,22 @@
 maxsize equ     1024
 
         org     0
-begin:  mov     ax, $B800
+begin:  xor     ax, ax
         mov     es, ax
-        mov     ax, cs
-        mov     ds, ax
-        xor     ax, ax
         mov     ss, ax
         mov     sp, $1000
+        mov     ax, cs
+        mov     ds, ax
 
         mov     si, s
-        mov     di, 0
+        mov     di, $B800
         mov     ah, $17
 @@:     lodsb
         and     al, al
-        je      $
+        je      stop
         stosw
         jmp     @b
+stop:   hlt
 
 s       db      "Hello world!",0
 

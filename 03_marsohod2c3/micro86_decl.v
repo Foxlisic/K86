@@ -4,7 +4,9 @@ localparam
 
     RUN     = 0,
     MODRM   = 1,
-    WB      = 2;
+    WB      = 2,
+    PUSH    = 3,
+    POP     = 4;
 
 localparam CF  = 0, PF = 2, AF  = 4, ZF  = 6, SF  = 7, TF  = 8, IF  = 9, DF  = 10, OF = 11;
 localparam ADD = 0, OR = 1, ADC = 2, SBB = 3, AND = 4, SUB = 5, XOR = 6, CMP = 7;

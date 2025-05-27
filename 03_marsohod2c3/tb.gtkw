@@ -1,15 +1,15 @@
 [*]
 [*] GTKWave Analyzer v3.3.66 (w)1999-2015 BSI
-[*] Mon May 26 04:47:57 2025
+[*] Tue May 27 04:35:10 2025
 [*]
 [dumpfile] "Z:\dev\03_x86\03_marsohod2c3\tb.vcd"
-[dumpfile_mtime] "Mon May 26 04:47:17 2025"
-[dumpfile_size] 67652
+[dumpfile_mtime] "Tue May 27 04:34:49 2025"
+[dumpfile_size] 68715
 [savefile] "Z:\dev\03_x86\03_marsohod2c3\tb.gtkw"
 [timestart] 0
 [size] 960 491
 [pos] -1 -1
-*-7.000000 180 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-7.000000 60 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] tb.
 [sst_width] 197
 [signals_width] 163
@@ -32,6 +32,7 @@ tb.a[19:0]
 tb.i[7:0]
 tb.o[7:0]
 @28
+[color] 2
 tb.w
 @22
 tb.Processor.sgn[15:0]
@@ -40,14 +41,16 @@ tb.Processor.ea[15:0]
 -IO
 @800200
 -CTL
+@28
+[color] 2
+tb.Processor.term
 @22
 tb.Processor.opcode[7:0]
 tb.Processor.modrm[7:0]
 tb.Processor.t[3:0]
 tb.Processor.m[3:0]
-tb.Processor.m1[3:0]
-@28
-tb.Processor.term
+@29
+tb.Processor.over
 @1000200
 -CTL
 @800200
@@ -69,6 +72,14 @@ tb.Processor.bp[15:0]
 tb.Processor.si[15:0]
 [color] 6
 tb.Processor.di[15:0]
+[color] 5
+tb.Processor.cs[15:0]
+[color] 5
+tb.Processor.ds[15:0]
+[color] 5
+tb.Processor.es[15:0]
+[color] 5
+tb.Processor.ss[15:0]
 @1000200
 -REGS
 @800200
@@ -81,7 +92,7 @@ tb.Processor.op2[15:0]
 tb.Processor.ar[16:0]
 tb.Processor.af[11:0]
 tb.Processor.wb[15:0]
-@c00023
+@c00022
 [color] 5
 tb.Processor.flags[11:0]
 @28
@@ -109,7 +120,7 @@ tb.Processor.flags[11:0]
 (10)tb.Processor.flags[11:0]
 [color] 5
 (11)tb.Processor.flags[11:0]
-@1401201
+@1401200
 -group_end
 @1000200
 -ALU

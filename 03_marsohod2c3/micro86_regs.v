@@ -2,7 +2,7 @@
 // Регистры общего назначения и сегментные
 reg [15:0]  ax = 16'hDEAD, cx = 16'hBEEF, dx = 16'hBABE, bx = 16'hF00D,
             sp = 16'h50A0, bp = 16'hF1FA, si = 16'hFACE, di = 16'h0777;
-reg [15:0]  es = 16'h0000, cs = 16'h0000, ss = 16'h0000, ds = 16'h0000;
+reg [15:0]  es = 16'hFEBA, cs = 16'h0000, ss = 16'h1000, ds = 16'hDAEB;
 reg [15:0]  ip = 16'h0000;
 //                      0DIT SZ A  P C
 reg [11:0]  flags = 12'b0000_0000_0010;
@@ -13,7 +13,8 @@ reg         dir;                    // =0 rm,r; =1 r,rm
 reg         term;                   // =1 Конец инструкции
 reg         over;                   // =1 Сегмент переопределен
 reg [ 3:0]  t, next;                // Исполняемая команда в данный момент
-reg [ 3:0]  m, m1, m2;              // Фаза исполнения T, MODRM, WB
+reg [ 3:0]  m;                      // Фаза исполнения T
+reg [ 2:0]  m1, m2, m3;             // Фаза исполнения MODRM, WB, PUSH/POP
 reg [ 2:0]  alu;                    // Функция АЛУ или сдвигов
 reg [ 7:0]  opcache, modrm;         // Кеш опкода
 reg [ 1:0]  rep;                    // Наличие REP:
