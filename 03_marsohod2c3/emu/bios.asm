@@ -20,7 +20,17 @@ begin:  xor     ax, ax
         je      stop
         stosw
         jmp     @b
-stop:   hlt
+
+        ; Тестовый прием клавиш
+stop:   in      al, $64
+        test    al, 1
+        je      stop
+        in      al, $60
+        stosw
+        jmp     stop
+
+        hlt
+
 
 s       db      "Hello world!",0
 

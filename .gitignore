@@ -13,6 +13,10 @@ c5_pin_model_dump.txt
 PLLJ_PLLSPE_INFO.txt
 bios.bin
 *.bak
+*.log
 debug.txt
 .tmp
 /vendor/
+/03_marsohod2c3/emu/emu86
+/*.geany
+
