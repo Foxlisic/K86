@@ -4,7 +4,6 @@ const static int dac[16] =
     0x555555, 0x5555ff, 0x55ff55, 0x55ffff, 0xff5555, 0xff55ff, 0xffff55, 0xffffff, // 8
 };
 
-
 enum KBASCII
 {
     key_UP          = 0x01,
@@ -68,6 +67,11 @@ protected:
     int key_last        = 0;
     int key_shift       = 0;
     int key_trigger     = 0;
+    int flash_cnt       = 0;
+    int flash           = 0;
+    int cursor_x        = 0;
+    int cursor_y        = 0;
+    uint8_t millis      = 0;
 
 public:
 
@@ -97,7 +101,10 @@ public:
     {
         switch (a)
         {
+            case 0x10: return cursor_x;
+            case 0x11: return cursor_y;
             case 0x60: return key_last;
+            case 0x62: return millis;
             case 0x64: if (key_trigger) { key_trigger = 0; return 1; } return 0; break;
         }
 
@@ -107,6 +114,11 @@ public:
     // Запись в порт
     void iowrite(uint16_t a, uint8_t b)
     {
+        switch (a)
+        {
+            case 0x10: cursor_x = a; break;
+            case 0x11: cursor_y = a; break;
+        }
     };
 
     // Чтение из памяти
@@ -130,7 +142,7 @@ public:
         FILE* fp = NULL;
 
         // Скопировать шрифты по умолчанию
-        for (int i = 0; i < 4096; i++) memory[0xC800 + i] = font[i];
+        for (int i = 0; i < 4096; i++) memory[0xB9000 + i] = font[i];
 
         while (i < argc) {
 
@@ -222,9 +234,12 @@ public:
             // Эмулятор
             Uint32 ticks = SDL_GetTicks();
 
-            for (int i = 0; i < 3500000; i++) {
+            // 60 кадров в секунду, инструкция примерно по 4Т
+            for (int i = 0; i < (416666>>2); i++) {
 
                 if (config_debugger && inhlt == 0) x86deb();
+                if (i % 8680 == 0) millis++;
+
                 x86run(1);
             }
 
@@ -264,18 +279,25 @@ public:
     // Обновление экранной области [cyclone-3]
     void refresh()
     {
+        flash_cnt = (flash_cnt + 1) % 15;
+        if (flash_cnt == 0) flash = !flash;
+
         for (int i = 0; i < 25; i++)
         for (int j = 0; j < 80; j++) {
 
-            int     a = 0xB800 + 2*j + 160*i;
+            int     a = 0xB8000 + 2*j + 160*i;
             uint8_t b = memory[a],
                     c = memory[a + 1];
 
             for (int y = 0; y < 16; y++) {
 
-                int d = memory[0xC800 + 16*b + y];
+                int d = memory[0xB9000 + 16*b + y];
                 for (int x = 0; x < 8; x++) {
-                    pset(j*8 + x, i*16 + y, dac[d & (0x80 >> x) ? c & 15 : c >> 4]);
+
+                    int mask = d & (0x80 >> x);
+                    int cl = mask || (cursor_x == j && cursor_y == i && flash && y >= 14) ? c & 15 : c >> 4;
+
+                    pset(j*8 + x, i*16 + y, dac[cl]);
                 }
             }
         }
@@ -329,56 +351,49 @@ public:
             /* 8 */   case SDLK_8: xt = sh ? '*' : '8'; break;
             /* 9 */   case SDLK_9: xt = sh ? '(' : '9'; break;
 
-//            /* ` */   case 0x31: xt = sh ? '~' : '`'; break;
-            /* - */   case 0x14: xt = sh ? '_' : '-'; break;
-            /* = */   case 0x15: xt = sh ? '+' : '='; break;
-//            /* \ */   case 0x33: xt = sh ? '|' : '\\'; break;
-            /* [ */   case 0x22: xt = sh ? '{' : '['; break;
-            /* ] */   case 0x23: xt = sh ? '}' : ']'; break;
-            /* ; */   case 0x2f: xt = sh ? ':' : ';'; break;
-//            /* ' */   case 0x30: xt = sh ? '|' : '\''; break;
-            /* , */   case 0x3b: xt = sh ? '<' : ','; break;
-            /* . */   case 0x3c: xt = sh ? '>' : '.'; break;
-            /* / */   case 0x3d: xt = sh ? '?' : '/'; break;
+            // Клавиши отдельные
+            /* ` */   case SDLK_BACKQUOTE:      xt = sh ? '~' : '`'; break;
+            /* - */   case SDLK_MINUS:          xt = sh ? '_' : '-'; break;
+            /* = */   case SDLK_EQUALS:         xt = sh ? '+' : '='; break;
+            /* \ */   case SDLK_BACKSLASH:      xt = sh ? '|' : '\\'; break;
+            /* [ */   case SDLK_LEFTBRACKET:    xt = sh ? '{' : '['; break;
+            /* ] */   case SDLK_RIGHTBRACKET:   xt = sh ? '}' : ']'; break;
+            /* ; */   case SDLK_SEMICOLON:      xt = sh ? ':' : ';'; break;
+            /* ' */   case SDLK_QUOTE:          xt = sh ? '|' : '\''; break;
+            /* , */   case SDLK_COMMA:          xt = sh ? '<' : ','; break;
+            /* . */   case SDLK_PERIOD:         xt = sh ? '>' : '.'; break;
+            /* / */   case SDLK_SLASH:          xt = sh ? '?' : '/'; break;
+            /* F1  */ case SDLK_F1:             xt = key_F1; break;
+            /* F2  */ case SDLK_F2:             xt = key_F2; break;
+            /* F3  */ case SDLK_F3:             xt = key_F3; break;
+            /* F4  */ case SDLK_F4:             xt = key_F4; break;
+            /* F5  */ case SDLK_F5:             xt = key_F5; break;
+            /* F6  */ case SDLK_F6:             xt = key_F6; break;
+            /* F7  */ case SDLK_F7:             xt = key_F7; break;
+            /* F8  */ case SDLK_F8:             xt = key_F8; break;
+            /* F9  */ case SDLK_F9:             xt = key_F9; break;
+            /* F10 */ case SDLK_F10:            xt = key_F10; break;
+            /* F11 */ case SDLK_F11:            xt = key_F11; break;
+            /* F12 */ case SDLK_F12:            xt = key_F12; break;
+            /* bs */  case SDLK_BACKSPACE:      xt = key_BS; break;     // Back Space
+            /* sp */  case SDLK_SPACE:          xt = ' '; break;        // Space
+            /* tb */  case SDLK_TAB:            xt = key_TAB; break;    // Tab
+            /* ls */  case SDLK_LSHIFT:         xt = key_LSHIFT; break; // Left Shift
+            /* la */  case SDLK_LALT:           xt = key_LALT;  break;  // Left Ctrl
+            /* lc */  case SDLK_LCTRL:          xt = key_LCTRL; break;  // Left Alt
+            /* en */  case SDLK_RETURN:         xt = key_ENTER; break;  // Enter
+            /* es */  case SDLK_ESCAPE:         xt = key_ESC; break;    // Escape
 
-            /* F1  */ case 67: xt = key_F1; break;
-            /* F2  */ case 68: xt = key_F2; break;
-            /* F3  */ case 69: xt = key_F3; break;
-            /* F4  */ case 70: xt = key_F4; break;
-            /* F5  */ case 71: xt = key_F5; break;
-            /* F6  */ case 72: xt = key_F6; break;
-            /* F7  */ case 73: xt = key_F7; break;
-            /* F8  */ case 74: xt = key_F8; break;
-            /* F9  */ case 75: xt = key_F9; break;
-            /* F10 */ case 76: xt = key_F10; break;
-            /* F11 */ case 95: xt = key_F11; break;
-            /* F12 */ case 96: xt = key_F12; break;
-
-            /* bs */  case 0x16: xt = key_BS; break;     // Back Space
-            /* sp */  case 0x41: xt = 0x20; break;       // Space
-            /* tb */  case 0x17: xt = key_TAB; break;    // Tab
-       //     /* ls */  case 0x32: xt = key_LSHIFT; break; // Left Shift
-            /* lc */  case 0x25: xt = key_LALT;  break;  // Left Ctrl
-            /* la */  case 0x40: xt = key_LCTRL; break;  // Left Alt
-            /* en */  case 0x24: xt = key_ENTER; break;  // Enter
-            /* es */  case 0x09: xt = key_ESC; break;    // Escape
-            /* es */  case 0x08: xt = key_ESC; break;
-
-            // ---------------------------------------------
-            // Специальные (не так же как в реальном железе)
-            // ---------------------------------------------
-
-       //     /* UP  */  case 0x6F: xt = key_UP; break;
-       //     /* RT  */  case 0x72: xt = key_RT; break;
-       //     /* DN  */  case 0x74: xt = key_DN; break;
-       //     /* LF  */  case 0x71: xt = key_LF; break;
-       //     /* Home */ case 0x6E: xt = key_HOME; break;
-       //     /* End  */ case 0x73: xt = key_END; break;
-       //     /* PgUp */ case 0x70: xt = key_PGUP; break;
-       //     /* PgDn */ case 0x75: xt = key_PGDN; break;
-       //     /* Del  */ case 0x77: xt = key_DEL; break;
-       //     /* Ins  */ case 0x76: xt = key_INS; break;
-       //     /* NLock*/ case 0x4D: xt = key_NL; break;
+            /* UP  */  case SDLK_UP:            xt = key_UP; break;
+            /* RT  */  case SDLK_RIGHT:         xt = key_RT; break;
+            /* DN  */  case SDLK_DOWN:          xt = key_DN; break;
+            /* LF  */  case SDLK_LEFT:          xt = key_LF; break;
+            /* Home */ case SDLK_HOME:          xt = key_HOME; break;
+            /* End  */ case SDLK_END:           xt = key_END; break;
+            /* PgUp */ case SDLK_PAGEUP:        xt = key_PGUP; break;
+            /* PgDn */ case SDLK_PAGEDOWN:      xt = key_PGDN; break;
+            /* Del  */ case SDLK_DELETE:        xt = key_DEL; break;
+            /* Ins  */ case SDLK_INSERT:        xt = key_INS; break;
 
             default: return 0;
         }
