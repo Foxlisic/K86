@@ -16,7 +16,5 @@ bios.bin
 *.log
 debug.txt
 .tmp
-/vendor/
-/03_marsohod2c3/emu/emu86
 /*.geany
-
+/tb.gtkw
