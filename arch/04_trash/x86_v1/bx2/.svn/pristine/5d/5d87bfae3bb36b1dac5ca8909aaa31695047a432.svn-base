@@ -1,0 +1,246 @@
+#include "step.cc"
+
+// Сброс CPU
+void cpu_reset() {
+
+    // Переход к реальному режиму работы
+    pmode           = 0;
+    eip             = 0;
+    eflags          = 0;
+
+    // Перезагрузка сегментов
+    load_segment(CS, 0xFFFF);
+    load_segment(DS, 0);
+    load_segment(ES, 0);
+    load_segment(SS, 0);
+}
+
+// Загрузка нового сегментного регистра по селектору
+void load_segment(byte segment_id, word selector) {
+
+    // Получение ссылки на структуру сегмента
+    Tsegment* seg = & segs[segment_id];
+
+    // @TODO PROTECTED MODE
+
+    // REAL MODE
+    seg->selector   = selector;
+    seg->base       = selector * 16;
+    seg->limit      = 65535;
+    seg->cpl        = 3;
+    seg->defsize    = 0;
+}
+
+// Проверка лимитов и разрешений на память
+dword read_address(struct Tsegment* seg, dword offset) {
+
+    // General Protection Error
+    if (offset > seg->limit) {
+        
+        exception = EXCEPTION_GENERAL;
+        return 0;
+    }
+
+    return seg->base + offset;
+}
+
+// Чтение байта
+byte read_byte(Tsegment* seg, dword offset) {
+    return phy_read( read_address(seg, offset) );
+}
+
+// Чтение слова 16 бит
+word read_word(Tsegment* seg, dword offset) {
+
+    byte L = read_byte(seg, offset);
+    byte H = read_byte(seg, offset+1);
+    return (H<<8) | L;
+}
+
+// Чтение слова 32 бит
+dword read_dword(Tsegment* seg, dword offset) {
+
+    word L = read_word(seg, offset);
+    word H = read_word(seg, offset+2);
+    return (H<<16) | L;
+}
+
+// Сохранить в память 8 бит
+void write_byte(Tsegment* seg, dword offset, byte data) {
+    
+    phy_write( read_address(seg, offset), data );
+}
+
+// Сохранить в память 16 бит
+void write_word(Tsegment* seg, dword offset, word data) {
+    
+    write_byte(seg, offset,   data);
+    write_byte(seg, offset+1, data >> 8);
+}
+
+// Сохранить в память 32 бит
+void write_dword(Tsegment* seg, dword offset, dword data) {
+    
+    write_word(seg, offset,   data);
+    write_word(seg, offset+2, data >> 16);
+}
+
+// Прочитывает следующий байт из потока CS:EIP
+byte fetch() {
+
+    // Получение адреса CS:EIP в зависимости от 16/32 битности
+    byte  defsize = segs[CS].defsize;
+
+    dword a = defsize ? eip : (eip & 0xFFFF);
+    byte  b = read_byte(&segs[CS], a);
+
+    // Если 16 бит, то +1 только в младшие 16 бит регистр
+    if (defsize) eip++; else eip = ((eip+1)&0xffff) | (eip&0xffff0000);
+
+    return b;
+}
+
+// Считывание Word 16 bit
+word fetch_word() {
+
+    byte L = fetch();
+    byte H = fetch();
+    return (H<<8) | L;
+}
+
+// Считывание modrm16/32
+void fetch_modrm() {
+    if (adsize) fetch_modrm32(); else fetch_modrm16();
+}
+
+// Раскодировать ModRM 16
+void fetch_modrm16() {
+
+    byte t  = fetch();
+
+    mod_mm  = (t & 0xc0) >> 6;
+    mod_reg = (t & 0x38) >> 3;
+    mod_rm  = (t & 7);
+
+    // Выбор памяти
+    switch (mod_rm) {
+
+        case 0: mod_ea = regs[ESI] + regs[EBX]; break;
+        case 1: mod_ea = regs[EDI] + regs[EBX]; break;
+        case 2: mod_ea = regs[ESI] + regs[EBX]; break;
+        case 3: mod_ea = regs[EDI] + regs[EBX]; break;
+        case 4: mod_ea = regs[ESI]; break;
+        case 5: mod_ea = regs[EDI]; break;
+        case 6: mod_ea = regs[EBP]; break;
+        case 7: mod_ea = regs[EBX]; break;
+    }
+
+    // Получение Displacement
+    switch (mod_mm) {
+
+        // mod=0
+        case 0:
+
+            if (mod_rm == 6) mod_ea = fetch_word(); break;
+            break;
+
+        // mod=1 +sign8
+        case 1:
+
+            mod_ea += (signed char)fetch();
+            break;
+
+        // mod=2 +disp16
+        case 2:
+
+            mod_ea += fetch_word();
+            break;
+    }
+
+    // При выборе BP, будет автоматически замещен текущий сегмент на SS:
+    if (seg_override == 0) {
+        if ((mod_mm && mod_rm == 6) || mod_rm == 2 || mod_rm == 3)
+            segment = & segs[SS];
+    }
+
+    // Вообще-то, за пределы тут может выйти
+    mod_ea &= 0xffff;
+}
+
+// Раскодировать ModRM 32
+void fetch_modrm32() {
+
+    exit(2);
+}
+
+// Прочитать регистр 8 бит
+byte get_regb(byte reg_id) {
+    byte rb = reg_id & 3;
+    return reg_id & 4 ? regs[rb] >> 8 : regs[rb];
+}
+
+// Регистр 16 или 32
+dword get_regw(byte reg_id) {
+    return opsize ? regs[reg_id] : (regs[reg_id] & 0xffff);
+}
+
+// Записать в регистр
+void put_regb(byte reg_id, byte data) {
+
+    byte rb = reg_id & 3;
+    if (reg_id & 4)
+        regs[rb] = (regs[rb] & 0xffff00ff) | (data << 8);
+    else
+        regs[rb] = (regs[rb] & 0xffffff00) | data;
+}
+
+// Сохранение в регистр 16/32
+void put_regw(byte reg_id, dword data) {
+
+    if (opsize) regs[reg_id] = data;
+    else        regs[reg_id] = (regs[reg_id] & 0xffff0000) | (data & 0xffff);
+}
+
+// Получение rm-части (8 бит)
+byte get_eb() {
+
+    if (mod_mm == 3)
+        return get_regb(mod_rm);
+    else
+        return read_byte(segment, mod_ea);
+}
+
+// Получение rm-части (16/32 бит)
+dword get_ew() {
+
+    if (mod_mm == 3)
+        return get_regw(mod_rm);
+    else if (opsize)
+        return read_dword(segment, mod_ea);
+    else
+        return read_word(segment, mod_ea);
+}
+
+// Сохранить в rm-часть (8 бит)
+void put_eb(byte data) {
+
+    if (mod_mm == 3)
+        put_regb(mod_rm, data);
+    else
+        write_byte(segment, mod_ea, data);
+}
+
+// Сохранить в rm-часть (16/32 бит)
+void put_ew(dword data) {
+    
+    if (mod_mm == 3)
+        put_regw(mod_rm, data);
+    else if (opsize)
+        write_dword(segment, mod_ea, data);
+    else
+        write_word(segment, mod_ea, data);
+}
+
+// Получение reg-части
+byte  get_rb() { return get_regb(mod_reg); }
+dword get_rw() { return get_regw(mod_reg); }

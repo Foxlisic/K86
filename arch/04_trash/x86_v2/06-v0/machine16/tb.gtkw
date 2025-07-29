@@ -1,0 +1,32 @@
+[*]
+[*] GTKWave Analyzer v3.3.66 (w)1999-2015 BSI
+[*] Wed Oct 06 18:19:58 2021
+[*]
+[dumpfile] "e:\dev\c3\x86\machine\tb.vcd"
+[dumpfile_mtime] "Wed Oct 06 18:19:18 2021"
+[dumpfile_size] 58444
+[savefile] "e:\dev\c3\x86\machine\tb.gtkw"
+[timestart] 0
+[size] 960 440
+[pos] -1 -1
+*-5.000000 20 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[sst_width] 197
+[signals_width] 184
+[sst_expanded] 1
+[sst_vpaned_height] 97
+@28
+tb.clock
+@29
+tb.clock_25
+@800200
+-IO
+@22
+tb.address[19:0]
+tb.din[7:0]
+tb.dout[7:0]
+@28
+tb.we
+@1000200
+-IO
+[pattern_trace] 1
+[pattern_trace] 0

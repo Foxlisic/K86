@@ -1,0 +1,122 @@
+[*]
+[*] GTKWave Analyzer v3.3.71 (w)1999-2016 BSI
+[*] Sun Jan 09 13:08:54 2022
+[*]
+[dumpfile] "d:\dev\x86\machine\tb.vcd"
+[dumpfile_mtime] "Sun Jan 09 13:07:03 2022"
+[dumpfile_size] 60711
+[savefile] "d:\dev\x86\machine\tb.gtkw"
+[timestart] 0
+[size] 1920 1017
+[pos] -1 -1
+*-7.000000 547 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] tb.
+[sst_width] 197
+[signals_width] 225
+[sst_expanded] 1
+[sst_vpaned_height] 300
+@28
+tb.clock
+tb.CPU88.clock
+@800200
+-Phys
+@22
+[color] 5
+tb.CPU88.address[31:0]
+[color] 5
+tb.CPU88.i_data[7:0]
+[color] 5
+tb.CPU88.o_data[7:0]
+@28
+[color] 2
+tb.CPU88.we
+@1000200
+-Phys
+@800200
+-Control
+@22
+[color] 2
+tb.CPU88.phase[4:0]
+tb.CPU88.opcode[8:0]
+@c00022
+tb.CPU88.modrm[7:0]
+@28
+(0)tb.CPU88.modrm[7:0]
+(1)tb.CPU88.modrm[7:0]
+(2)tb.CPU88.modrm[7:0]
+(3)tb.CPU88.modrm[7:0]
+(4)tb.CPU88.modrm[7:0]
+(5)tb.CPU88.modrm[7:0]
+(6)tb.CPU88.modrm[7:0]
+(7)tb.CPU88.modrm[7:0]
+@1401200
+-group_end
+@28
+tb.CPU88.opsize
+tb.CPU88.adsize
+tb.CPU88.override
+@29
+[color] 2
+tb.CPU88.sel
+@22
+tb.CPU88.segment[15:0]
+tb.CPU88.ea[31:0]
+@28
+tb.CPU88.rep[1:0]
+@22
+tb.CPU88.sib[7:0]
+@1000200
+-Control
+@800200
+-ALU
+@22
+tb.CPU88.alu[3:0]
+@28
+tb.CPU88.dir
+tb.CPU88.size
+@22
+tb.CPU88.op1[31:0]
+tb.CPU88.op2[31:0]
+tb.CPU88.eflags[15:0]
+@1000200
+-ALU
+@800200
+-REGS
+@22
+[color] 5
+tb.CPU88.eax[31:0]
+[color] 5
+tb.CPU88.ebx[31:0]
+[color] 5
+tb.CPU88.ecx[31:0]
+[color] 5
+tb.CPU88.edx[31:0]
+[color] 5
+tb.CPU88.esp[31:0]
+[color] 5
+tb.CPU88.ebp[31:0]
+[color] 5
+tb.CPU88.esi[31:0]
+[color] 5
+tb.CPU88.edi[31:0]
+@1000200
+-REGS
+@800200
+-SEGMENTS
+@22
+[color] 5
+tb.CPU88.es[15:0]
+[color] 5
+tb.CPU88.cs[15:0]
+[color] 5
+tb.CPU88.ss[15:0]
+[color] 5
+tb.CPU88.ds[15:0]
+[color] 5
+tb.CPU88.fs[15:0]
+[color] 5
+tb.CPU88.gs[15:0]
+@1000200
+-SEGMENTS
+[pattern_trace] 1
+[pattern_trace] 0

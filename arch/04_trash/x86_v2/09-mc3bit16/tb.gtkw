@@ -1,0 +1,108 @@
+[*]
+[*] GTKWave Analyzer v3.3.66 (w)1999-2015 BSI
+[*] Mon Feb 07 04:18:49 2022
+[*]
+[dumpfile] "e:\dev\x86\12-mc3bit16\tb.vcd"
+[dumpfile_mtime] "Mon Feb 07 04:18:37 2022"
+[dumpfile_size] 80315
+[savefile] "e:\dev\x86\12-mc3bit16\tb.gtkw"
+[timestart] 0
+[size] 960 491
+[pos] -1 -1
+*-7.000000 100 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] tb.
+[sst_width] 197
+[signals_width] 190
+[sst_expanded] 1
+[sst_vpaned_height] 195
+@28
+tb.clock
+tb.clock_25
+@800200
+-IOPhys
+@22
+tb.CPU16.address[19:0]
+tb.CPU16.i_data[7:0]
+tb.CPU16.o_data[7:0]
+@28
+tb.CPU16.we
+@1000200
+-IOPhys
+@800200
+-CONTROL
+@28
+tb.CPU16.cursor
+@22
+tb.CPU16.t[4:0]
+@28
+tb.CPU16.s[2:0]
+@22
+tb.CPU16.m[3:0]
+tb.CPU16.tn[4:0]
+tb.CPU16.opcode[7:0]
+tb.CPU16.segment[15:0]
+tb.CPU16.ea[15:0]
+@28
+tb.CPU16.dir
+tb.CPU16.size
+@22
+tb.CPU16.modrm[7:0]
+@1000200
+-CONTROL
+@800200
+-ALU
+@28
+tb.CPU16.alu[2:0]
+@22
+tb.CPU16.op1[15:0]
+tb.CPU16.op2[15:0]
+tb.CPU16.r[16:0]
+tb.CPU16.f[11:0]
+tb.CPU16.wb[15:0]
+@c00022
+tb.CPU16.flags[11:0]
+@28
+(0)tb.CPU16.flags[11:0]
+(1)tb.CPU16.flags[11:0]
+(2)tb.CPU16.flags[11:0]
+(3)tb.CPU16.flags[11:0]
+(4)tb.CPU16.flags[11:0]
+(5)tb.CPU16.flags[11:0]
+(6)tb.CPU16.flags[11:0]
+(7)tb.CPU16.flags[11:0]
+(8)tb.CPU16.flags[11:0]
+(9)tb.CPU16.flags[11:0]
+(10)tb.CPU16.flags[11:0]
+(11)tb.CPU16.flags[11:0]
+@1401200
+-group_end
+@28
+tb.CPU16.regn[2:0]
+@22
+tb.CPU16.regv[15:0]
+@1000200
+-ALU
+@800200
+-REG
+@22
+tb.CPU16.ax[15:0]
+tb.CPU16.bx[15:0]
+tb.CPU16.cx[15:0]
+tb.CPU16.dx[15:0]
+tb.CPU16.sp[15:0]
+tb.CPU16.bp[15:0]
+tb.CPU16.si[15:0]
+tb.CPU16.di[15:0]
+@1000200
+-REG
+@800200
+-SEG
+@22
+tb.CPU16.es[15:0]
+tb.CPU16.cs[15:0]
+tb.CPU16.ss[15:0]
+tb.CPU16.ds[15:0]
+@1000200
+-SEG
+[pattern_trace] 1
+[pattern_trace] 0

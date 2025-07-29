@@ -1,0 +1,4 @@
+*.o
+tb.bin
+/bx.exe
+/bx

@@ -1,0 +1,250 @@
+[*]
+[*] GTKWave Analyzer v3.3.86 (w)1999-2017 BSI
+[*] Fri Oct  8 18:31:17 2021
+[*]
+[dumpfile] "/disk/fox/dev/x86/machine32/tb.vcd"
+[dumpfile_mtime] "Fri Oct  8 18:24:33 2021"
+[dumpfile_size] 353721
+[savefile] "/disk/fox/dev/x86/machine32/tb.gtkw"
+[timestart] 843
+[size] 1920 1029
+[pos] -1 -1
+*-7.000000 1127 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] tb.
+[treeopen] tb.UnitCPU.
+[sst_width] 248
+[signals_width] 309
+[sst_expanded] 1
+[sst_vpaned_height] 325
+@28
+tb.clock
+tb.UnitCPU.clock
+tb.UnitCPU.__m0
+[color] 2
+tb.UnitCPU.sel
+@22
+tb.UnitCPU.address[19:0]
+tb.UnitCPU.ip[15:0]
+tb.UnitCPU.bus[7:0]
+tb.UnitCPU.data[7:0]
+@28
+tb.UnitCPU.wreq
+@c00200
+-STATE
+@22
+[color] 2
+tb.UnitCPU.opcode[8:0]
+[color] 5
+tb.UnitCPU.tstate[3:0]
+[color] 5
+tb.UnitCPU.mode[3:0]
+[color] 5
+tb.UnitCPU.estate[4:0]
+@28
+[color] 5
+tb.UnitCPU.sel_rep[1:0]
+@c00022
+[color] 6
+tb.UnitCPU.modrm[7:0]
+@28
+[color] 6
+(0)tb.UnitCPU.modrm[7:0]
+[color] 6
+(1)tb.UnitCPU.modrm[7:0]
+[color] 6
+(2)tb.UnitCPU.modrm[7:0]
+[color] 6
+(3)tb.UnitCPU.modrm[7:0]
+[color] 6
+(4)tb.UnitCPU.modrm[7:0]
+[color] 6
+(5)tb.UnitCPU.modrm[7:0]
+[color] 6
+(6)tb.UnitCPU.modrm[7:0]
+[color] 6
+(7)tb.UnitCPU.modrm[7:0]
+@1401200
+-group_end
+@22
+[color] 7
+tb.UnitCPU.seg_ea[15:0]
+[color] 7
+tb.UnitCPU.ea[31:0]
+@28
+tb.UnitCPU.isize
+tb.UnitCPU.idir
+tb.UnitCPU.opsize
+tb.UnitCPU.adsize
+@22
+tb.UnitCPU.rdtsc[63:0]
+@c00200
+-INT
+@28
+tb.UnitCPU.intr
+tb.UnitCPU.intr_latch
+tb.UnitCPU.is_intr
+@22
+tb.UnitCPU.irq[7:0]
+@1401200
+-INT
+-STATE
+@c00200
+-Reg
+@c00022
+[color] 2
+tb.UnitCPU.flags[11:0]
+@28
+(0)tb.UnitCPU.flags[11:0]
+(1)tb.UnitCPU.flags[11:0]
+(2)tb.UnitCPU.flags[11:0]
+(3)tb.UnitCPU.flags[11:0]
+(4)tb.UnitCPU.flags[11:0]
+(5)tb.UnitCPU.flags[11:0]
+(6)tb.UnitCPU.flags[11:0]
+(7)tb.UnitCPU.flags[11:0]
+(8)tb.UnitCPU.flags[11:0]
+(9)tb.UnitCPU.flags[11:0]
+(10)tb.UnitCPU.flags[11:0]
+(11)tb.UnitCPU.flags[11:0]
+@1401200
+-group_end
+@22
+[color] 5
+tb.UnitCPU.eax[31:0]
+[color] 5
+tb.UnitCPU.ebx[31:0]
+[color] 5
+tb.UnitCPU.ecx[31:0]
+[color] 5
+tb.UnitCPU.edx[31:0]
+[color] 5
+tb.UnitCPU.esp[31:0]
+[color] 5
+tb.UnitCPU.ebp[31:0]
+[color] 5
+tb.UnitCPU.esi[31:0]
+[color] 5
+tb.UnitCPU.edi[31:0]
+@1401200
+-Reg
+@c00201
+-PORT
+@28
+tb.PortCtlUnit.clock50
+tb.UnitCPU.port_clk
+@22
+tb.UnitCPU.port[15:0]
+tb.UnitCPU.port_i[7:0]
+tb.UnitCPU.port_o[7:0]
+@28
+tb.UnitCPU.port_w
+@22
+tb.PortCtlUnit.ps2_data[7:0]
+@28
+tb.ps2_hit
+@22
+tb.PortCtlUnit.cga_reg[7:0]
+tb.PortCtlUnit.vga_cursor[10:0]
+@c00200
+-DAC
+@22
+tb.PortCtlUnit.dac_address[7:0]
+@28
+tb.PortCtlUnit.dac_cursor[1:0]
+@22
+tb.PortCtlUnit.dac_out[31:0]
+@28
+tb.PortCtlUnit.dac_we
+@1401200
+-DAC
+@c00200
+-PIT
+@22
+tb.PortCtlUnit.pit_119mhz[4:0]
+tb.PortCtlUnit.pit_channel0[15:0]
+tb.PortCtlUnit.pit_cnt[15:0]
+tb.PortCtlUnit.pit_mode[7:0]
+@1401200
+-PIT
+@c00200
+-INT
+@28
+tb.PortCtlUnit.eoi_master
+tb.PortCtlUnit.keyb_intr
+tb.PortCtlUnit.keyb_intr_latch
+tb.UnitCPU.intr_latch
+@22
+tb.PortCtlUnit.irq_pend[15:0]
+@1401200
+-INT
+@1401201
+-PORT
+@c00200
+-DIV
+@22
+tb.UnitCPU.diva[63:0]
+tb.UnitCPU.divb[63:0]
+tb.UnitCPU.divrem[63:0]
+tb.UnitCPU.divres[63:0]
+tb.UnitCPU.divcnt[6:0]
+@1401200
+-DIV
+@c00200
+-ALU
+@28
+tb.UnitCPU.alumode[2:0]
+@22
+[color] 7
+tb.UnitCPU.flags_o[11:0]
+tb.UnitCPU.UnitALU.op1[31:0]
+@c00022
+tb.UnitCPU.UnitALU.op2[31:0]
+@28
+(0)tb.UnitCPU.UnitALU.op2[31:0]
+(1)tb.UnitCPU.UnitALU.op2[31:0]
+(2)tb.UnitCPU.UnitALU.op2[31:0]
+(3)tb.UnitCPU.UnitALU.op2[31:0]
+(4)tb.UnitCPU.UnitALU.op2[31:0]
+(5)tb.UnitCPU.UnitALU.op2[31:0]
+(6)tb.UnitCPU.UnitALU.op2[31:0]
+(7)tb.UnitCPU.UnitALU.op2[31:0]
+(8)tb.UnitCPU.UnitALU.op2[31:0]
+(9)tb.UnitCPU.UnitALU.op2[31:0]
+(10)tb.UnitCPU.UnitALU.op2[31:0]
+(11)tb.UnitCPU.UnitALU.op2[31:0]
+(12)tb.UnitCPU.UnitALU.op2[31:0]
+(13)tb.UnitCPU.UnitALU.op2[31:0]
+(14)tb.UnitCPU.UnitALU.op2[31:0]
+(15)tb.UnitCPU.UnitALU.op2[31:0]
+(16)tb.UnitCPU.UnitALU.op2[31:0]
+(17)tb.UnitCPU.UnitALU.op2[31:0]
+(18)tb.UnitCPU.UnitALU.op2[31:0]
+(19)tb.UnitCPU.UnitALU.op2[31:0]
+(20)tb.UnitCPU.UnitALU.op2[31:0]
+(21)tb.UnitCPU.UnitALU.op2[31:0]
+(22)tb.UnitCPU.UnitALU.op2[31:0]
+(23)tb.UnitCPU.UnitALU.op2[31:0]
+(24)tb.UnitCPU.UnitALU.op2[31:0]
+(25)tb.UnitCPU.UnitALU.op2[31:0]
+(26)tb.UnitCPU.UnitALU.op2[31:0]
+(27)tb.UnitCPU.UnitALU.op2[31:0]
+(28)tb.UnitCPU.UnitALU.op2[31:0]
+(29)tb.UnitCPU.UnitALU.op2[31:0]
+(30)tb.UnitCPU.UnitALU.op2[31:0]
+(31)tb.UnitCPU.UnitALU.op2[31:0]
+@1401200
+-group_end
+@22
+tb.UnitCPU.UnitALU.result[31:0]
+tb.UnitCPU.wb[31:0]
+tb.UnitCPU.mult[63:0]
+tb.UnitCPU.UnitALU.res[32:0]
+tb.UnitCPU.UnitALU.signx[3:0]
+@28
+tb.UnitCPU.UnitALU.daa_c
+@22
+tb.UnitCPU.UnitALU.daa_i[8:0]
+@1401200
+-ALU
+[pattern_trace] 1
+[pattern_trace] 0
