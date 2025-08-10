@@ -1,1 +1,0 @@
-cd .. && sh make.sh

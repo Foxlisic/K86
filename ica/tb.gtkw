@@ -1,0 +1,77 @@
+[*]
+[*] GTKWave Analyzer v3.3.116 (w)1999-2023 BSI
+[*] Tue Jul 29 12:26:17 2025
+[*]
+[dumpfile] "/home/fox/dev/03_x86/tb.vcd"
+[dumpfile_mtime] "Tue Jul 29 12:25:34 2025"
+[dumpfile_size] 13541
+[savefile] "/home/fox/dev/03_x86/tb.gtkw"
+[timestart] 0
+[size] 1920 1008
+[pos] -1 -1
+*-4.800000 52 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] tb.
+[sst_width] 319
+[signals_width] 181
+[sst_expanded] 1
+[sst_vpaned_height] 332
+@28
+[color] 2
+tb.clock
+[color] 5
+tb.reset_n
+@800200
+-IFACE
+@22
+tb.C1.eip[31:0]
+tb.a[31:0]
+tb.i[31:0]
+tb.o[31:0]
+@28
+tb.w
+@1000200
+-IFACE
+@800200
+-CONTROL
+@1000200
+-CONTROL
+@800200
+-REG
+@22
+[color] 6
+tb.C1.eax[31:0]
+[color] 6
+tb.C1.ecx[31:0]
+[color] 6
+tb.C1.edx[31:0]
+[color] 6
+tb.C1.ebx[31:0]
+[color] 6
+tb.C1.esp[31:0]
+[color] 6
+tb.C1.ebp[31:0]
+[color] 6
+tb.C1.esi[31:0]
+[color] 6
+tb.C1.edi[31:0]
+@1000200
+-REG
+@800200
+-SEG
+@22
+[color] 6
+tb.C1.es[15:0]
+[color] 6
+tb.C1.cs[15:0]
+[color] 6
+tb.C1.ss[15:0]
+[color] 6
+tb.C1.ds[15:0]
+[color] 6
+tb.C1.fs[15:0]
+[color] 6
+tb.C1.gs[15:0]
+@1000200
+-SEG
+[pattern_trace] 1
+[pattern_trace] 0

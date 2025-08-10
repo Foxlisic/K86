@@ -18,3 +18,4 @@ debug.txt
 .tmp
 /*.geany
 /tb.gtkw
+/vm/emu86

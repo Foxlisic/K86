@@ -1,1 +1,0 @@
-gtkwave tb.gtkw
