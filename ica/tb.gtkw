@@ -1,76 +1,99 @@
 [*]
 [*] GTKWave Analyzer v3.3.116 (w)1999-2023 BSI
-[*] Tue Jul 29 12:26:17 2025
+[*] Mon Aug 11 09:35:40 2025
 [*]
-[dumpfile] "/home/fox/dev/03_x86/tb.vcd"
-[dumpfile_mtime] "Tue Jul 29 12:25:34 2025"
-[dumpfile_size] 13541
-[savefile] "/home/fox/dev/03_x86/tb.gtkw"
+[dumpfile] "/home/fox/dev/03_x86/ica/tb.vcd"
+[dumpfile_mtime] "Mon Aug 11 09:33:13 2025"
+[dumpfile_size] 37713
+[savefile] "/home/fox/dev/03_x86/ica/tb.gtkw"
 [timestart] 0
 [size] 1920 1008
 [pos] -1 -1
-*-4.800000 52 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-6.600000 53 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] tb.
 [sst_width] 319
 [signals_width] 181
 [sst_expanded] 1
 [sst_vpaned_height] 332
 @28
+[color] 7
+tb.reset_n
 [color] 2
 tb.clock
-[color] 5
-tb.reset_n
 @800200
 -IFACE
+@28
+[color] 2
+tb.T1.m0
+@23
+[color] 5
+tb.T1.ip[15:0]
 @22
-tb.C1.eip[31:0]
-tb.a[31:0]
-tb.i[31:0]
-tb.o[31:0]
+tb.T1.a[19:0]
+tb.T1.i[7:0]
+tb.T1.o[7:0]
 @28
 tb.w
 @1000200
 -IFACE
 @800200
 -CONTROL
+@22
+tb.T1.t[3:0]
 @1000200
 -CONTROL
 @800200
 -REG
 @22
 [color] 6
-tb.C1.eax[31:0]
+tb.T1.ax[15:0]
 [color] 6
-tb.C1.ecx[31:0]
+tb.T1.bx[15:0]
 [color] 6
-tb.C1.edx[31:0]
+tb.T1.cx[15:0]
 [color] 6
-tb.C1.ebx[31:0]
+tb.T1.dx[15:0]
 [color] 6
-tb.C1.esp[31:0]
+tb.T1.sp[15:0]
 [color] 6
-tb.C1.ebp[31:0]
+tb.T1.bp[15:0]
 [color] 6
-tb.C1.esi[31:0]
+tb.T1.si[15:0]
 [color] 6
-tb.C1.edi[31:0]
+tb.T1.di[15:0]
 @1000200
 -REG
-@800200
--SEG
+@c00022
+[color] 6
+tb.T1.cs[15:0]
+@28
+(0)tb.T1.cs[15:0]
+(1)tb.T1.cs[15:0]
+(2)tb.T1.cs[15:0]
+(3)tb.T1.cs[15:0]
+(4)tb.T1.cs[15:0]
+(5)tb.T1.cs[15:0]
+(6)tb.T1.cs[15:0]
+(7)tb.T1.cs[15:0]
+(8)tb.T1.cs[15:0]
+(9)tb.T1.cs[15:0]
+(10)tb.T1.cs[15:0]
+(11)tb.T1.cs[15:0]
+(12)tb.T1.cs[15:0]
+(13)tb.T1.cs[15:0]
+(14)tb.T1.cs[15:0]
+(15)tb.T1.cs[15:0]
+@1401200
+-group_end
 @22
 [color] 6
-tb.C1.es[15:0]
+tb.T1.ds[15:0]
 [color] 6
-tb.C1.cs[15:0]
+tb.T1.es[15:0]
 [color] 6
-tb.C1.ss[15:0]
-[color] 6
-tb.C1.ds[15:0]
-[color] 6
-tb.C1.fs[15:0]
-[color] 6
-tb.C1.gs[15:0]
+tb.T1.ss[15:0]
+@800200
+-SEG
 @1000200
 -SEG
 [pattern_trace] 1

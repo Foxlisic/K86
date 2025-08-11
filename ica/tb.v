@@ -5,16 +5,17 @@ reg         clock, reset_n;
 always #2.0 clock = ~clock;
 // -----------------------------------------------------------------------------
 initial begin reset_n = 0; clock = 0; #3.0 reset_n = 1; #3000 $finish; end
-initial begin $dumpfile("tb.vcd"); $dumpvars(0, tb); $readmemh("memory.hex", m, 0); end
+initial begin $dumpfile("tb.vcd"); $dumpvars(0, tb); end
+initial begin $readmemh("bios.hex", m, 20'hFF000); end
 // -----------------------------------------------------------------------------
-reg  [15:0] m[256*1024];
+reg  [15:0] m[1024*1024];
 // -----------------------------------------------------------------------------
 wire [19:0] a;
 reg  [ 7:0] i;
 wire [ 7:0] o;
 wire        w;
 // -----------------------------------------------------------------------------
-always @(negedge clock) begin if (w) m[a] <= o; #0.3 i <= m[a]; end
+always @(negedge clock) begin if (w) m[a] <= o; #0.2 i <= m[a]; end
 // -----------------------------------------------------------------------------
 c86 T1
 (
