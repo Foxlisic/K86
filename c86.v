@@ -263,7 +263,6 @@ wire [31:0] div3a = {div2a[30:0], ~div3c[32]};
 wire [31:0] div4a = {div3a[30:0], ~div4c[32]};
 // -----------------------------------------------------------------------------
 
-
 always @(posedge clock)
 // Сброс процессора
 if (reset_n == 0) begin
@@ -285,12 +284,12 @@ if (reset_n == 0) begin
 // Запуск выполнения команд процессора
 end else if (ce) begin
 
-    w    <= 0;
-    pw   <= 0;
+    w  <= 0;
+    pw <= 0;
 
     case (t)
 
-    // -------------------------------------------------------------
+    // -------------------------------------------------------------------------
     // ВЫПОЛНЕИЕ ИНСТРУКЦИИ
     // -------------------------------------------------------------
     RUN: begin
@@ -319,133 +318,192 @@ end else if (ce) begin
         casex (opcode)
 
         8'b00xxx0xx: case (m) // ### AL-операции с операндами ModRM [3T+]
-        0: begin t <= MODRM; alu <= opcode[5:3]; end
-        1: begin t <= alu == CMP ? RUN : WB; wb <= ar; flags <= af; `TERM end
+
+            0: begin t <= MODRM; alu <= opcode[5:3]; end
+            1: begin t <= alu == CMP ? RUN : WB; wb <= ar; flags <= af; `TERM end
+
         endcase
 
         8'b00xxx10x: case (m) // ### AL-операции AL/AX + imm [3/4T]
-        0: begin alu <= opcode[5:3];        op1 <= i[0] ? ax : ax[7:0]; end
-        1: begin ip <= ipn; m <= size?2:3;  op2 <= i; end
-        2: begin ip <= ipn; m <= 3;         op2[15:8] <= i; end
-        3: begin flags <= af; if (alu != CMP) ax <= size ? ar : {ax[15:8], ar[7:0]}; `TERM end
+
+            0: begin alu   <= opcode[5:3];         op1 <= i[0] ? ax : ax[7:0]; end
+            1: begin ip    <= ipn; m <= size?2:3;  op2 <= i; end
+            2: begin ip    <= ipn; m <= 3;         op2[15:8] <= i; end
+            3: begin flags <= af; if (alu != CMP) ax <= size ? ar : {ax[15:8], ar[7:0]}; `TERM end
+
         endcase
 
         8'b000xx110: case (m) // ### PUSH es/cs/ss/ds [4T]
-        0: begin t <= PUSH; case (i[4:3]) 0:wb<=es; 1:wb<=cs; 2:wb<=ss; 3:wb<=ds; endcase `TERM; end
+
+            0: begin
+
+                t <= PUSH;
+
+                case (i[4:3])
+                0: wb <= es; 1: wb <= cs;
+                2: wb <= ss; 3: wb <= ds;
+                endcase
+
+                `TERM;
+
+            end
+
         endcase
 
         8'b00001111: case (m) // ### ::Extended::
-        0: begin end
+
+            0: begin end
+
         endcase
 
         8'b000xx111: case (m) // ### POP es/../ss/ds [5T]
-        0: begin t <= POP; end
-        1: begin case (opcode[4:3]) 0:es<=wb; 2:ss<=wb; 3:ds<=wb; endcase `TERM; end
+
+            0: begin t <= POP; end
+            1: begin case (opcode[4:3]) 0: es<=wb; 2: ss<=wb; 3: ds<=wb; endcase `TERM; end
+
         endcase
 
         8'b001xx110: case (m) // ### Префикс es/cs/ss/ds: [1T]
-        0: begin over <= 1; case (i[4:3]) 0:sgn<=es; 1:sgn<=cs; 2:sgn<=ss; 3:sgn<=ds; endcase m <= 0; end
+
+            0: begin
+
+                m    <= 0;
+                over <= 1;
+
+                case (i[4:3])
+                0: sgn <= es; 1: sgn <= cs;
+                2: sgn <= ss; 3: sgn <= ds;
+                endcase
+
+             end
+
         endcase
 
         8'b0010x111: case (m) // ### Десятичная коррекция [1T]
-        0: begin ax[7:0] <= daa; flags <= daa_f; `TERM; end
+
+            0: begin ax[7:0] <= daa; flags <= daa_f; `TERM; end
+
         endcase
 
         8'b0011x111: case (m) // ### ASCII коррекция [1T]
-        0: begin ax <= {aaa_b, ax[7:4], aaa_a}; {flags[AF], flags[CF]} <= {daa_a, daa_a}; `TERM; end
+
+            0: begin
+
+                ax <= {aaa_b, ax[7:4], aaa_a};
+                {flags[AF], flags[CF]} <= {daa_a, daa_a};
+                `TERM;
+
+            end
+
         endcase
 
         8'b0100xxxx: case (m) // ### INC/DEC r16 [4T]
-        0: begin ip <= ip; {dir, size} <= 2'b11; alu <= opcode[3] ? SUB : ADD; end
-        1: begin ip <= ipn; op1 <= i20; op2 <= 1; m <= 2; end
-        2: begin wb <= ar; `REG <= opcode[2:0]; t <= WB; flags <= {af[11:1], flags[CF]}; `TERM; end
+
+            0: begin ip <= ip; {dir, size} <= 2'b11; alu <= opcode[3] ? SUB : ADD; end
+            1: begin ip <= ipn; op1 <= i20; op2 <= 1; m <= 2; end
+            2: begin wb <= ar; `REG <= opcode[2:0]; t <= WB; flags <= {af[11:1], flags[CF]}; `TERM; end
+
         endcase
 
         8'b01010xxx: case (m) // ### PUSH r16 [5T]
-        0: begin ip <= ip; size <= 1'b1; end
-        1: begin ip <= ipn; wb <= i20; t <= PUSH; `TERM; end
+
+            0: begin ip <= ip; size <= 1'b1; end
+            1: begin ip <= ipn; wb <= i20; t <= PUSH; `TERM; end
+
         endcase
 
         8'b01011xxx: case (m) // ### POP r16 [6T]
-        0: begin t <= POP; {size, dir} <= 2'b11; end
-        1: begin t <= WB; `REG <= opcode[2:0]; `TERM; end
+
+            0: begin t <= POP; {size, dir} <= 2'b11; end
+            1: begin t <= WB; `REG <= opcode[2:0]; `TERM; end
+
         endcase
 
         8'b01100000: case (m) // ### PUSHA [18T]
-        0: begin ea <= sp; sgn <= ss; cp <= 1; end
-        1: begin
 
-            w   <= 1;
-            m1  <= m1 + 1;
-            ea  <= ea - 1;
+            0: begin ea <= sp; sgn <= ss; cp <= 1; end
+            1: begin
 
-            if (m1 == 15) begin m <= 2; m1 <= 0; end
+                w   <= 1;
+                m1  <= m1 + 1;
+                ea  <= ea - 1;
 
-            case (m1)
-            0:  o <= ax[15:8];  1: o <= ax[7:0];
-            2:  o <= cx[15:8];  3: o <= cx[7:0];
-            4:  o <= dx[15:8];  5: o <= dx[7:0];
-            6:  o <= bx[15:8];  7: o <= bx[7:0];
-            8:  o <= sp[15:8];  9: o <= sp[7:0];
-            10: o <= bp[15:8]; 11: o <= bp[7:0];
-            12: o <= si[15:8]; 13: o <= si[7:0];
-            14: o <= di[15:8]; 15: o <= di[7:0];
-            endcase
+                if (m1 == 15) begin m <= 2; m1 <= 0; end
 
-        end
-        2: begin cp <= 0; sp <= sp - 16; `TERM; end
+                case (m1)
+                0:  o <= ax[15:8];  1: o <= ax[7:0];
+                2:  o <= cx[15:8];  3: o <= cx[7:0];
+                4:  o <= dx[15:8];  5: o <= dx[7:0];
+                6:  o <= bx[15:8];  7: o <= bx[7:0];
+                8:  o <= sp[15:8];  9: o <= sp[7:0];
+                10: o <= bp[15:8]; 11: o <= bp[7:0];
+                12: o <= si[15:8]; 13: o <= si[7:0];
+                14: o <= di[15:8]; 15: o <= di[7:0];
+                endcase
+
+            end
+            2: begin cp <= 0; sp <= sp - 16; `TERM; end
+
         endcase
 
         8'b01100001: case (m) // ### POPA [18T]
-        0: begin ea <= sp; sgn <= ss; cp <= 1; end
-        1: begin
 
-            m1  <= m1 + 1;
-            ea  <= ea + 1;
+            0: begin ea <= sp; sgn <= ss; cp <= 1; end
+            1: begin
 
-            if (m1 == 15) begin m <= 2; m1 <= 0; end
+                m1  <= m1 + 1;
+                ea  <= ea + 1;
 
-            case (m1)
-            0:  di[ 7:0] <= i;  1: di[15:8] <= i;
-            2:  si[ 7:0] <= i;  3: si[15:8] <= i;
-            4:  bp[ 7:0] <= i;  5: bp[15:8] <= i;
-            6:  sp[ 7:0] <= i;  7: sp[15:8] <= i;
-            8:  bx[ 7:0] <= i;  9: bx[15:8] <= i;
-            10: dx[ 7:0] <= i; 11: dx[15:8] <= i;
-            12: cx[ 7:0] <= i; 13: cx[15:8] <= i;
-            14: ax[ 7:0] <= i; 15: ax[15:8] <= i;
-            endcase
+                if (m1 == 15) begin m <= 2; m1 <= 0; end
 
-        end
-        2: begin cp <= 0; sp <= ea; `TERM; end
+                case (m1)
+                0:  di[ 7:0] <= i;  1: di[15:8] <= i;
+                2:  si[ 7:0] <= i;  3: si[15:8] <= i;
+                4:  bp[ 7:0] <= i;  5: bp[15:8] <= i;
+                6:  sp[ 7:0] <= i;  7: sp[15:8] <= i;
+                8:  bx[ 7:0] <= i;  9: bx[15:8] <= i;
+                10: dx[ 7:0] <= i; 11: dx[15:8] <= i;
+                12: cx[ 7:0] <= i; 13: cx[15:8] <= i;
+                14: ax[ 7:0] <= i; 15: ax[15:8] <= i;
+                endcase
+
+            end
+            2: begin cp <= 0; sp <= ea; `TERM; end
+
         endcase
 
         8'b0110010x: case (m) // ### FS: GS: [1T]
-        0: begin m <= 0; over <= 1; sgn <= i[0] ? GS : FS; end
+
+            0: begin m <= 0; over <= 1; sgn <= i[0] ? GS : FS; end
+
         endcase
 
         8'b011010x0: case (m) // ### PUSH s8/u16 [5/6T]
-        1: begin ip <= ipn; wb <= o1 ? sign : i; if (op1) begin t <= PUSH; `TERM; end else m <= 2; end
-        2: begin ip <= ipn; wb[15:8] <= i; t <= PUSH; `TERM; end
+
+            1: begin ip <= ipn; wb <= o1 ? sign : i; if (op1) begin t <= PUSH; `TERM; end else m <= 2; end
+            2: begin ip <= ipn; wb[15:8] <= i; t <= PUSH; `TERM; end
+
         endcase
 
         8'b011010x1: case (m) // ### IMUL r16,rm,imm [7T+]
-        0: begin {dir, size} <= 2'b11; t <= MODRM; end
-        1: begin cp  <= 0;       m <= 2;  end
-        2: begin op2 <= sign;    m <= 3 + o1; ip <= ipn; end
-        3: begin op2[15:8] <= i; m <= 4;      ip <= ipn; end
-        4: begin
 
-            t  <= WB;
-            wb <= imul_r[15:0];
+            0: begin {dir, size} <= 2'b11; t <= MODRM; end
+            1: begin cp  <= 0;       m <= 2;  end
+            2: begin op2 <= sign;    m <= 3 + o1; ip <= ipn; end
+            3: begin op2[15:8] <= i; m <= 4;      ip <= ipn; end
+            4: begin
 
-            flags[CF] <= imul_o;
-            flags[OF] <= imul_o;
-            flags[ZF] <= imul_z;
+                t  <= WB;
+                wb <= imul_r[15:0];
 
-            `TERM;
+                flags[CF] <= imul_o;
+                flags[OF] <= imul_o;
+                flags[ZF] <= imul_z;
 
-        end
+                `TERM;
+
+            end
+
         endcase
 
         8'b0111xxxx: case (m) // ### JCC short [1/2T]
@@ -544,13 +602,13 @@ end else if (ce) begin
 
         endcase
 
-        8'b10011000: case (m) // ### CBW
+        8'b10011000: case (m) // ### CBW [1T]
 
             0: begin ax <= {{8{ax[7]}}, ax[7:0]}; `TERM; end
 
         endcase
 
-        8'b10011001: case (m) // ### CWD
+        8'b10011001: case (m) // ### CWD [1T]
 
             0: begin dx <= {16{ax[15]}}; `TERM; end
 
@@ -753,7 +811,7 @@ end else if (ce) begin
 
         endcase
 
-        8'b1010110x: case (m) // ### LODSx :: 3*
+        8'b1010110x: case (m) // ### LODSx :: 3*T
 
             1: begin
 
@@ -938,14 +996,14 @@ end else if (ce) begin
 
         endcase
 
-        8'b11100011: case (m) // ### JCXZ x
+        8'b11100011: case (m) // ### JCXZ x [1-2T]
 
             0: begin if (cx) begin ip <= ip + 2; `TERM; end end
             1: begin ip <= ip + 1 + sign; `TERM; end
 
         endcase
 
-        8'b1110x10x: case (m) // ### IN a,p 3/4T*
+        8'b1110x10x: case (m) // ### IN a,p [3/4T*]
 
             0: begin m <= i[3] ? 2 : 1; pa <= dx; pr <= i[3]; end
             1: begin m <= 2; pr <= 1; pa <= i; ip <= ip + 1; end
@@ -955,7 +1013,7 @@ end else if (ce) begin
 
         endcase
 
-        8'b1110x11x: case (m) // ### OUT p,a 2/3T
+        8'b1110x11x: case (m) // ### OUT p,a [2/3T]
 
             1: begin
 
@@ -980,21 +1038,21 @@ end else if (ce) begin
 
         endcase
 
-        8'b11101000: case (m) // ### CALL b16 6T
+        8'b11101000: case (m) // ### CALL b16 [6T]
 
             1: begin m <= 2;    ip <= ip + 1; ea <= i; end
             2: begin t <= PUSH; wb <= ip + 1; ip <= ip + 1 + {i, ea[7:0]}; `TERM; end
 
         endcase
 
-        8'b11101001: case (m) // ### JMP o16 3T
+        8'b11101001: case (m) // ### JMP o16 [3T]
 
             1: begin ea <= i; ip <= ip + 1; m <= 2; end
             2: begin ip <= ip + 1 + {i, ea[7:0]}; `TERM; end
 
         endcase
 
-        8'b11101010: case (m) // ### JMP far 5T
+        8'b11101010: case (m) // ### JMP far [5T]
 
             // Прочитаьть 4 байта для нового CS:IP
             1: begin ip <= ip + 1; m <= 2; ea       <= i; end
@@ -1004,7 +1062,7 @@ end else if (ce) begin
 
         endcase
 
-        8'b11101011: case (m) // ### JMP b 2T
+        8'b11101011: case (m) // ### JMP b [2T]
 
             1: begin ip <= ip + sign + 1; `TERM; end
 
@@ -1216,7 +1274,7 @@ end else if (ce) begin
 
     end
 
-    // -------------------------------------------------------------
+    // -------------------------------------------------------------------------
     // СЧИТЫВАНИЕ ОПЕРАНДОВ ИЗ РЕГИСТРОВ ИЛИ ИЗ ПАМЯТИ
     // -------------------------------------------------------------
     MODRM: case (m1)
@@ -1283,7 +1341,7 @@ end else if (ce) begin
 
     endcase
 
-    // -------------------------------------------------------------
+    // -------------------------------------------------------------------------
     // [1T,2-3T] ЗАПИСЬ РЕЗУЛЬТАТОВ WB,DIR,SIZE,MODRM В ПАМЯТЬ/РЕГИСТРЫ
     // -------------------------------------------------------------
     WB: case (m2)
@@ -1330,7 +1388,7 @@ end else if (ce) begin
 
     endcase
 
-    // -------------------------------------------------------------
+    // -------------------------------------------------------------------------
     // [3T] ВЫГРУЗКА WB -> В СТЕК
     // -------------------------------------------------------------
     PUSH: case (m3)
@@ -1339,7 +1397,7 @@ end else if (ce) begin
     2: begin m3 <= 0; cp <= 0; t <= next; end
     endcase
 
-    // -------------------------------------------------------------
+    // -------------------------------------------------------------------------
     // [3T] ЗАГРУЗКА ИЗ СТЕКА -> WB
     // -------------------------------------------------------------
     POP: case (m3)
@@ -1348,7 +1406,7 @@ end else if (ce) begin
     2: begin m3 <= 0; wb[15:8] <= i; cp <= 0; t <= next; end
     endcase
 
-    // -------------------------------------------------------------
+    // -------------------------------------------------------------------------
     // Прерывание interrupt; считается за выполнение инструкции
     // -------------------------------------------------------------
     INTR: case (m4)
@@ -1362,7 +1420,7 @@ end else if (ce) begin
     7: begin m4 <= 0; cs[15:8] <= i; cp <= 0; t <= RUN; flags[IF] <= 1'b0; end
     endcase
 
-    // -------------------------------------------------------------
+    // -------------------------------------------------------------------------
     // Деление diva на divb; повторять op1 раз (количество сдвигов)
     // divr = 0 на старте и является остатком; diva это результат
     // -------------------------------------------------------------
