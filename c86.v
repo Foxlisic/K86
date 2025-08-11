@@ -7,7 +7,7 @@
 module c86
 (
     input               clock,      // 25Мгц
-    input               reset_n,    // =0 Сброс процессора
+    input               rst_n,      // =0 Сброс процессора
     input               ce,         // =1 Активация чипа
     // ----------------
     output      [19:0]  a,          // Адрес в общей памяти
@@ -265,7 +265,7 @@ wire [31:0] div4a = {div3a[30:0], ~div4c[32]};
 
 always @(posedge clock)
 // Сброс процессора
-if (reset_n == 0) begin
+if (rst_n == 0) begin
 
     t       <= RUN;              // Исполнение инструкции начинается сразу
     m       <= 0;
