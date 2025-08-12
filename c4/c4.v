@@ -44,7 +44,7 @@ assign LED  = 4'b1111;
 // -----------------------------------------------------------------------------
 assign {VGA_R, VGA_G, VGA_B} = {vga_r[3], vga_g[3], vga_b[3]};
 // -----------------------------------------------------------------------------
-wire clock, clock_100, rst_n;
+wire        clock, clock_100, rst_n;
 wire [ 3:0] vga_r, vga_g, vga_b;
 wire [12:0] vga_a;
 wire [ 7:9] vga_i;
